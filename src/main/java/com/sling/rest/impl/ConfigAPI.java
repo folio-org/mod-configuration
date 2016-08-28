@@ -37,6 +37,10 @@ public class ConfigAPI implements ConfigurationsResource {
   public void getConfigurationsTables(String authorization, String query, String orderBy, Order order, int offset, int limit, String lang,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
+    /**
+     * http://host:port/apis/configurations/tables
+     */
+    
     try {
       System.out.println("sending... getConfigurationsTables");
       context.runOnContext(v -> {
