@@ -1,4 +1,4 @@
-# configuration
+# mod-configuration
 Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a mongoDB async implementation
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md)
