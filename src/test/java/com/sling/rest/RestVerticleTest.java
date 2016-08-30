@@ -37,8 +37,6 @@ public class RestVerticleTest {
   private ArrayList<String> urls;
 
   /**
-   * Before executing our test, need to deploy our 2 verticles - the persistence verticle to write to mongo anf then the rest verticle.
-   * <p/>
    * 
    * @param context
    *          the test context.
