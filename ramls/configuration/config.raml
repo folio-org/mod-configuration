@@ -59,6 +59,22 @@ resourceTypes:
           orderable: {fieldsList: "module"},
           pageable
         ] 
+    /module/{module}:
+      /name/{name}:
+        displayName: Module configurations
+        description: List / Add a row to this table
+        type:
+          collection:
+            schemaCollection: configs
+            schemaItem: config
+            exampleCollection: !include ../_examples/kv_configuration.sample
+            exampleItem: !include ../_examples/kv_configuration.sample
+        get:
+          is: [
+            searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "[\"name\", \"renewals_allowed_count\", \"=\"]"},
+            orderable: {fieldsList: "module"},
+            pageable
+          ]
   /rules:
     description: The file to be reproduced by the client
     type:
