@@ -11,7 +11,9 @@ Can be run in both embedded mongodb mode or with a regular MongoDB server
 
 instructions:
 
-`mvn clean install`
+clone / download the raml-module-builder and `mvn clean install`
+
+then do the same for the current project `mvn clean install`
 
 Run:
 
