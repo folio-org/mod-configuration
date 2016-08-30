@@ -59,7 +59,6 @@
   },
   "required": [
     "module",
-    "name",
-    "description"
+    "name"
   ]
 }

@@ -2,14 +2,17 @@ package com.sling.rest.impl;
 
 import java.io.InputStream;
 import java.util.List;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+
 import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folio.rulez.Rules;
 import com.sling.rest.annotations.Validate;
@@ -17,8 +20,8 @@ import com.sling.rest.jaxrs.model.Config;
 import com.sling.rest.jaxrs.model.Configs;
 import com.sling.rest.jaxrs.resource.ConfigurationsResource;
 import com.sling.rest.persist.MongoCRUD;
+import com.sling.rest.resource.utils.LogUtil;
 import com.sling.rest.resource.utils.OutStream;
-import com.sling.rest.resource.utils.RestUtils;
 import com.sling.rest.tools.Messages;
 
 @Path("apis/configurations")
@@ -75,8 +78,6 @@ public class ConfigAPI implements ConfigurationsResource {
 
     try {
       System.out.println("sending... postConfigurationsTables");
-      JsonObject jObj = RestUtils.createMongoObject(CONFIG_COLLECTION, METHOD_POST, authorization, null, null, null, 0, 0,
-          entity, null);
 
       context.runOnContext(v -> {
         MongoCRUD.getInstance(context.owner()).save(CONFIG_COLLECTION, entity,
@@ -254,6 +255,71 @@ public class ConfigAPI implements ConfigurationsResource {
   public void getConfigurationsRules(String authorization, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
       Context vertxContext) throws Exception {
     // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.sling.rest.jaxrs.resource.ConfigurationsResource#getConfigurationsTablesModuleByModuleNameByName(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, com.sling.rest.jaxrs.resource.ConfigurationsResource.Order, int, int, java.lang.String, io.vertx.core.Handler, io.vertx.core.Context)
+   */
+  @Override
+  public void getConfigurationsTablesModuleByModuleNameByName(String module, String name, String authorization, String query,
+      String orderBy, Order order, int offset, int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
+      Context vertxContext) throws Exception {
+
+    
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.sling.rest.jaxrs.resource.ConfigurationsResource#postConfigurationsTablesModuleByModuleNameByName(java.lang.String, java.lang.String, java.lang.String, java.lang.String, com.sling.rest.jaxrs.model.Config, io.vertx.core.Handler, io.vertx.core.Context)
+   */
+  @Override
+  public void postConfigurationsTablesModuleByModuleNameByName(String name, String module, String authorization, String lang,
+      Config entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+
+    try {
+      System.out.println("sending... postConfigurationsTablesModuleByModuleNameByName");
+      vertxContext.runOnContext(v -> {
+        JsonObject q = new JsonObject();
+        q.put("module", module);
+        q.put("name", name);
+        try {
+          MongoCRUD.getInstance(vertxContext.owner())
+              .addToArray(CONFIG_COLLECTION, "rows", entity.getRows(), q,
+                  reply -> {
+                    try {
+                      if(reply.failed()){
+                        LogUtil.formatErrorLogMessage("ConfigAPI", "postConfigurationsTablesModuleByModuleNameByName", reply.cause().getMessage());
+                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                          PostConfigurationsTablesModuleByModuleNameByNameResponse
+                            .withPlainInternalServerError(messages.getMessage(lang, "10001"))));
+                      }else{
+                        OutStream stream = new OutStream();
+                        stream.setData(entity);
+                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                          PostConfigurationsTablesModuleByModuleNameByNameResponse.withJsonCreated(module+"_"+name,
+                            stream)));                
+                      }
+                    } catch (Exception e) {
+                      e.printStackTrace();
+                      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                        PostConfigurationsTablesModuleByModuleNameByNameResponse
+                          .withPlainInternalServerError(messages.getMessage(lang, "10001"))));
+                    }
+                  });
+        } catch (Exception e) {
+          e.printStackTrace();
+          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+            PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages
+              .getMessage(lang, "10001"))));
+        }
+      });
+    } catch (Exception e) {
+      e.printStackTrace();
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse
+        .withPlainInternalServerError(messages
+          .getMessage(lang, "10001"))));
+    }
     
   }
 
