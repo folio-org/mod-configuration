@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM openjdk:8-jre
 
 ENV VERTICLE_FILE configuration-fat.jar
 
@@ -9,8 +9,8 @@ ENV VERTICLE_HOME /usr/verticles
 COPY target/$VERTICLE_FILE $VERTICLE_HOME/
 
 # Create user/group 'folio'
-RUN addgroup folio && \
-    adduser -H -h $VERTICLE_HOME -G folio -D folio && \
+RUN groupadd folio && \
+    useradd -r -d $VERTICLE_HOME -g folio -M folio && \
     chown -R folio.folio $VERTICLE_HOME
 
 # Run as this user 
@@ -22,5 +22,5 @@ WORKDIR $VERTICLE_HOME
 # Expose this port locally in the container
 EXPOSE 8081
 
-ENTRYPOINT ["sh", "-c"]
-CMD ["java -jar $VERTICLE_FILE"]
+ENTRYPOINT ["java", "-jar", "configuration-fat.jar"]
+CMD []
