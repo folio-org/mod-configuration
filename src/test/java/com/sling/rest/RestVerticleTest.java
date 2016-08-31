@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.ByteStreams;
+import com.sling.rest.persist.MongoCRUD;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -44,6 +45,14 @@ public class RestVerticleTest {
   @Before
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
+    
+    MongoCRUD.setIsEmbedded(true);
+    try {
+      MongoCRUD.getInstance(vertx).startEmbeddedMongo();
+    } catch (Exception e1) {
+      e1.printStackTrace();
+    }
+    
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
       Integer.valueOf(System.getProperty("http.port"))));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
@@ -57,7 +66,7 @@ public class RestVerticleTest {
     }));
 
   }
-
+  
   /**
    * This method, called after our test, just cleanup everything by closing the vert.x instance
    *
