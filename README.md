@@ -5,22 +5,24 @@ This project is built using the raml-module-builder, using the MongoDB async cli
 
 The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows. 
 
-Module 
+```sh
 
-	-> config 1
-	
-		 -> row 1
-		 
-		 -> row 2
-		 
-	-> config 2
-	
-			-> row 1
-			
-			-> row 2
-			
-			-> row 3
-			
+-> Module 
+
+		-> config 1
+		
+			 -> row 1
+			 
+			 -> row 2
+			 
+		-> config 2
+		
+				-> row 1
+				
+				-> row 2
+				
+				-> row 3
+	```		
 			
 
 Can be run in both embedded mongodb mode or with a regular MongoDB server
