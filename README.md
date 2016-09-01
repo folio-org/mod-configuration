@@ -1,5 +1,12 @@
 # mod-configuration
-Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a mongoDB async implementation
+
+
+Copyright (C) 2016 The Open Library Foundation
+
+This software is distributed under the terms of the Apache License, Version 2.0. See the file ["LICENSE"](https://github.com/folio-org/mod-configuration/blob/master/LICENSE) for more information.
+
+
+#### Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a mongoDB async implementation
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md)
 
