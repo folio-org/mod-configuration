@@ -1,4 +1,4 @@
-package com.sling.rest.impl;
+package com.folio.rest.impl;
 
 import java.io.InputStream;
 import java.util.List;
@@ -16,9 +16,9 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folio.rulez.Rules;
 import com.sling.rest.annotations.Validate;
-import com.sling.rest.jaxrs.model.Config;
-import com.sling.rest.jaxrs.model.Configs;
-import com.sling.rest.jaxrs.resource.ConfigurationsResource;
+import com.folio.rest.jaxrs.model.Config;
+import com.folio.rest.jaxrs.model.Configs;
+import com.folio.rest.jaxrs.resource.ConfigurationsResource;
 import com.sling.rest.persist.MongoCRUD;
 import com.sling.rest.resource.utils.LogUtil;
 import com.sling.rest.resource.utils.OutStream;

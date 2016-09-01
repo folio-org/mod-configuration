@@ -1,4 +1,4 @@
-package com.sling.rest;
+package com.folio.rest;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.ByteStreams;
+import com.sling.rest.RestVerticle;
 import com.sling.rest.persist.MongoCRUD;
 
 /**
