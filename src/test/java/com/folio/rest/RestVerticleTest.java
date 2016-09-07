@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.ByteStreams;
-import com.sling.rest.RestVerticle;
-import com.sling.rest.persist.MongoCRUD;
+import com.folio.rest.RestVerticle;
+import com.folio.rest.persist.MongoCRUD;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
