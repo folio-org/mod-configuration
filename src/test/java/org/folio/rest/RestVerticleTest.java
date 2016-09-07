@@ -1,4 +1,4 @@
-package com.folio.rest;
+package org.folio.rest;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.ByteStreams;
-import com.folio.rest.RestVerticle;
-import com.folio.rest.persist.MongoCRUD;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.MongoCRUD;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.

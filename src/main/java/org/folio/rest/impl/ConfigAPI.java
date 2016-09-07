@@ -1,4 +1,4 @@
-package com.folio.rest.impl;
+package org.folio.rest.impl;
 
 import java.io.InputStream;
 import java.util.List;
@@ -14,15 +14,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.folio.rulez.Rules;
-import com.folio.rest.annotations.Validate;
-import com.folio.rest.jaxrs.model.Config;
-import com.folio.rest.jaxrs.model.Configs;
-import com.folio.rest.jaxrs.resource.ConfigurationsResource;
-import com.folio.rest.persist.MongoCRUD;
-import com.folio.rest.tools.utils.LogUtil;
-import com.folio.rest.tools.utils.OutStream;
-import com.folio.rest.tools.Messages;
+import org.folio.rulez.Rules;
+import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.Configs;
+import org.folio.rest.jaxrs.resource.ConfigurationsResource;
+import org.folio.rest.persist.MongoCRUD;
+import org.folio.rest.tools.utils.LogUtil;
+import org.folio.rest.tools.utils.OutStream;
+import org.folio.rest.tools.Messages;
 
 @Path("apis/configurations")
 public class ConfigAPI implements ConfigurationsResource {
