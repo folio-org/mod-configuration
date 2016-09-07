@@ -15,14 +15,14 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folio.rulez.Rules;
-import com.sling.rest.annotations.Validate;
+import com.folio.rest.annotations.Validate;
 import com.folio.rest.jaxrs.model.Config;
 import com.folio.rest.jaxrs.model.Configs;
 import com.folio.rest.jaxrs.resource.ConfigurationsResource;
-import com.sling.rest.persist.MongoCRUD;
-import com.sling.rest.resource.utils.LogUtil;
-import com.sling.rest.resource.utils.OutStream;
-import com.sling.rest.tools.Messages;
+import com.folio.rest.persist.MongoCRUD;
+import com.folio.rest.tools.utils.LogUtil;
+import com.folio.rest.tools.utils.OutStream;
+import com.folio.rest.tools.Messages;
 
 @Path("apis/configurations")
 public class ConfigAPI implements ConfigurationsResource {
@@ -258,9 +258,6 @@ public class ConfigAPI implements ConfigurationsResource {
     
   }
 
-  /* (non-Javadoc)
-   * @see com.sling.rest.jaxrs.resource.ConfigurationsResource#getConfigurationsTablesModuleByModuleNameByName(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, com.sling.rest.jaxrs.resource.ConfigurationsResource.Order, int, int, java.lang.String, io.vertx.core.Handler, io.vertx.core.Context)
-   */
   @Override
   public void getConfigurationsTablesModuleByModuleNameByName(String module, String name, String authorization, String query,
       String orderBy, Order order, int offset, int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
@@ -270,9 +267,6 @@ public class ConfigAPI implements ConfigurationsResource {
     
   }
 
-  /* (non-Javadoc)
-   * @see com.sling.rest.jaxrs.resource.ConfigurationsResource#postConfigurationsTablesModuleByModuleNameByName(java.lang.String, java.lang.String, java.lang.String, java.lang.String, com.sling.rest.jaxrs.model.Config, io.vertx.core.Handler, io.vertx.core.Context)
-   */
   @Override
   public void postConfigurationsTablesModuleByModuleNameByName(String name, String module, String authorization, String lang,
       Config entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
