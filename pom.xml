@@ -1,8 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.folio</groupId>
-  <artifactId>configuration</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.folio</groupId>
+	<artifactId>configuration</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
 		<aspectj.version>1.8.9</aspectj.version>
@@ -16,6 +17,14 @@
 		<filebeat_registry_file>${basedir}/logs/filebeat/registry</filebeat_registry_file>
 		<logstash_instance>ec2-52-41-57-165.us-west-2.compute.amazonaws.com:5044</logstash_instance>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>id-maven-repo</id>
+			<name>Index Data Maven Repository</name>
+			<url>https://folio-nexus.indexdata.com/repository/maven-snapshots</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -60,20 +69,20 @@
 				</configuration>
 			</plugin>
 
-		<plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-surefire-plugin</artifactId>
-		    <configuration>
-		        <systemProperties>
-		            <property>
-		                <name>http.port</name>
-		                <value>8887</value>
-		            </property>
-		        </systemProperties>
-		    </configuration>
-		</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>http.port</name>
+							<value>8887</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
 
-	<plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.5.0</version>
@@ -171,31 +180,32 @@
 				</executions>
 			</plugin>
 
-	<!-- replace the baseuri and the protocol in the ramls that are in the apidocs directory so that they can at least be used
-	to check via the html api console on IE -->
-  <plugin>
-    <artifactId>maven-antrun-plugin</artifactId>
-    <executions>
-      <execution>
-        <phase>prepare-package</phase>
-        <configuration>
-          <tasks>
-            <replace token= "baseUri: http://github.com/sling-incubator/lsp-apis" 
-            value="baseUri: http://localhost:${http.port}/apis" dir="${basedir}/target/classes/apidocs/raml/configuration">                                 
-              <include name="**/*.raml"/>
-            </replace>
-            <replace token= "protocols: [ HTTPS ]" 
-            value="protocols: [ HTTP ]" dir="${basedir}/target/classes/apidocs/raml/configuration">                                 
-              <include name="**/*.raml"/>
-            </replace>
-          </tasks>
-        </configuration>
-        <goals>
-          <goal>run</goal>
-        </goals>
-      </execution>
-    </executions>
-  </plugin>
+			<!-- replace the baseuri and the protocol in the ramls that are in the 
+				apidocs directory so that they can at least be used to check via the html 
+				api console on IE -->
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<configuration>
+							<tasks>
+								<replace token="baseUri: http://github.com/sling-incubator/lsp-apis"
+									value="baseUri: http://localhost:${http.port}/apis" dir="${basedir}/target/classes/apidocs/raml/configuration">
+									<include name="**/*.raml" />
+								</replace>
+								<replace token="protocols: [ HTTPS ]" value="protocols: [ HTTP ]"
+									dir="${basedir}/target/classes/apidocs/raml/configuration">
+									<include name="**/*.raml" />
+								</replace>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 
 			<plugin>
