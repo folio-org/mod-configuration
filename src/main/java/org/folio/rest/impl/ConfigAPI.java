@@ -22,7 +22,7 @@ import org.folio.rest.jaxrs.resource.ConfigurationsResource;
 import org.folio.rest.persist.MongoCRUD;
 import org.folio.rest.tools.utils.LogUtil;
 import org.folio.rest.tools.utils.OutStream;
-import org.folio.rest.tools.Messages;
+import org.folio.rest.tools.messages.Messages;
 
 @Path("apis/configurations")
 public class ConfigAPI implements ConfigurationsResource {
