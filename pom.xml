@@ -5,6 +5,13 @@
 	<artifactId>configuration</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://spdx.org/licenses/Apache-2.0</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<aspectj.version>1.8.9</aspectj.version>
 		<http.port>8081</http.port>
