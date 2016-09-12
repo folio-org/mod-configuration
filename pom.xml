@@ -197,7 +197,7 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<tasks>
-								<replace token="baseUri: http://github.com/sling-incubator/lsp-apis"
+								<replace token="baseUri: http://github.com/org/folio/lsp-apis"
 									value="baseUri: http://localhost:${http.port}/apis" dir="${basedir}/target/classes/apidocs/raml/configuration">
 									<include name="**/*.raml" />
 								</replace>
