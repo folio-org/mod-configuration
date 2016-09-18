@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.folio.rulez.Rules;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Config;
@@ -23,6 +24,7 @@ import org.folio.rest.persist.MongoCRUD;
 import org.folio.rest.tools.utils.LogUtil;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.messages.Messages;
+import org.folio.utils.ConfMessageConsts;
 
 @Path("apis/configurations")
 public class ConfigAPI implements ConfigurationsResource {
@@ -226,6 +228,16 @@ public class ConfigAPI implements ConfigurationsResource {
           //this is the config entry - load into a config object, if that fails, data passed is not correct
           conf = mapper.readValue(part.getContent().toString(), Config.class);
         }
+      }
+      if(drool == null){
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "Valid Drool file")))); 
+        return;
+      }
+      if(conf == null){
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry")))); 
+        return;
       }
       conf.getRows().get(0).setValue(drool.toString());
       final Config fconf = conf;

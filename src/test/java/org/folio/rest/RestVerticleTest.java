@@ -26,8 +26,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.ByteStreams;
+
+import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.MongoCRUD;
+import org.folio.rest.tools.utils.NetworkUtils;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -37,7 +40,7 @@ public class RestVerticleTest {
 
   private Vertx             vertx;
   private ArrayList<String> urls;
-
+  int port;
   /**
    * 
    * @param context
@@ -55,12 +58,10 @@ public class RestVerticleTest {
     }
     
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-      Integer.valueOf(System.getProperty("http.port"))));
+      port = NetworkUtils.nextFreePort()));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      System.out.println("async complete =========================");
       try {
         urls = urlsFromFile();
-        System.out.println("url complete =========================");
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -107,7 +108,7 @@ public class RestVerticleTest {
           method = HttpMethod.GET;
         }
         HttpClient client = vertx.createHttpClient();
-        HttpClientRequest request = client.requestAbs(method, urlInfo[1], new Handler<HttpClientResponse>() {
+        HttpClientRequest request = client.requestAbs(method, urlInfo[1].replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
 
           @Override
           public void handle(HttpClientResponse httpClientResponse) {
@@ -142,8 +143,42 @@ public class RestVerticleTest {
     } finally {
 
     }
+    
+    Async async = context.async();
+    HttpClient client = vertx.createHttpClient();
+    HttpClientRequest request;
+    request = client.postAbs("http://localhost:"+port+"/apis/configurations/rules");
+    request.exceptionHandler(error -> {
+      async.complete();
+      context.fail(error.getMessage());
+    }).handler(response -> {
+      int statusCode = response.statusCode();
+      // is it 2XX
+      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + request.path());
+
+      if (statusCode == 204) {
+        context.assertTrue(true);
+      } else {        
+        response.bodyHandler(responseData -> {
+          context.fail("got non 200 response from bosun, error: " + responseData + " code " + statusCode);
+        });
+      }
+      if(!async.isCompleted()){
+        async.complete();
+      }
+    });
+    request.setChunked(true);
+    request.putHeader("Authorization", "abcdefg");
+    request.putHeader("Accept", "application/json,text/plain");
+    request.putHeader("Content-type",
+      "multipart/form-data; boundary=MyBoundary");    
+    Buffer b = Buffer.buffer();
+    b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(getBody("kv_configuration.sample", true)));
+    request.write(b);
+    request.end();
   }
 
+  
   private ArrayList<String> urlsFromFile() throws IOException {
     ArrayList<String> ret = new ArrayList<String>();
     byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
@@ -169,4 +204,29 @@ public class RestVerticleTest {
     return ret;
   }
 
+  private String getFile(String filename) throws IOException {
+    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
+  }
+
+
+  private Buffer getBody(String filename, boolean closeBody) {
+    Buffer buffer = Buffer.buffer();
+    buffer.appendString("--MyBoundary\r\n");
+    buffer.appendString("Content-Disposition: form-data; name=\""+filename+"\"; filename=\""+filename+"\"\r\n");
+    buffer.appendString("Content-Type: application/octet-stream\r\n");
+    buffer.appendString("Content-Transfer-Encoding: binary\r\n");
+    buffer.appendString("\r\n");
+    try {
+      buffer.appendString(getFile(filename));
+      buffer.appendString("\r\n");
+    } catch (IOException e) {
+      e.printStackTrace();
+
+    }
+    if(closeBody){
+      buffer.appendString("--MyBoundary--\r\n");      
+    }
+    return buffer;
+  }
+  
 }
