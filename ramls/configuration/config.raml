@@ -14,16 +14,12 @@ schemas:
  - config: !include ../_schemas/kv_configuration.schema
  - libraries: !include ../_schemas/library.schema
 
-traits: 
- - secured: !include ../traits/auth.raml
- - orderable: !include ../traits/orderable.raml
- - pageable:  !include ../traits/pageable.raml
- - searchable: !include ../traits/searchable.raml
- - payment: !include ../traits/payment.raml
- - barcode_id: !include ../traits/barcode_id.raml
- - item_id: !include ../traits/item_id.raml
- - reason: !include ../traits/reason.raml
- - language: !include ../traits/language.raml
+traits:  
+ - secured: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/auth.raml
+ - orderable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/orderable.raml
+ - pageable:  !include https://raw.githubusercontent.com/folio-org/raml/master/traits/pageable.raml
+ - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
+ - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
 resourceTypes: 
  - collection: !include ../rtypes/collection.raml
  - collection-item: !include ../rtypes/item-collection.raml
