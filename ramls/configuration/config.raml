@@ -21,11 +21,12 @@ traits:
  - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
  - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
 resourceTypes: 
- - collection: !include ../rtypes/collection.raml
- - collection-item: !include ../rtypes/item-collection.raml
- - post-empty-body: !include ../rtypes/post-empty-body.raml
- - get-only: !include ../rtypes/get-only.raml
- - attachments: !include ../rtypes/attachments.raml
+ - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
+ - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
+ - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
+ - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
+ - post-empty-body: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/post-empty-body.raml
+ 
 /configurations:
   /tables:
     displayName: Configurations
