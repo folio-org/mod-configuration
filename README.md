@@ -10,27 +10,27 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md)
 
-The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows. 
+The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
 
 ```sh
--> Module 
+-> Module
 
 		-> config 1
-		
+
 			 -> row 1
-			 
+
 			 -> row 2
-			 
+
 		-> config 2
-		
+
 				-> row 1
-				
+
 				-> row 2
-				
+
 				-> row 3
-				
-```	
-			
+
+```
+
 
 Can be run in both embedded mongodb mode or with a regular MongoDB server
 
@@ -75,7 +75,7 @@ http://localhost:8085/apis/configurations/tables
 add a module / config pair for the circulation module and the validation rules configuration, along with 2 rows
 
 (POST)
-http://localhost:8085/apis/configurations/tables		
+http://localhost:8085/apis/configurations/tables
 {
   "module": "CIRCULATION",
   "name": "validation_rules",
@@ -136,7 +136,7 @@ http://localhost:8085/apis/configurations/tables/module/CIRCULATION/name/validat
 }
 
 
-query for a specific module / config / row 
+query for a specific module / config / row
 
 (GET)
 http://localhost:8085/apis/configurations/tables?query={"$and": [ { "module": "CIRCULATION"}, { "name": "validation_rules"}, { "rows.code": { "$all": [ "PATRON_RULE" ] } }]}

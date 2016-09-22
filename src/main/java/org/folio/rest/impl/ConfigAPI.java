@@ -45,7 +45,7 @@ public class ConfigAPI implements ConfigurationsResource {
     /**
      * http://host:port/apis/configurations/tables
      */
-    
+
     try {
       System.out.println("sending... getConfigurationsTables");
       context.runOnContext(v -> {
@@ -109,12 +109,12 @@ public class ConfigAPI implements ConfigurationsResource {
   public void getConfigurationsTablesByTableId(String tableId, String authorization, String query, String orderBy, Order order, int offset,
       int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
-    try {   
+    try {
       System.out.println("sending... getConfigurationsTablesByTableId");
       context.runOnContext(v -> {
         JsonObject q = new JsonObject();
         if(query != null){
-          q = new JsonObject(query);          
+          q = new JsonObject(query);
         }
         q.put("_id", tableId);
         MongoCRUD.getInstance(context.owner()).get(
@@ -231,12 +231,12 @@ public class ConfigAPI implements ConfigurationsResource {
       }
       if(drool == null){
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
-          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "Valid Drool file")))); 
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "Valid Drool file"))));
         return;
       }
       if(conf == null){
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
-          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry")))); 
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
         return;
       }
       conf.getRows().get(0).setValue(drool.toString());
@@ -259,7 +259,7 @@ public class ConfigAPI implements ConfigurationsResource {
       asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
           .withPlainInternalServerError(messages.getMessage(lang, "10001"))));
     }
-    
+
   }
 
   @Validate
@@ -267,7 +267,7 @@ public class ConfigAPI implements ConfigurationsResource {
   public void getConfigurationsRules(String authorization, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
       Context vertxContext) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -275,8 +275,8 @@ public class ConfigAPI implements ConfigurationsResource {
       String orderBy, Order order, int offset, int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
       Context vertxContext) throws Exception {
 
-    
-    
+
+
   }
 
   @Override
@@ -304,7 +304,7 @@ public class ConfigAPI implements ConfigurationsResource {
                         stream.setData(entity);
                         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
                           PostConfigurationsTablesModuleByModuleNameByNameResponse.withJsonCreated(module+"_"+name,
-                            stream)));                
+                            stream)));
                       }
                     } catch (Exception e) {
                       e.printStackTrace();
@@ -326,7 +326,7 @@ public class ConfigAPI implements ConfigurationsResource {
         .withPlainInternalServerError(messages
           .getMessage(lang, "10001"))));
     }
-    
+
   }
 
 }

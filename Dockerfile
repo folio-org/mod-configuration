@@ -13,7 +13,7 @@ RUN groupadd folio && \
     useradd -r -d $VERTICLE_HOME -g folio -M folio && \
     chown -R folio.folio $VERTICLE_HOME
 
-# Run as this user 
+# Run as this user
 USER folio
 
 # Launch the verticle

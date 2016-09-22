@@ -10,23 +10,23 @@ filebeat:
         - ${log_path}
 
       document_type: ${module_name}
-    
+
       tail_files: true
- 
+
     -
       paths:
         - ${audit_log_path}
 
       document_type: audit
-    
+
       tail_files: true
- 
+
     -
       paths:
         - ${gclog_path}
 
       document_type: gc_logs
-    
+
       tail_files: true
   registry_file: ${filebeat_registry_file}
 
