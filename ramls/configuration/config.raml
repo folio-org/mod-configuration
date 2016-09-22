@@ -10,22 +10,23 @@ documentation:
 
 
 schemas:
- - configs: !include ../_schemas/kv_configurations.schema
- - config: !include ../_schemas/kv_configuration.schema
- - libraries: !include ../_schemas/library.schema
+  - configs: !include ../_schemas/kv_configurations.schema
+  - config: !include ../_schemas/kv_configuration.schema
+  - libraries: !include ../_schemas/library.schema
 
 traits:
- - secured: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/auth.raml
- - orderable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/orderable.raml
- - pageable:  !include https://raw.githubusercontent.com/folio-org/raml/master/traits/pageable.raml
- - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
- - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
+  - secured: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/auth.raml
+  - orderable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/orderable.raml
+  - pageable:  !include https://raw.githubusercontent.com/folio-org/raml/master/traits/pageable.raml
+  - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
+  - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
+
 resourceTypes:
- - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
- - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
- - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
- - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
- - post-empty-body: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/post-empty-body.raml
+  - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
+  - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
+  - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
+  - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
+  - post-empty-body: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/post-empty-body.raml
 
 /configurations:
   /tables:
