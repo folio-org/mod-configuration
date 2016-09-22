@@ -15,19 +15,19 @@ The idea behind this module is to provide a sample of a configuration service. T
 ```sh
 -> Module
 
-		-> config 1
+    -> config 1
 
-			 -> row 1
+       -> row 1
 
-			 -> row 2
+       -> row 2
 
-		-> config 2
+    -> config 2
 
-				-> row 1
+        -> row 1
 
-				-> row 2
+        -> row 2
 
-				-> row 3
+        -> row 3
 
 ```
 
@@ -83,24 +83,24 @@ http://localhost:8085/apis/configurations/tables
   "updated_by": "joe",
   "update_date": "2016.06.27.10.56.03",
   "scope": {
-	"institution_id" : "aaa",
-	"library_id" : "vvv"
+    "institution_id" : "aaa",
+    "library_id" : "vvv"
   },
   "rows": [
-	{
-	  "code": "PATRON_RULE2",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	},
-	{
-	  "code": "PATRON_RULE2",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "12345"
-	}
+    {
+      "code": "PATRON_RULE2",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    },
+    {
+      "code": "PATRON_RULE2",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "12345"
+    }
   ]
 }
 
@@ -114,24 +114,24 @@ http://localhost:8085/apis/configurations/tables/module/CIRCULATION/name/validat
   "module": "CIRCULATION",
   "name": "validation_rules",
   "scope": {
-	"institution_id" : "aaa",
-	"library_id" : "vvv"
+    "institution_id" : "aaa",
+    "library_id" : "vvv"
   },
   "rows": [
-	{
-	  "code": "PATRON_RULE3",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	},
-					{
-	  "code": "PATRON_RULE4",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	}
+    {
+      "code": "PATRON_RULE3",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    },
+    {
+      "code": "PATRON_RULE4",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    }
   ]
 }
 
