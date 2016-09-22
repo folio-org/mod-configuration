@@ -10,23 +10,24 @@ documentation:
 
 
 schemas:
- - configs: !include ../_schemas/kv_configurations.schema
- - config: !include ../_schemas/kv_configuration.schema
- - libraries: !include ../_schemas/library.schema
+  - configs: !include ../_schemas/kv_configurations.schema
+  - config: !include ../_schemas/kv_configuration.schema
+  - libraries: !include ../_schemas/library.schema
 
-traits:  
- - secured: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/auth.raml
- - orderable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/orderable.raml
- - pageable:  !include https://raw.githubusercontent.com/folio-org/raml/master/traits/pageable.raml
- - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
- - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
-resourceTypes: 
- - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
- - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
- - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
- - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
- - post-empty-body: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/post-empty-body.raml
- 
+traits:
+  - secured: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/auth.raml
+  - orderable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/orderable.raml
+  - pageable:  !include https://raw.githubusercontent.com/folio-org/raml/master/traits/pageable.raml
+  - searchable: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/searchable.raml
+  - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
+
+resourceTypes:
+  - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
+  - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
+  - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
+  - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
+  - post-empty-body: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/post-empty-body.raml
+
 /configurations:
   /tables:
     displayName: Configurations
@@ -42,7 +43,7 @@ resourceTypes:
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "[\"module\", \"CIRCULATION\", \"=\"]"},
         orderable: {fieldsList: "module"},
         pageable
-      ] 
+      ]
     /{tableId}:
       displayName: Module configurations
       description: <ul><li>Delete or Update a specific module from the configuration table<br>An example of this would be to add a configuration to the circulation table or to delete a configuration from the circulation table. The query parameters can be used to filter for the desired module's configuration</li><li>Get a the specified module's configurations</li></ul><br>The JWT token limits the returned configurations to those of the calling institution
@@ -55,7 +56,7 @@ resourceTypes:
           searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "[\"name\", \"renewals_allowed_count\", \"=\"]"},
           orderable: {fieldsList: "module"},
           pageable
-        ] 
+        ]
     /module/{module}:
       /name/{name}:
         displayName: Module configurations

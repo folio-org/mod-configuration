@@ -10,27 +10,27 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md)
 
-The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows. 
+The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
 
 ```sh
--> Module 
+-> Module
 
-		-> config 1
-		
-			 -> row 1
-			 
-			 -> row 2
-			 
-		-> config 2
-		
-				-> row 1
-				
-				-> row 2
-				
-				-> row 3
-				
-```	
-			
+    -> config 1
+
+       -> row 1
+
+       -> row 2
+
+    -> config 2
+
+        -> row 1
+
+        -> row 2
+
+        -> row 3
+
+```
+
 
 Can be run in both embedded mongodb mode or with a regular MongoDB server
 
@@ -75,7 +75,7 @@ http://localhost:8085/apis/configurations/tables
 add a module / config pair for the circulation module and the validation rules configuration, along with 2 rows
 
 (POST)
-http://localhost:8085/apis/configurations/tables		
+http://localhost:8085/apis/configurations/tables
 {
   "module": "CIRCULATION",
   "name": "validation_rules",
@@ -83,24 +83,24 @@ http://localhost:8085/apis/configurations/tables
   "updated_by": "joe",
   "update_date": "2016.06.27.10.56.03",
   "scope": {
-	"institution_id" : "aaa",
-	"library_id" : "vvv"
+    "institution_id" : "aaa",
+    "library_id" : "vvv"
   },
   "rows": [
-	{
-	  "code": "PATRON_RULE2",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	},
-	{
-	  "code": "PATRON_RULE2",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "12345"
-	}
+    {
+      "code": "PATRON_RULE2",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    },
+    {
+      "code": "PATRON_RULE2",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "12345"
+    }
   ]
 }
 
@@ -114,29 +114,29 @@ http://localhost:8085/apis/configurations/tables/module/CIRCULATION/name/validat
   "module": "CIRCULATION",
   "name": "validation_rules",
   "scope": {
-	"institution_id" : "aaa",
-	"library_id" : "vvv"
+    "institution_id" : "aaa",
+    "library_id" : "vvv"
   },
   "rows": [
-	{
-	  "code": "PATRON_RULE3",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	},
-					{
-	  "code": "PATRON_RULE4",
-	  "description": "for patrons2",
-	  "default": true,
-	  "enabled": true,
-	  "value": "123"
-	}
+    {
+      "code": "PATRON_RULE3",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    },
+    {
+      "code": "PATRON_RULE4",
+      "description": "for patrons2",
+      "default": true,
+      "enabled": true,
+      "value": "123"
+    }
   ]
 }
 
 
-query for a specific module / config / row 
+query for a specific module / config / row
 
 (GET)
 http://localhost:8085/apis/configurations/tables?query={"$and": [ { "module": "CIRCULATION"}, { "name": "validation_rules"}, { "rows.code": { "$all": [ "PATRON_RULE" ] } }]}

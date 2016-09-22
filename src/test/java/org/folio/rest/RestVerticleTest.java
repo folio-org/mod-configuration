@@ -42,21 +42,21 @@ public class RestVerticleTest {
   private ArrayList<String> urls;
   int port;
   /**
-   * 
+   *
    * @param context
    *          the test context.
    */
   @Before
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
-    
+
     MongoCRUD.setIsEmbedded(true);
     try {
       MongoCRUD.getInstance(vertx).startEmbeddedMongo();
     } catch (Exception e1) {
       e1.printStackTrace();
     }
-    
+
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
       port = NetworkUtils.nextFreePort()));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
@@ -68,7 +68,7 @@ public class RestVerticleTest {
     }));
 
   }
-  
+
   /**
    * This method, called after our test, just cleanup everything by closing the vert.x instance
    *
@@ -143,7 +143,7 @@ public class RestVerticleTest {
     } finally {
 
     }
-    
+
     Async async = context.async();
     HttpClient client = vertx.createHttpClient();
     HttpClientRequest request;
@@ -158,7 +158,7 @@ public class RestVerticleTest {
 
       if (statusCode == 204) {
         context.assertTrue(true);
-      } else {        
+      } else {
         response.bodyHandler(responseData -> {
           context.fail("got non 200 response from bosun, error: " + responseData + " code " + statusCode);
         });
@@ -171,14 +171,14 @@ public class RestVerticleTest {
     request.putHeader("Authorization", "abcdefg");
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type",
-      "multipart/form-data; boundary=MyBoundary");    
+      "multipart/form-data; boundary=MyBoundary");
     Buffer b = Buffer.buffer();
     b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(getBody("kv_configuration.sample", true)));
     request.write(b);
     request.end();
   }
 
-  
+
   private ArrayList<String> urlsFromFile() throws IOException {
     ArrayList<String> ret = new ArrayList<String>();
     byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
@@ -224,9 +224,9 @@ public class RestVerticleTest {
 
     }
     if(closeBody){
-      buffer.appendString("--MyBoundary--\r\n");      
+      buffer.appendString("--MyBoundary--\r\n");
     }
     return buffer;
   }
-  
+
 }
