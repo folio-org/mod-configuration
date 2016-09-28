@@ -251,7 +251,8 @@ public class ConfigAPI implements ConfigurationsResource {
       }
       if (conf == null) {
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
-          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
+          .withPlainInternalServerError(messages.getMessage(
+            lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
         return;
       }
       conf.getRows().get(0).setValue(drool.toString());

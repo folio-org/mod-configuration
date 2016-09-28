@@ -1,5 +1,6 @@
 package org.folio.rest;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -84,12 +85,33 @@ public class RestVerticleTest {
   /**
    * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
    *
-   * @param context
-   *          the test context
+   * @param context the test context
    */
   @Test
   public void checkURLs(TestContext context) {
+ 
+    try {
+      mutateURLs("http://localhost:" + port + "/apis/configurations/tables", context, HttpMethod.POST, 
+        getFile("kv_configuration.sample"), "application/json", 201);
+      
+      Buffer b = Buffer.buffer();
+      b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(
+        getBody("kv_configuration.sample", true)));
+      
+      mutateURLs("http://localhost:" + port + "/apis/configurations/rules", context, HttpMethod.POST, 
+        b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
+      
+      Thread.sleep(500);
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    runGETURLoop(context);
 
+  }
+  
+  private void runGETURLoop(TestContext context){
     try {
       int[] urlCount = { urls.size() };
       urls.forEach(url -> {
@@ -109,7 +131,8 @@ public class RestVerticleTest {
               httpClientResponse.bodyHandler(new Handler<Buffer>() {
                 @Override
                 public void handle(Buffer buffer) {
-                  System.out.println(buffer.getString(0, buffer.length()));
+                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
+                  context.assertEquals(2, records);
                   async.complete();
                 }
               });
@@ -123,39 +146,55 @@ public class RestVerticleTest {
     } catch (Throwable e) {
       e.printStackTrace();
     }
+  }
 
+  /**
+   * for POST / PUT / DELETE
+   * @param api
+   * @param context
+   * @param method
+   * @param content
+   * @param id
+   */
+  private void mutateURLs(String api, TestContext context, HttpMethod method, String content,
+      String contentType, int errorCode) {
     Async async = context.async();
     HttpClient client = vertx.createHttpClient();
     HttpClientRequest request;
-    request = client.postAbs("http://localhost:" + port + "/apis/configurations/rules");
+    Buffer buffer = Buffer.buffer(content);
+
+    if (method == HttpMethod.POST) {
+      request = client.postAbs(api);
+    }
+    else if (method == HttpMethod.DELETE) {
+      request = client.deleteAbs(api);
+    }
+    else {
+      request = client.putAbs(api);
+    }
     request.exceptionHandler(error -> {
       async.complete();
       context.fail(error.getMessage());
     }).handler(response -> {
       int statusCode = response.statusCode();
-      // is it 2XX
-      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for "
-          + request.path());
-      if (statusCode == 204) {
+      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
+      if(errorCode == statusCode){
         context.assertTrue(true);
       } else {
-        context.fail("got non 200 response from bosun, error: code " + statusCode);
+        context.fail("expected " + errorCode +" code, but got " + statusCode);
       }
-      if (!async.isCompleted()) {
+      if(!async.isCompleted()){
         async.complete();
       }
+      System.out.println("complete");
     });
     request.setChunked(true);
     request.putHeader("Authorization", "abcdefg");
     request.putHeader("Accept", "application/json,text/plain");
-    request.putHeader("Content-type", "multipart/form-data; boundary=MyBoundary");
-    Buffer b = Buffer.buffer();
-    b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(
-      getBody("kv_configuration.sample", true)));
-    request.write(b);
-    request.end();
+    request.putHeader("Content-type", contentType);
+    request.end(buffer);
   }
-
+  
   private ArrayList<String> urlsFromFile() throws IOException {
     ArrayList<String> ret = new ArrayList<String>();
     byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
