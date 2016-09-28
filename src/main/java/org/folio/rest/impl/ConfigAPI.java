@@ -23,7 +23,6 @@ import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Configs;
 import org.folio.rest.jaxrs.resource.ConfigurationsResource;
 import org.folio.rest.persist.MongoCRUD;
-import org.folio.rest.tools.utils.LogUtil;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
@@ -43,7 +42,8 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsTables(String authorization, String query, String orderBy, Order order, int offset, int limit, String lang,
+  public void getConfigurationsTables(String authorization, String query, String orderBy,
+      Order order, int offset, int limit, String lang,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     /**
@@ -54,24 +54,28 @@ public class ConfigAPI implements ConfigurationsResource {
       System.out.println("sending... getConfigurationsTables");
       context.runOnContext(v -> {
         MongoCRUD.getInstance(context.owner()).get(
-          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, query, orderBy, order, offset, limit),
+          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, query, orderBy, order,
+            offset, limit),
           reply -> {
             try {
               Configs configs = new Configs();
               List<Config> config = (List<Config>) reply.result();
               configs.setConfigs(config);
               configs.setTotalRecords(config.size());
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse.withJsonOK(configs)));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse.withJsonOK(
+                configs)));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse.withPlainInternalServerError(messages.getMessage(
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse
+                .withPlainInternalServerError(messages.getMessage(
                 lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse.withPlainInternalServerError(messages.getMessage(
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse
+        .withPlainInternalServerError(messages.getMessage(
         lang, MessageConsts.InternalServerError))));
     }
 
@@ -79,8 +83,8 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void postConfigurationsTables(String authorization, String lang, Config entity, Handler<AsyncResult<Response>> asyncResultHandler,
-      Context context) throws Exception {
+  public void postConfigurationsTables(String authorization, String lang, Config entity,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     try {
       System.out.println("sending... postConfigurationsTables");
@@ -98,22 +102,23 @@ public class ConfigAPI implements ConfigurationsResource {
                 stream.getData().toString(), stream)));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse.withPlainInternalServerError(messages.getMessage(
-                lang, MessageConsts.InternalServerError))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse
+                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse.withPlainInternalServerError(messages.getMessage(
-        lang, MessageConsts.InternalServerError))));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse
+        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
   }
 
   @Validate
   @Override
-  public void getConfigurationsTablesByTableId(String tableId, String authorization, String query, String orderBy, Order order, int offset,
-      int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+  public void getConfigurationsTablesByTableId(String tableId, String authorization, String query,
+      String orderBy, Order order, int offset, int limit, String lang,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     try {
       System.out.println("sending... getConfigurationsTablesByTableId");
@@ -124,31 +129,33 @@ public class ConfigAPI implements ConfigurationsResource {
         }
         q.put("_id", tableId);
         MongoCRUD.getInstance(context.owner()).get(
-          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, q, orderBy, order, offset, limit),
+          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, q, orderBy, order, offset,
+            limit),
           reply -> {
             try {
               Object ret = reply.result();
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse.withJsonOK(new ObjectMapper().readValue(
-                ret.toString(), Configs.class))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+                .withJsonOK(new ObjectMapper().readValue(ret.toString(), Configs.class))));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-                lang, MessageConsts.InternalServerError))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-        lang, MessageConsts.InternalServerError))));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
   }
 
   @Validate
   @Override
-  public void deleteConfigurationsTablesByTableId(String tableId, String authorization, String lang,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+  public void deleteConfigurationsTablesByTableId(String tableId, String authorization,
+      String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
+      throws Exception {
 
     try {
       JsonObject q = new JsonObject();
@@ -161,26 +168,28 @@ public class ConfigAPI implements ConfigurationsResource {
           q,
           reply -> {
             try {
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse.withNoContent()));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
+                .withNoContent()));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-                lang, MessageConsts.InternalServerError))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
+                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-        lang, MessageConsts.InternalServerError))));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
+        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
   }
 
   @Validate
   @Override
-  public void putConfigurationsTablesByTableId(String tableId, String authorization, String lang, Configs entity,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+  public void putConfigurationsTablesByTableId(String tableId, String authorization, String lang,
+      Configs entity, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
+      throws Exception {
 
     try {
       JsonObject q = new JsonObject();
@@ -194,18 +203,19 @@ public class ConfigAPI implements ConfigurationsResource {
           q,
           reply -> {
             try {
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withNoContent()));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+                .withNoContent()));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-                lang, MessageConsts.InternalServerError))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-        lang, MessageConsts.InternalServerError))));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
   }
@@ -235,13 +245,13 @@ public class ConfigAPI implements ConfigurationsResource {
         }
       }
       if (drool == null) {
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-          lang, ConfMessageConsts.UploadFileMissing, "Valid Drool file"))));
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "Valid Drool file"))));
         return;
       }
       if (conf == null) {
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-          lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+          .withPlainInternalServerError(messages.getMessage(lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
         return;
       }
       conf.getRows().get(0).setValue(drool.toString());
@@ -252,11 +262,12 @@ public class ConfigAPI implements ConfigurationsResource {
           fconf,
           reply -> {
             try {
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withNoContent()));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+                .withNoContent()));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-                lang, MessageConsts.InternalServerError))));
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
@@ -270,23 +281,25 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsRules(String authorization, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
-      Context vertxContext) throws Exception {
+  public void getConfigurationsRules(String authorization, String lang,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void getConfigurationsTablesModuleByModuleNameByName(String module, String name, String authorization, String query,
-      String orderBy, Order order, int offset, int limit, String lang, Handler<AsyncResult<Response>> asyncResultHandler,
-      Context vertxContext) throws Exception {
+  public void getConfigurationsTablesModuleByModuleNameByName(String module, String name,
+      String authorization, String query, String orderBy, Order order, int offset, int limit,
+      String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
+      throws Exception {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void postConfigurationsTablesModuleByModuleNameByName(String name, String module, String authorization, String lang,
-      Config entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+  public void postConfigurationsTablesModuleByModuleNameByName(String name, String module,
+      String authorization, String lang, Config entity,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
     try {
       System.out.println("sending... postConfigurationsTablesModuleByModuleNameByName");
@@ -303,30 +316,35 @@ public class ConfigAPI implements ConfigurationsResource {
             reply -> {
               try {
                 if (reply.failed()) {
-                  LogUtil.formatErrorLogMessage("ConfigAPI", "postConfigurationsTablesModuleByModuleNameByName", reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
+                  log.error(reply.cause());
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                    PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
                     lang, MessageConsts.InternalServerError))));
                 } else {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse.withJsonCreated(
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                    PostConfigurationsTablesModuleByModuleNameByNameResponse.withJsonCreated(
                     module + "_" + name, stream)));
                 }
               } catch (Exception e) {
                 log.error(e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                  PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
                   lang, MessageConsts.InternalServerError))));
               }
             });
         } catch (Exception e) {
           log.error(e);
-          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
+          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+            PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
             lang, MessageConsts.InternalServerError))));
         }
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+        PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
         lang, MessageConsts.InternalServerError))));
     }
 
