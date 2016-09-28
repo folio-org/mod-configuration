@@ -91,43 +91,25 @@ public class RestVerticleTest {
 
     try {
       int[] urlCount = { urls.size() };
-      // Async async = context.async(urlCount[0]);
       urls.forEach(url -> {
         Async async = context.async();
-        urlCount[0] = urlCount[0] - 1;
-        HttpMethod method = null;
-
         String[] urlInfo = url.split(" , ");
-        if ("POST".equalsIgnoreCase(urlInfo[0].trim())) {
-          method = HttpMethod.POST;
-        } else if ("PUT".equalsIgnoreCase(urlInfo[0].trim())) {
-          method = HttpMethod.PUT;
-        } else if ("DELETE".equalsIgnoreCase(urlInfo[0].trim())) {
-          method = HttpMethod.DELETE;
-        } else {
-          method = HttpMethod.GET;
-        }
         HttpClient client = vertx.createHttpClient();
-        HttpClientRequest request = client.requestAbs(method, urlInfo[1].replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
-
+        HttpClientRequest request = client.requestAbs(HttpMethod.GET, urlInfo[1].replaceFirst("<port>", port + ""), 
+          new Handler<HttpClientResponse>() {
           @Override
           public void handle(HttpClientResponse httpClientResponse) {
-
             System.out.println(urlInfo[1]);
             if (httpClientResponse.statusCode() != 404) {
               // this is cheating for now - add posts to the test case so that
               // we dont get 404 for missing entities
               context.assertInRange(200, httpClientResponse.statusCode(), 5);
             }
-            // System.out.println(context.assertInRange(200, httpClientResponse.statusCode(),5).);
             httpClientResponse.bodyHandler(new Handler<Buffer>() {
               @Override
               public void handle(Buffer buffer) {
-                /*
-                 * // System.out.println("Response (" // + buffer.length() // + "): ");
-                 */System.out.println(buffer.getString(0, buffer.length()));
+                System.out.println(buffer.getString(0, buffer.length()));
                 async.complete();
-
               }
             });
           }
@@ -136,14 +118,12 @@ public class RestVerticleTest {
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
-
       });
     } catch (Throwable e) {
       e.printStackTrace();
-    } finally {
-
     }
-
+    
+    
     Async async = context.async();
     HttpClient client = vertx.createHttpClient();
     HttpClientRequest request;
@@ -155,13 +135,10 @@ public class RestVerticleTest {
       int statusCode = response.statusCode();
       // is it 2XX
       System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + request.path());
-
       if (statusCode == 204) {
         context.assertTrue(true);
       } else {
-        response.bodyHandler(responseData -> {
-          context.fail("got non 200 response from bosun, error: " + responseData + " code " + statusCode);
-        });
+        context.fail("got non 200 response from bosun, error: code " + statusCode);
       }
       if(!async.isCompleted()){
         async.complete();
