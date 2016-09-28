@@ -273,8 +273,8 @@ public class ConfigAPI implements ConfigurationsResource {
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse.withPlainInternalServerError(messages.getMessage(
-        lang, MessageConsts.InternalServerError))));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
   }
