@@ -302,6 +302,9 @@ public class ConfigAPI implements ConfigurationsResource {
       String authorization, String lang, Config entity,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
+    /**
+     * http://host:port/apis/configurations/tables/module/{module}/name/{name}
+     */
     try {
       System.out.println("sending... postConfigurationsTablesModuleByModuleNameByName");
       vertxContext.runOnContext(v -> {
@@ -326,7 +329,7 @@ public class ConfigAPI implements ConfigurationsResource {
                   stream.setData(entity);
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
                     PostConfigurationsTablesModuleByModuleNameByNameResponse.withJsonCreated(
-                    module + "_" + name, stream)));
+                    module + "/" + name, stream)));
                 }
               } catch (Exception e) {
                 log.error(e);

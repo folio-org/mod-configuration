@@ -9,6 +9,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -20,16 +21,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.Row;
 import org.folio.rest.persist.MongoCRUD;
 import org.folio.rest.tools.utils.NetworkUtils;
 
@@ -100,13 +105,37 @@ public class RestVerticleTest {
       
       mutateURLs("http://localhost:" + port + "/apis/configurations/rules", context, HttpMethod.POST, 
         b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
+       
+      
+      Config conf = new Config();
+      conf.setModule("CIRCULATION");
+      conf.setName("validation_rules");
+      conf.setRows(createListOfRows());
             
+      mutateURLs("http://localhost:" + port + 
+        "/apis/configurations/tables/module/CIRCULATION/name/validation_rules", context, HttpMethod.POST, 
+        new ObjectMapper().writeValueAsString(conf), "application/json", 0);
+              
     } catch (Exception e) {
       e.printStackTrace();
     }
     
     runGETURLoop(context);
 
+  }
+  
+  private List<Row> createListOfRows(){
+    List<Row> list = new ArrayList<>();
+    Row r = new Row();
+    for (int i = 0; i < 5; i++) {
+      r.setCode(i+"");
+      r.setDefault(true);
+      r.setDescription("ssssssssss");
+      r.setEnabled(true);
+      r.setValue("value"+i);
+      list.add(r);
+    }
+    return list;
   }
   
   private void runGETURLoop(TestContext context){
@@ -178,7 +207,12 @@ public class RestVerticleTest {
       System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
       if(errorCode == statusCode){
         context.assertTrue(true);
-      } else {
+      } 
+      else if(errorCode == 0){
+        //currently dont care about return value
+        context.assertTrue(true);
+      }
+      else {
         context.fail("expected " + errorCode +" code, but got " + statusCode);
       }
       if(!async.isCompleted()){
