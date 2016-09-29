@@ -133,9 +133,12 @@ public class ConfigAPI implements ConfigurationsResource {
             limit),
           reply -> {
             try {
-              Object ret = reply.result();
+              Configs configs = new Configs();
+              List<Config> config = (List<Config>) reply.result();
+              configs.setConfigs(config);
+              configs.setTotalRecords(config.size());
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
-                .withJsonOK(new ObjectMapper().readValue(ret.toString(), Configs.class))));
+                .withJsonOK(configs)));
             } catch (Exception e) {
               log.error(e);
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse

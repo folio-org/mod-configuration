@@ -1,1 +1,2 @@
-"GET , http://localhost:<port>/apis/configurations/tables , get a configuration table for a specific configuration in a specific module"
+"GET , http://localhost:<port>/apis/configurations/tables , get list of configuration tables"
+"GET , http://localhost:<port>/apis/configurations/tables/57c552959c79114ef4439edb , get specific table"
