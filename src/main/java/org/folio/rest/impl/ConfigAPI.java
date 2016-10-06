@@ -28,7 +28,7 @@ import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.utils.ConfMessageConsts;
 
-@Path("apis/configurations")
+@Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
 
   private final Messages            messages          = Messages.getInstance();
@@ -47,7 +47,7 @@ public class ConfigAPI implements ConfigurationsResource {
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     /**
-     * http://host:port/apis/configurations/tables
+     * http://host:port/configurations/tables
      */
 
     try {
@@ -306,7 +306,7 @@ public class ConfigAPI implements ConfigurationsResource {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
     /**
-     * http://host:port/apis/configurations/tables/module/{module}/name/{name}
+     * http://host:port/configurations/tables/module/{module}/name/{name}
      */
     try {
       System.out.println("sending... postConfigurationsTablesModuleByModuleNameByName");
