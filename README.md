@@ -69,13 +69,13 @@ Content-Type: application/json
 get all tables
 
 (GET)
-http://localhost:8085/apis/configurations/tables
+http://localhost:8085/configurations/tables
 
 
 add a module / config pair for the circulation module and the validation rules configuration, along with 2 rows
 
 (POST)
-http://localhost:8085/apis/configurations/tables
+http://localhost:8085/configurations/tables
 {
   "module": "CIRCULATION",
   "name": "validation_rules",
@@ -108,7 +108,7 @@ http://localhost:8085/apis/configurations/tables
 add rows to the existing module (circ) / config (validation rules)
 
 (POST)
-http://localhost:8085/apis/configurations/tables/module/CIRCULATION/name/validation_rules
+http://localhost:8085/configurations/tables/module/CIRCULATION/name/validation_rules
 
 {
   "module": "CIRCULATION",
@@ -139,7 +139,7 @@ http://localhost:8085/apis/configurations/tables/module/CIRCULATION/name/validat
 query for a specific module / config / row
 
 (GET)
-http://localhost:8085/apis/configurations/tables?query={"$and": [ { "module": "CIRCULATION"}, { "name": "validation_rules"}, { "rows.code": { "$all": [ "PATRON_RULE" ] } }]}
+http://localhost:8085/configurations/tables?query={"$and": [ { "module": "CIRCULATION"}, { "name": "validation_rules"}, { "rows.code": { "$all": [ "PATRON_RULE" ] } }]}
 
 Notice that the query parameter 'query' is a standard mongoDB query as the configuration module is mongoDB based.
 

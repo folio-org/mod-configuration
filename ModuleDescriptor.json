@@ -7,7 +7,7 @@
   } ],
   "routingEntries" : [ {
     "methods" : [ "GET", "POST" ],
-    "path" : "/apis/configurations/tables",
+    "path" : "/configurations/tables",
     "level" : "30",
     "type" : "request-response",
     "permissionsRequired" : [ ],
@@ -15,7 +15,7 @@
   },
 {
     "methods" : [ "GET", "POST" ],
-    "path" : "/apis/configurations/rules",
+    "path" : "/configurations/rules",
     "level" : "30",
     "type" : "request-response",
     "permissionsRequired" : [ ],
