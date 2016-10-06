@@ -96,15 +96,15 @@ public class RestVerticleTest {
   public void checkURLs(TestContext context) {
  
     try {
-      mutateURLs("http://localhost:" + port + "/apis/configurations/tables", context, HttpMethod.POST, 
-        getFile("kv_configuration.sample"), "application/json", 201);
+      mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
+              getFile("kv_configuration.sample"), "application/json", 201);
       
       Buffer b = Buffer.buffer();
       b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(
         getBody("kv_configuration.sample", true)));
       
-      mutateURLs("http://localhost:" + port + "/apis/configurations/rules", context, HttpMethod.POST, 
-        b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
+      mutateURLs("http://localhost:" + port + "/configurations/rules", context, HttpMethod.POST,
+              b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
        
       
       Config conf = new Config();
@@ -113,8 +113,8 @@ public class RestVerticleTest {
       conf.setRows(createListOfRows());
             
       mutateURLs("http://localhost:" + port + 
-        "/apis/configurations/tables/module/CIRCULATION/name/validation_rules", context, HttpMethod.POST, 
-        new ObjectMapper().writeValueAsString(conf), "application/json", 0);
+ "/configurations/tables/module/CIRCULATION/name/validation_rules", context, HttpMethod.POST,
+              new ObjectMapper().writeValueAsString(conf), "application/json", 0);
               
     } catch (Exception e) {
       e.printStackTrace();
