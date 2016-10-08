@@ -258,7 +258,7 @@ public class ConfigAPI implements ConfigurationsResource {
             lang, ConfMessageConsts.UploadFileMissing, "file with Configuration entry"))));
         return;
       }
-      conf.getRows().get(0).setValue(drool.toString());
+      conf.setValue(drool.toString());
       final Config fconf = conf;
       vertxContext.runOnContext(v -> {
         MongoCRUD.getInstance(vertxContext.owner()).save(
@@ -300,6 +300,9 @@ public class ConfigAPI implements ConfigurationsResource {
 
   }
 
+  /**
+   * remove this entry in the raml
+   */
   @Override
   public void postConfigurationsTablesModuleByModuleNameByName(String name, String module,
       String authorization, String lang, Config entity,
@@ -308,7 +311,7 @@ public class ConfigAPI implements ConfigurationsResource {
     /**
      * http://host:port/configurations/tables/module/{module}/name/{name}
      */
-    try {
+/*    try {
       System.out.println("sending... postConfigurationsTablesModuleByModuleNameByName");
       vertxContext.runOnContext(v -> {
         JsonObject q = new JsonObject();
@@ -353,8 +356,7 @@ public class ConfigAPI implements ConfigurationsResource {
       asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
         PostConfigurationsTablesModuleByModuleNameByNameResponse.withPlainInternalServerError(messages.getMessage(
         lang, MessageConsts.InternalServerError))));
-    }
-
+    }*/
   }
 
 }

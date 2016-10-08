@@ -1,6 +1,5 @@
 package org.folio.rest;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -9,32 +8,23 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
-
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
-import org.folio.rest.jaxrs.model.Config;
-import org.folio.rest.jaxrs.model.Row;
 import org.folio.rest.persist.MongoCRUD;
 import org.folio.rest.tools.utils.NetworkUtils;
 
@@ -107,14 +97,14 @@ public class RestVerticleTest {
               b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
        
       
-      Config conf = new Config();
+/*      Config conf = new Config();
       conf.setModule("CIRCULATION");
       conf.setName("validation_rules");
       conf.setRows(createListOfRows());
             
       mutateURLs("http://localhost:" + port + 
  "/configurations/tables/module/CIRCULATION/name/validation_rules", context, HttpMethod.POST,
-              new ObjectMapper().writeValueAsString(conf), "application/json", 0);
+              new ObjectMapper().writeValueAsString(conf), "application/json", 0);*/
               
     } catch (Exception e) {
       e.printStackTrace();
@@ -124,7 +114,7 @@ public class RestVerticleTest {
 
   }
   
-  private List<Row> createListOfRows(){
+/*  private List<Row> createListOfRows(){
     List<Row> list = new ArrayList<>();
     Row r = new Row();
     for (int i = 0; i < 5; i++) {
@@ -136,7 +126,7 @@ public class RestVerticleTest {
       list.add(r);
     }
     return list;
-  }
+  }*/
   
   private void runGETURLoop(TestContext context){
     try {
