@@ -94,12 +94,16 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
         content, "application/json", 201);
 
-      //save config entry with value being a file base64 encoded
+      //save config entry with value being a base64 encoded file
       String attachment = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
       conf.setValue(attachment);
 
       mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+      
+      //delete non existent record
+      mutateURLs("http://localhost:" + port + "/configurations/tables/123456", context, HttpMethod.DELETE,
+        "", "application/json", 404);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -111,6 +115,7 @@ public class RestVerticleTest {
       e.printStackTrace();
     }
 
+    //run get queries from the csv file
     runGETURLoop(context);
 
   }

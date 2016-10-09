@@ -113,7 +113,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsTablesByTableId(String tableId, String authorization, String query,
+  public void getConfigurationsTablesByEntryId(String entryId, String authorization, String query,
       String orderBy, Order order, int offset, int limit, String lang,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
@@ -124,34 +124,33 @@ public class ConfigAPI implements ConfigurationsResource {
         if (query != null) {
           q = new JsonObject(query);
         }
-        q.put("_id", tableId);
+        q.put("_id", entryId);
         MongoCRUD.getInstance(context.owner()).get(
-          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, q, orderBy, order, offset,
-            limit),
+          MongoCRUD.buildJson(Config.class.getName(), CONFIG_COLLECTION, q, orderBy, order, offset, limit),
             reply -> {
               try {
                 Configs configs = new Configs();
                 List<Config> config = (List<Config>) reply.result();
                 if(config.isEmpty()){
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
-                    .withPlainNotFound(tableId)));
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
+                    .withPlainNotFound(entryId)));
                 }
                 else{
                   configs.setConfigs(config);
                   configs.setTotalRecords(config.size());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
                     .withJsonOK(configs)));
                 }
               } catch (Exception e) {
                 log.error(e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
                   .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByTableIdResponse
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
         .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
@@ -159,33 +158,45 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void deleteConfigurationsTablesByTableId(String tableId, String authorization,
+  public void deleteConfigurationsTablesByEntryId(String entryId, String authorization,
       String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
     try {
       JsonObject q = new JsonObject();
-      q.put("_id", tableId);
+      q.put("_id", entryId);
       System.out.println("sending... deleteConfigurationsTablesByTableId");
 
       context.runOnContext(v -> {
-        MongoCRUD.getInstance(context.owner()).delete(
-          CONFIG_COLLECTION,
-          q,
+        MongoCRUD.getInstance(context.owner()).delete(CONFIG_COLLECTION, q,
           reply -> {
             try {
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
-                .withNoContent()));
+              if(reply.succeeded()){
+                if(reply.result().getRemovedCount() == 1){
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
+                    .withNoContent()));
+                }
+                else{
+                  log.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getRemovedCount()));
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
+                    .withPlainNotFound(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                }
+              }
+              else{
+                log.error(reply.cause());
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
+                  .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+              }
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
                 .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByTableIdResponse
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
         .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
 
@@ -193,13 +204,13 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void putConfigurationsTablesByTableId(String tableId, String authorization, String lang,
+  public void putConfigurationsTablesByEntryId(String entryId, String authorization, String lang,
       Configs entity, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
     try {
       JsonObject q = new JsonObject();
-      q.put("_id", tableId);
+      q.put("_id", entryId);
       System.out.println("sending... putConfigurationsTablesByTableId");
 
       context.runOnContext(v -> {
@@ -209,19 +220,20 @@ public class ConfigAPI implements ConfigurationsResource {
           q,
           reply -> {
             try {
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByEntryIdResponse
                 .withNoContent()));
             } catch (Exception e) {
               log.error(e);
-              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+              asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByEntryIdResponse
                 .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       });
     } catch (Exception e) {
       log.error(e);
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByTableIdResponse
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByEntryIdResponse
         .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
   }
+
 }
