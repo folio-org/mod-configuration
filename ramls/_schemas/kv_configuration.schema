@@ -11,9 +11,6 @@
 		"config_name":{
 			"type":"string"
 		},
-		"description":{
-			"type":"string"
-		},
 		"updated_by":{
 			"type":"string"
 		},

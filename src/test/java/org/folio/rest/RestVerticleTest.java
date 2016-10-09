@@ -12,21 +12,26 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Base64;
+
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.persist.MongoCRUD;
+import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
-import org.apache.commons.io.IOUtils;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.persist.MongoCRUD;
-import org.folio.rest.tools.utils.NetworkUtils;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -57,11 +62,6 @@ public class RestVerticleTest {
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
       port = NetworkUtils.nextFreePort()));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      try {
-        urls = urlsFromFile();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
     }));
 
   }
@@ -84,50 +84,37 @@ public class RestVerticleTest {
    */
   @Test
   public void checkURLs(TestContext context) {
- 
+
     try {
+
+      //save config entry
+      String content = getFile("kv_configuration.sample");
+      Config conf =  new ObjectMapper().readValue(content, Config.class);
+
       mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
-              getFile("kv_configuration.sample"), "application/json", 201);
-      
-      Buffer b = Buffer.buffer();
-      b.appendBuffer(getBody("Sample.drl", false).appendString("\r\n").appendBuffer(
-        getBody("kv_configuration.sample", true)));
-      
-      mutateURLs("http://localhost:" + port + "/configurations/rules", context, HttpMethod.POST,
-              b.toString("UTF8"), "multipart/form-data; boundary=MyBoundary", 204);
-       
-      
-/*      Config conf = new Config();
-      conf.setModule("CIRCULATION");
-      conf.setName("validation_rules");
-      conf.setRows(createListOfRows());
-            
-      mutateURLs("http://localhost:" + port + 
- "/configurations/tables/module/CIRCULATION/name/validation_rules", context, HttpMethod.POST,
-              new ObjectMapper().writeValueAsString(conf), "application/json", 0);*/
-              
+        content, "application/json", 201);
+
+      //save config entry with value being a file base64 encoded
+      String attachment = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
+      conf.setValue(attachment);
+
+      mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
+        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
+
+    try {
+      urls = urlsFromFile();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     runGETURLoop(context);
 
   }
-  
-/*  private List<Row> createListOfRows(){
-    List<Row> list = new ArrayList<>();
-    Row r = new Row();
-    for (int i = 0; i < 5; i++) {
-      r.setCode(i+"");
-      r.setDefault(true);
-      r.setDescription("ssssssssss");
-      r.setEnabled(true);
-      r.setValue("value"+i);
-      list.add(r);
-    }
-    return list;
-  }*/
-  
+
   private void runGETURLoop(TestContext context){
     try {
       int[] urlCount = { urls.size() };
@@ -136,25 +123,27 @@ public class RestVerticleTest {
         String[] urlInfo = url.split(" , ");
         HttpClient client = vertx.createHttpClient();
         HttpClientRequest request = client.requestAbs(HttpMethod.GET,
-          urlInfo[1].replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
-            @Override
-            public void handle(HttpClientResponse httpClientResponse) {
-              System.out.println(urlInfo[1]);
-              if (httpClientResponse.statusCode() != 404) {
-                // this is cheating for now - add posts to the test case so that
-                // we dont get 404 for missing entities
-                context.assertInRange(200, httpClientResponse.statusCode(), 5);
-              }
-              httpClientResponse.bodyHandler(new Handler<Buffer>() {
-                @Override
-                public void handle(Buffer buffer) {
-                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
-                  System.out.println("-------->"+records);
-                  async.complete();
-                }
-              });
+          urlInfo[1].trim().replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
+          @Override
+          public void handle(HttpClientResponse httpClientResponse) {
+            System.out.println(urlInfo[1]);
+            if (httpClientResponse.statusCode() == 200) {
+              context.assertTrue(true);
             }
-          });
+            else if(httpClientResponse.statusCode() == 404){
+              context.assertTrue(true);
+              async.complete();
+            }
+            httpClientResponse.bodyHandler(new Handler<Buffer>() {
+              @Override
+              public void handle(Buffer buffer) {
+                int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
+                System.out.println("-------->"+records);
+                async.complete();
+              }
+            });
+          }
+        });
         request.headers().add("Authorization", "abcdefg");
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
@@ -197,7 +186,7 @@ public class RestVerticleTest {
       System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
       if(errorCode == statusCode){
         context.assertTrue(true);
-      } 
+      }
       else if(errorCode == 0){
         //currently dont care about return value
         context.assertTrue(true);
@@ -216,7 +205,7 @@ public class RestVerticleTest {
     request.putHeader("Content-type", contentType);
     request.end(buffer);
   }
-  
+
   private ArrayList<String> urlsFromFile() throws IOException {
     ArrayList<String> ret = new ArrayList<String>();
     byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
@@ -244,27 +233,6 @@ public class RestVerticleTest {
 
   private String getFile(String filename) throws IOException {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
-  }
-
-  private Buffer getBody(String filename, boolean closeBody) {
-    Buffer buffer = Buffer.buffer();
-    buffer.appendString("--MyBoundary\r\n");
-    buffer.appendString("Content-Disposition: form-data; name=\"" + filename + "\"; filename=\""
-        + filename + "\"\r\n");
-    buffer.appendString("Content-Type: application/octet-stream\r\n");
-    buffer.appendString("Content-Transfer-Encoding: binary\r\n");
-    buffer.appendString("\r\n");
-    try {
-      buffer.appendString(getFile(filename));
-      buffer.appendString("\r\n");
-    } catch (IOException e) {
-      e.printStackTrace();
-
-    }
-    if (closeBody) {
-      buffer.appendString("--MyBoundary--\r\n");
-    }
-    return buffer;
   }
 
 }

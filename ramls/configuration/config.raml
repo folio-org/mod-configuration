@@ -22,7 +22,6 @@ traits:
   - language: !include https://raw.githubusercontent.com/folio-org/raml/master/traits/language.raml
 
 resourceTypes:
-  - attachments: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/attachments.raml
   - collection: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/collection.raml
   - collection-item: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/item-collection.raml
   - get-only: !include https://raw.githubusercontent.com/folio-org/raml/master/rtypes/get-only.raml
@@ -37,10 +36,10 @@ resourceTypes:
         schemaCollection: configs
         schemaItem: config
         exampleCollection: !include ../_examples/kv_configuration.sample
-        exampleItem: !include ../_examples/kv_configuration_module.sample
+        exampleItem: !include ../_examples/kv_configuration.sample
     get:
       is: [
-        searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "[\"module\", \"CIRCULATION\", \"=\"]"},
+        searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "{\"module\":\"CIRCULATION\"}"},
         orderable: {fieldsList: "module"},
         pageable
       ]
@@ -57,24 +56,3 @@ resourceTypes:
           orderable: {fieldsList: "module"},
           pageable
         ]
-    /module/{module}:
-      /name/{name}:
-        displayName: Module configurations
-        description: List / Add a row to this table
-        type:
-          collection:
-            schemaCollection: configs
-            schemaItem: config
-            exampleCollection: !include ../_examples/kv_configuration.sample
-            exampleItem: !include ../_examples/kv_configuration.sample
-        get:
-          is: [
-            searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "[\"name\", \"renewals_allowed_count\", \"=\"]"},
-            orderable: {fieldsList: "module"},
-            pageable
-          ]
-  /rules:
-    description: The rules file and the config table entry to save
-    type:
-      attachments:
-        exampleItem: !include ../_examples/attachment.sample

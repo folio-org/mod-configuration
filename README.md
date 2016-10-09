@@ -8,26 +8,22 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 #### Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a mongoDB async implementation
 
-This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md)
+This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
 
 The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
 
 ```sh
 -> Module
 
-    -> config 1
+    -> config 1 -> row 1
 
-       -> row 1
+    -> config 1 -> row 2
 
-       -> row 2
+    -> config 2 -> row 1
 
-    -> config 2
+    -> config 2 -> row 2
 
-        -> row 1
-
-        -> row 2
-
-        -> row 3
+    -> config 2 -> row 3
 
 ```
 
@@ -36,9 +32,7 @@ Can be run in both embedded mongodb mode or with a regular MongoDB server
 
 #### Instructions:
 
-clone / download the raml-module-builder and `mvn clean install`
-
-then do the same for the current project `mvn clean install`
+clone / download mod-configuration then `mvn clean install`
 
 Run:
 
@@ -52,6 +46,7 @@ Note that the embedded mongo is started on a dynamic port chosen at embedded mon
 
 #### documentation of the APIs can be found at:
 
+Documentation is auto-generated from the RAML file into HTML. Once the service is started the documentation can be viewed at:
 http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
 
 ### Examples:
@@ -63,6 +58,9 @@ Authorization: aaaaa
 Accept: application/json
 
 Content-Type: application/json
+
+see configuration schema for an object description:
+https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
 
 ```sh
 
@@ -78,71 +76,29 @@ add a module / config pair for the circulation module and the validation rules c
 http://localhost:8085/configurations/tables
 {
   "module": "CIRCULATION",
-  "name": "validation_rules",
-  "description": "validate content",
+  "config_name": "validation_rules",
   "updated_by": "joe",
   "update_date": "2016.06.27.10.56.03",
   "scope": {
     "institution_id" : "aaa",
     "library_id" : "vvv"
   },
-  "rows": [
-    {
-      "code": "PATRON_RULE2",
-      "description": "for patrons2",
-      "default": true,
-      "enabled": true,
-      "value": "123"
-    },
-    {
-      "code": "PATRON_RULE2",
-      "description": "for patrons2",
-      "default": true,
-      "enabled": true,
-      "value": "12345"
-    }
-  ]
-}
-
-
-add rows to the existing module (circ) / config (validation rules)
-
-(POST)
-http://localhost:8085/configurations/tables/module/CIRCULATION/name/validation_rules
-
-{
-  "module": "CIRCULATION",
-  "name": "validation_rules",
-  "scope": {
-    "institution_id" : "aaa",
-    "library_id" : "vvv"
-  },
-  "rows": [
-    {
-      "code": "PATRON_RULE3",
-      "description": "for patrons2",
-      "default": true,
-      "enabled": true,
-      "value": "123"
-    },
-    {
-      "code": "PATRON_RULE4",
-      "description": "for patrons2",
-      "default": true,
-      "enabled": true,
-      "value": "123"
-    }
-  ]
+  "code": "PATRON_RULE",
+  "description": "for patrons",
+  "default": true,
+  "enabled": true,
+  "value": ""
 }
 
 
 query for a specific module / config / row
 
 (GET)
-http://localhost:8085/configurations/tables?query={"$and": [ { "module": "CIRCULATION"}, { "name": "validation_rules"}, { "rows.code": { "$all": [ "PATRON_RULE" ] } }]}
+http://localhost:8085/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"},{"code":"ABC"}]}
 
 Notice that the query parameter 'query' is a standard mongoDB query as the configuration module is mongoDB based.
 
 ```
+
 
 
