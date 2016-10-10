@@ -30,7 +30,7 @@ The idea behind this module is to provide a type of centralized configuration se
 This would in turn look something like:
 
 Module| config_name | updated_by | update_date | scope | default | enabled | code | value | desc
------------- | -------------  | -------------
+------------ | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------
  |  |
 CIRCULATION| import.uploads.files | Joe | 1234567890 | 88 | false | true | path_2_file | PENDING | file to import
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 | base64enc_drools_file| rule file
