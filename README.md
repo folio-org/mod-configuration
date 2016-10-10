@@ -10,7 +10,7 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
 
-The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
+The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation of module configurations. Within a module there are named configurations, and within a configuration there are 1..N 'rows'.
 
 ```sh
 -> Module
