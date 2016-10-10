@@ -10,7 +10,7 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
 
-The idea behind this module is to provide a sample of a configuration service. The service allows to create module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
+The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation module configurations. Within a module there are named configurations, and within a configuration there are 1..N rows.
 
 ```sh
 -> Module
@@ -27,10 +27,22 @@ The idea behind this module is to provide a sample of a configuration service. T
 
 ```
 
+This would in turn look something like:
 
-Can be run in both embedded mongodb mode or with a regular MongoDB server
+Module| config_name | updated_by | update_date | scope | default | enabled | code | value | desc
+------------ | -------------  | -------------
+ |  |
+CIRCULATION| import.uploads.files | Joe | 1234567890 | 88 | false | true | path_2_file | PENDING | file to import
+CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 | base64enc_drools_file| rule file
+CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 | base64enc_drools_file| rule file
 
-#### Instructions:
+see configuration schema for an object description:
+https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
+
+
+
+
+### Instructions:
 
 clone / download mod-configuration then `mvn clean install`
 
@@ -41,13 +53,15 @@ Run:
 
 Or run via dockerfile
 
+The Configuration service can be run in both embedded mongodb mode or with a regular MongoDB server
+
 Note that the embedded mongo is started on a dynamic port chosen at embedded mongo start up - refer to the log ("created embedded mongo config on port 54851")
 
 
-#### documentation of the APIs can be found at:
+#### Documentation of the Service's APIs
 
 Documentation is auto-generated from the RAML file into HTML. Once the service is started the documentation can be viewed at:
-http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
+http://[host]:[port]/apidocs/index.html?raml=raml/configuration/config.raml
 
 ### Examples:
 
@@ -59,19 +73,22 @@ Accept: application/json
 
 Content-Type: application/json
 
-see configuration schema for an object description:
-https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
 
 ```sh
 
-get all tables
-
+Query for all tables
 (GET)
 http://localhost:8085/configurations/tables
 
 
-add a module / config pair for the circulation module and the validation rules configuration, along with 2 rows
+Query for a specific module / config / row
+(GET)
+http://localhost:8085/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"},{"code":"ABC"}]}
 
+Notice that the query parameter 'query' is a standard mongoDB query as the configuration module is mongoDB based.
+
+
+Add an entry
 (POST)
 http://localhost:8085/configurations/tables
 {
@@ -90,15 +107,5 @@ http://localhost:8085/configurations/tables
   "value": ""
 }
 
-
-query for a specific module / config / row
-
-(GET)
-http://localhost:8085/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"},{"code":"ABC"}]}
-
-Notice that the query parameter 'query' is a standard mongoDB query as the configuration module is mongoDB based.
-
+Deleting / Updating specific entries is possible as well - See circulation.raml file. 
 ```
-
-
-
