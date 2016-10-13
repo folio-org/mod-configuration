@@ -38,7 +38,7 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final String       LOCATION_PREFIX   = "/configurations/tables/";
   @Validate
   @Override
-  public void getConfigurationsTables(String authorization, String query, String orderBy,
+  public void getConfigurationsTables(String query, String orderBy,
       Order order, int offset, int limit, String lang,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
@@ -79,7 +79,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void postConfigurationsTables(String authorization, String lang, Config entity,
+  public void postConfigurationsTables(String lang, Config entity,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     try {
@@ -113,7 +113,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsTablesByEntryId(String entryId, String authorization, String query,
+  public void getConfigurationsTablesByEntryId(String entryId, String query,
       String orderBy, Order order, int offset, int limit, String lang,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
@@ -158,7 +158,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void deleteConfigurationsTablesByEntryId(String entryId, String authorization,
+  public void deleteConfigurationsTablesByEntryId(String entryId,
       String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
@@ -204,7 +204,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void putConfigurationsTablesByEntryId(String entryId, String authorization, String lang,
+  public void putConfigurationsTablesByEntryId(String entryId, String lang,
       Configs entity, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
