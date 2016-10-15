@@ -39,7 +39,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void getConfigurationsTables(String query, String orderBy,
-      Order order, int offset, int limit, String lang,
+      Order order, int offset, int limit, String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     /**
@@ -79,7 +79,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void postConfigurationsTables(String lang, Config entity,
+  public void postConfigurationsTables(String lang, Config entity, java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     try {
@@ -114,7 +114,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void getConfigurationsTablesByEntryId(String entryId, String query,
-      String orderBy, Order order, int offset, int limit, String lang,
+      String orderBy, Order order, int offset, int limit, String lang, java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     try {
@@ -158,8 +158,8 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void deleteConfigurationsTablesByEntryId(String entryId,
-      String lang, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
+  public void deleteConfigurationsTablesByEntryId(String entryId, String lang,
+      java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
     try {
@@ -204,8 +204,8 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void putConfigurationsTablesByEntryId(String entryId, String lang,
-      Configs entity, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
+  public void putConfigurationsTablesByEntryId(String entryId, String lang, Configs entity,
+      java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
     try {
