@@ -67,7 +67,6 @@ http://[host]:[port]/apidocs/index.html?raml=raml/configuration/config.raml
 
 Make sure to include appropriate headers as the runtime framework validates them
 
-Authorization: aaaaa
 
 Accept: application/json
 
