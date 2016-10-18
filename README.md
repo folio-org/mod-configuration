@@ -109,3 +109,11 @@ http://localhost:8085/configurations/tables
 
 Deleting / Updating specific entries is possible as well - See circulation.raml file. 
 ```
+
+## Additional information
+
+The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
+
+Other [modules](http://dev.folio.org/source-code/#server-side).
+
+Other FOLIO Developer documentation is at [dev.folio.org](http://dev.folio.org/)
