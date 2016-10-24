@@ -51,7 +51,7 @@ Run:
 `java -jar configuration-fat.jar -Dhttp.port=8085 embed_mongo=true`
 
 
-Or run via dockerfile
+Or run via Dockerfile
 
 The Configuration service can be run in both embedded mongodb mode or with a regular MongoDB server
 
@@ -75,19 +75,19 @@ Content-Type: application/json
 
 ```sh
 
-Query for all tables
+Query for all tables:
 (GET)
 http://localhost:8085/configurations/tables
 
 
-Query for a specific module / config / row
+Query for a specific module / config / row:
 (GET)
 http://localhost:8085/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"},{"code":"ABC"}]}
 
-Notice that the query parameter 'query' is a standard mongoDB query as the configuration module is mongoDB based.
+Notice that the query parameter 'query' is a standard MongoDB query as the configuration module is MongoDB based.
 
 
-Add an entry
+Add an entry:
 (POST)
 http://localhost:8085/configurations/tables
 {
