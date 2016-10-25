@@ -26,7 +26,7 @@
 
  package com.sample
 
- import com.sling.rest.jaxrs.model.Patron;
+ import org.folio.rest.jaxrs.model.Patron;
 
 
  rule "Patron needs one ID at the least"
@@ -50,7 +50,7 @@
  end
 
  ------WebKitFormBoundaryAcNN9H3iQZAJ9Muk
- Content-Disposition: form-data; name="package com.sample%0D%0A %0D%0Aimport com.sling.rest.jaxrs.model.Patron;%0D%0A %0D%0A%0D%0Arule %22Patron needs one ID at the least%22%0D%0A%0D%0A	no-loop%0D%0A	%0D%0A    when%0D%0A        p : Patron( patronBarcode"
+ Content-Disposition: form-data; name="package com.sample%0D%0A %0D%0Aimport org.folio.rest.jaxrs.model.Patron;%0D%0A %0D%0A%0D%0Arule %22Patron needs one ID at the least%22%0D%0A%0D%0A	no-loop%0D%0A	%0D%0A    when%0D%0A        p : Patron( patronBarcode"
 
 
  ------WebKitFormBoundaryAcNN9H3iQZAJ9Muk--
