@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
 
-  private final Messages            messages          = Messages.getInstance();
   public static final String        CONFIG_COLLECTION = "config_data";
   public static final String        METHOD_GET        = "get";
   public static final String        METHOD_POST       = "post";
@@ -35,6 +34,7 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/tables/";
+  private final Messages            messages          = Messages.getInstance();
   @Validate
   @Override
   public void getConfigurationsTables(String query, String orderBy,
