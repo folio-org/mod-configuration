@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ConfigAPI implements ConfigurationsResource {
 
   private final Messages            messages          = Messages.getInstance();
-  private static final ObjectMapper mapper            = new ObjectMapper();
   public static final String        CONFIG_COLLECTION = "config_data";
   public static final String        METHOD_GET        = "get";
   public static final String        METHOD_POST       = "post";
