@@ -39,10 +39,7 @@ CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 |
 see configuration schema for an object description:
 https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
 
-
-
-
-### Instructions:
+### Instructions
 
 clone / download mod-configuration then `mvn clean install`
 
@@ -57,20 +54,21 @@ The Configuration service can be run in both embedded mongodb mode or with a reg
 
 Note that the embedded mongo is started on a dynamic port chosen at embedded mongo start up - refer to the log ("created embedded mongo config on port 54851")
 
+### Documentation of the Service's APIs
 
-#### Documentation of the Service's APIs
+Documentation is auto-generated from the RAML file into HTML. 
+After the service is started, the documentation can be viewed at:
 
-Documentation is auto-generated from the RAML file into HTML. Once the service is started the documentation can be viewed at:
-http://[host]:[port]/apidocs/index.html?raml=raml/configuration/config.raml
+http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
 
-### Examples:
+### Examples
 
-Make sure to include appropriate headers as the runtime framework validates them
+Make sure to include appropriate headers as the runtime framework validates them.
 
 
-Accept: application/json
+`Accept: application/json`
 
-Content-Type: application/json
+`Content-Type: application/json`
 
 
 ```sh
