@@ -45,7 +45,7 @@ clone / download mod-configuration then `mvn clean install`
 
 Run:
 
-`java -jar configuration-fat.jar -Dhttp.port=8085 embed_mongo=true`
+`java -jar target/configuration-fat.jar -Dhttp.port=8085 embed_mongo=true`
 
 
 Or run via Dockerfile
