@@ -16,6 +16,7 @@
     <aspectj.version>1.8.9</aspectj.version>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
+    <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <module_name>configuration</module_name>
     <audit_log_path>${basedir}/logs/audit.log</audit_log_path>
     <log_path>${basedir}/logs/configuration.log</log_path>
@@ -178,6 +179,22 @@
               <resources>
                 <resource>
                   <directory>${ramlfiles_path}</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-resources-2</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/apidocs/raml-util</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${ramlfiles_util_path}</directory>
                   <filtering>true</filtering>
                 </resource>
               </resources>
