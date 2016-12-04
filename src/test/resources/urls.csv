@@ -1,4 +1,4 @@
 "GET , http://localhost:<port>/configurations/tables , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/tables/57c552959c79114ef4439edb , get specific table"
-"GET , http://localhost:<port>/configurations/tables?query={"module":"CIRCULATION"} , get list of configuration tables"
-"GET , http://localhost:<port>/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"}]} , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/tables?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/tables?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"

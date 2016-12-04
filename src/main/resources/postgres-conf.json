@@ -1,0 +1,10 @@
+{
+  "host" : "localhost",
+  "port" : 6000,
+  "maxPoolSize" : 50,
+  "username" : "username",
+  "password" : "password",
+  "database" : "postgres",
+  "charset"  : "windows-1252",
+  "queryTimeout" : 10000
+}

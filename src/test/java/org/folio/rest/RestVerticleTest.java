@@ -23,9 +23,10 @@ import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.Config;
-import org.folio.rest.persist.MongoCRUD;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +40,7 @@ import com.google.common.io.ByteStreams;
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
 
-  private Vertx             vertx;
+  private static Vertx      vertx;
   private ArrayList<String> urls;
   int                       port;
 
@@ -52,18 +53,36 @@ public class RestVerticleTest {
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
 
-    MongoCRUD.setIsEmbedded(true);
     try {
-      MongoCRUD.getInstance(vertx).startEmbeddedMongo();
-    } catch (Exception e1) {
-      e1.printStackTrace();
+      setupPostgres();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-      port = NetworkUtils.nextFreePort()));
-    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-    }));
+    Async async = context.async();
+    PostgresClient.getInstance(vertx, "postgres").mutate(
+      "create table public.config_data (_id SERIAL PRIMARY KEY,jsonb JSONB NOT NULL)",
+      res -> {
+        if(res.succeeded()){
+          System.out.println("config_data table created");
+          DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
+            port = NetworkUtils.nextFreePort()));
+          vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
+            async.complete();
+          }));
+        }
+        else{
+          System.out.println("config_data table NOT created");
+          Assert.fail("config_data table NOT created " + res.cause().getMessage());
+          async.complete();
+        }
+      });
 
+  }
+
+  private static void setupPostgres() throws Exception {
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
   /**
@@ -100,7 +119,7 @@ public class RestVerticleTest {
 
       mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf), "application/json", 201);
-      
+
       //delete non existent record
       mutateURLs("http://localhost:" + port + "/configurations/tables/123456", context, HttpMethod.DELETE,
         "", "application/json", 404);
@@ -149,7 +168,8 @@ public class RestVerticleTest {
             });
           }
         });
-        request.headers().add("Authorization", "abcdefg");
+        request.putHeader("x-okapi-tenant", "postgres");
+        request.headers().add("Authorization", "postgres");
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -205,7 +225,8 @@ public class RestVerticleTest {
       System.out.println("complete");
     });
     request.setChunked(true);
-    request.putHeader("Authorization", "abcdefg");
+    request.putHeader("Authorization", "postgres");
+    request.putHeader("x-okapi-tenant", "postgres");
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);
