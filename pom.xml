@@ -146,6 +146,7 @@
                 </systemProperty>
                 <systemProperty>
                   <key>json.type</key>
+                  <value>postgres</value>
                 </systemProperty>
               </systemProperties>
             </configuration>
