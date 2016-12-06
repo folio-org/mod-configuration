@@ -61,7 +61,7 @@ public class RestVerticleTest {
 
     Async async = context.async();
     PostgresClient.getInstance(vertx, "postgres").mutate(
-      "create table public.config_data (_id SERIAL PRIMARY KEY,jsonb JSONB NOT NULL)",
+      "create table IF NOT EXISTS public.config_data (_id SERIAL PRIMARY KEY,jsonb JSONB NOT NULL)",
       res -> {
         if(res.succeeded()){
           System.out.println("config_data table created");
