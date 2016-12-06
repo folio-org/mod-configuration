@@ -199,6 +199,32 @@
       </plugin>
 
       <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+              <execution>
+                  <id>client</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>jar</goal>
+                  </goals>
+                  <configuration>
+                      <archive>
+                          <index>false</index>
+                          <manifest>
+                              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                          </manifest>
+                      </archive>
+      
+                      <classifier>client</classifier>
+                      <includes>
+                          <include>org/folio/rest/client/*</include>
+                      </includes>
+                  </configuration>
+              </execution>
+          </executions>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.0.1</version>
         <executions>
