@@ -4,7 +4,7 @@ FROM openjdk:8-jre
 ENV VERTICLE_HOME /usr/verticles
 
 # Copy your fat jar to the container
-COPY target/*-fat.jar $VERTICLE_HOME/module.jar
+COPY mod-configuration-server/target/*-fat.jar $VERTICLE_HOME/module.jar
 
 # Create user/group 'folio'
 RUN groupadd folio && \
