@@ -8,12 +8,8 @@ CREATE USER myuniversity WITH CREATEDB PASSWORD 'myuniversity';
 DROP DATABASE IF EXISTS myuniversity;
 
 CREATE DATABASE myuniversity
-  WITH OWNER = myuniversity
-       ENCODING = 'WIN1252'
-       TABLESPACE = pg_default
-       LC_COLLATE = 'English_United States.1252'
-       LC_CTYPE = 'English_United States.1252'
-       CONNECTION LIMIT = -1;
+  WITH OWNER = myuniversity;
+
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
