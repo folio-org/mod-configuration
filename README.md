@@ -45,7 +45,7 @@ clone / download mod-configuration then `mvn clean install`
 
 Run:
 
-`java -jar target/configuration-fat.jar -Dhttp.port=8085 embed_mongo=true`
+`java -jar target/configuration-fat.jar -Dhttp.port=8085 embed_postgres=true`
 
 
 Or run via Dockerfile
@@ -80,9 +80,9 @@ http://localhost:8085/configurations/tables
 
 Query for a specific module / config / row:
 (GET)
-http://localhost:8085/configurations/tables?query={"$and":[{"module":"CIRCULATION"},{"config_name":"validation_rules"},{"code":"ABC"}]}
+http://localhost:8085/configurations/tables?query=[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]
 
-Notice that the query parameter 'query' is a standard MongoDB query as the configuration module is MongoDB based.
+Notice that the query parameter 'query' is very similar to the standard PostgreSQL JSONB query syntax.
 
 
 Add an entry:
