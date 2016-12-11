@@ -150,7 +150,8 @@ public class RestVerticleTest {
           urlInfo[1].trim().replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
           @Override
           public void handle(HttpClientResponse httpClientResponse) {
-            System.out.println(urlInfo[1]);
+            int statusCode = httpClientResponse.statusCode();
+            System.out.println("Status - " + statusCode + " " + urlInfo[1]);
             if (httpClientResponse.statusCode() == 200) {
               context.assertTrue(true);
             }

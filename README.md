@@ -6,9 +6,9 @@ Copyright (C) 2016 The Open Library Foundation
 This software is distributed under the terms of the Apache License, Version 2.0. See the file ["LICENSE"](https://github.com/folio-org/mod-configuration/blob/master/LICENSE) for more information.
 
 
-#### Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a mongoDB async implementation
+#### Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
 
-This project is built using the raml-module-builder, using the MongoDB async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
+This project is built using the raml-module-builder, using the PostgreSQL async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
 
 The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation of module configurations. Within a module there are named configurations, and within a configuration there are 1..N 'rows'.
 
@@ -50,9 +50,9 @@ Run:
 
 Or run via Dockerfile
 
-The Configuration service can be run in both embedded mongodb mode or with a regular MongoDB server
+The Configuration service can be run in both embedded PostgreSQL mode or with a regular PostgreSQL server
 
-Note that the embedded mongo is started on a dynamic port chosen at embedded mongo start up - refer to the log ("created embedded mongo config on port 54851")
+Note that the embedded PostgreSQL is started on a static port (6000)
 
 ### Documentation of the Service's APIs
 

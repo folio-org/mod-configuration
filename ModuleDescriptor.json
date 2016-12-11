@@ -23,6 +23,6 @@
   }],
   "launchDescriptor" : {
     "dockerImage" : "mod-configuration",
-    "dockerCMD" : [ "embed_mongo=true" ]
+    "dockerCMD" : [ "embed_postgres=true" ]
   }
 }
