@@ -70,7 +70,7 @@ public class TestClient {
     try {
       Async async = context.async(2);
 
-      PostgresClient.getInstance(Vertx.vertx(), "postgres").runSQLFile(getFile("create_config.sql"),
+      PostgresClient.getInstance(Vertx.vertx(), "public").runSQLFile(getFile("create_config.sql"),
         "myuniversity", false, reply -> {
           try {
             postConfigs(async);

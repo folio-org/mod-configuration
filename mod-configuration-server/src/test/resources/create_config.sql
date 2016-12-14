@@ -47,5 +47,5 @@ $$ language 'plpgsql';
 
 CREATE TRIGGER update_date BEFORE UPDATE ON config_data FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
 
--- give the user PRIVILEGES after everything is created by script
+-- superuser can give the user this grant
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity TO myuniversity;

@@ -64,14 +64,14 @@ public class ConfigAPI implements ConfigurationsResource {
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse.withJsonOK(
                   configs)));
               } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse
                   .withPlainInternalServerError(messages.getMessage(
                     lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
-        log.error(e);
+        log.error(e.getMessage(), e);
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesResponse
           .withPlainInternalServerError(messages.getMessage(
             lang, MessageConsts.InternalServerError))));
@@ -108,13 +108,13 @@ public class ConfigAPI implements ConfigurationsResource {
                   .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             } catch (Exception e) {
-              log.error(e);
+              log.error(e.getMessage(), e);
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse
                 .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       } catch (Exception e) {
-        log.error(e);
+        log.error(e.getMessage(), e);
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsTablesResponse
           .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
@@ -154,13 +154,13 @@ public class ConfigAPI implements ConfigurationsResource {
                     .withJsonOK(configs)));
                 }
               } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
                   .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
         });
       } catch (Exception e) {
-        log.error(e);
+        log.error(e.getMessage(), e);
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsTablesByEntryIdResponse
           .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
@@ -200,13 +200,13 @@ public class ConfigAPI implements ConfigurationsResource {
                     .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
                   .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
         } catch (Exception e) {
-          log.error(e);
+          log.error(e.getMessage(), e);
           asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsTablesByEntryIdResponse
             .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
         }
@@ -243,13 +243,13 @@ public class ConfigAPI implements ConfigurationsResource {
                   .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             } catch (Exception e) {
-              log.error(e);
+              log.error(e.getMessage(), e);
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByEntryIdResponse
                 .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       } catch (Exception e) {
-        log.error(e);
+        log.error(e.getMessage(), e);
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutConfigurationsTablesByEntryIdResponse
           .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }

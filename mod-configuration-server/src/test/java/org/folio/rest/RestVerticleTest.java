@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.client.AdminClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,23 +60,34 @@ public class RestVerticleTest {
     }
 
     Async async = context.async();
-    PostgresClient.getInstance(vertx, "postgres").mutate(
-      "create table IF NOT EXISTS public.config_data (_id SERIAL PRIMARY KEY,jsonb JSONB NOT NULL)",
-      res -> {
-        if(res.succeeded()){
-          System.out.println("config_data table created");
-          DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-            port = NetworkUtils.nextFreePort()));
-          vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-            async.complete();
-          }));
-        }
-        else{
-          System.out.println("config_data table NOT created");
-          Assert.fail("config_data table NOT created " + res.cause().getMessage());
+
+    port = NetworkUtils.nextFreePort();
+
+    AdminClient aClient = new AdminClient("localhost", port, "myuniversity");
+
+/*    port = 8888;//NetworkUtils.nextFreePort();
+
+    AdminClient aClient = new AdminClient("localhost", port, "myuniversity");
+    try {
+      aClient.postImportSQL(
+        RestVerticleTest.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
           async.complete();
-        }
-      });
+        });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }*/
+    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
+      port));
+    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
+      try {
+        aClient.postImportSQL(
+          RestVerticleTest.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
+            async.complete();
+          });
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }));
 
   }
 
@@ -169,8 +180,8 @@ public class RestVerticleTest {
             });
           }
         });
-        request.putHeader("x-okapi-tenant", "postgres");
-        request.headers().add("Authorization", "postgres");
+        request.putHeader("x-okapi-tenant", "myuniversity");
+        request.headers().add("Authorization", "myuniversity");
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -226,8 +237,8 @@ public class RestVerticleTest {
       System.out.println("complete");
     });
     request.setChunked(true);
-    request.putHeader("Authorization", "postgres");
-    request.putHeader("x-okapi-tenant", "postgres");
+    request.putHeader("Authorization", "myuniversity");
+    request.putHeader("x-okapi-tenant", "myuniversity");
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);
