@@ -8,7 +8,7 @@ CREATE USER myuniversity WITH ENCRYPTED PASSWORD 'myuniversity';
 ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 
 -- remove this
-GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
+-- GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
 
 -- create table space per tenant 
 CREATE TABLESPACE ts_myuniversity OWNER myuniversity LOCATION 'c:\\git\\postgres';

@@ -35,6 +35,8 @@ public class TestClient {
   private ArrayList<String> urls;
   int                       port;
   ConfigurationsClient cc = null;
+  TenantClient ac = null;
+
   @Before
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
@@ -70,7 +72,7 @@ public class TestClient {
 
     try {
       Async async = context.async(2);
-      TenantClient ac = new TenantClient("localhost", port, "harvard");
+      ac = new TenantClient("localhost", port, "harvard");
       ac.post(reply -> {
           try {
             postConfigs(async);
@@ -88,13 +90,17 @@ public class TestClient {
     cc.getEntries("[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]", null, null, 0, 10, "en", response -> {
       response.bodyHandler(body -> {
         System.out.println(body);
-        async.countDown();
+        ac.delete( reply -> {
+          reply.bodyHandler( body2 -> {
+            System.out.println(body2);
+            async.countDown();
+          });
+        });
       });
     });
   }
 
   public void postConfigs(Async async) throws Exception {
-
     String content = getFile("kv_configuration.sample");
     Config conf =  new ObjectMapper().readValue(content, Config.class);
     cc.postEntries(null, conf, reply -> {
@@ -114,7 +120,7 @@ public class TestClient {
   }
 
   private static String getFile(String filename) throws IOException {
-    return IOUtils.toString(Test.class.getClassLoader().getResourceAsStream(filename), "UTF-8");
+    return IOUtils.toString(TestClient.class.getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
 }
