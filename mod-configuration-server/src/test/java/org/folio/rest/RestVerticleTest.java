@@ -121,18 +121,18 @@ public class RestVerticleTest {
       String content = getFile("kv_configuration.sample");
       Config conf =  new ObjectMapper().readValue(content, Config.class);
 
-      mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         content, "application/json", 201);
 
       //save config entry with value being a base64 encoded file
       String attachment = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
       conf.setValue(attachment);
 
-      mutateURLs("http://localhost:" + port + "/configurations/tables", context, HttpMethod.POST,
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf), "application/json", 201);
 
       //delete non existent record
-      mutateURLs("http://localhost:" + port + "/configurations/tables/123456", context, HttpMethod.DELETE,
+      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
         "", "application/json", 404);
 
     } catch (Exception e) {

@@ -36,7 +36,23 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/tables/"+entryId+""+queryParams.toString()
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     * 
+     */
+    public void deleteEntryId(String entryId, String lang, Handler<HttpClientResponse> responseHandler) {
+        StringBuilder queryParams = new StringBuilder("?");
+        if(lang != null) {queryParams.append("lang="+lang);
+        queryParams.append("&");}
+        io.vertx.core.http.HttpClientRequest request = httpClient.delete("/configurations/entries/"+entryId+""+queryParams.toString());
+        request.handler(responseHandler);
+        request.putHeader("Accept", "text/plain");
+        request.putHeader("Authorization", tenantId);
+        request.putHeader("x-okapi-tenant", tenantId);
+        request.end();
+    }
+
+    /**
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
      * 
      */
     public void putEntryId(String entryId, String lang, org.folio.rest.jaxrs.model.Configs Configs, Handler<HttpClientResponse> responseHandler)
@@ -47,7 +63,7 @@ public class ConfigurationsClient {
         queryParams.append("&");}
         io.vertx.core.buffer.Buffer buffer = io.vertx.core.buffer.Buffer.buffer();
         buffer.appendString(org.folio.rest.persist.PostgresClient.pojo2json(Configs));
-        io.vertx.core.http.HttpClientRequest request = httpClient.put("/configurations/tables/"+entryId+""+queryParams.toString());
+        io.vertx.core.http.HttpClientRequest request = httpClient.put("/configurations/entries/"+entryId+""+queryParams.toString());
         request.handler(responseHandler);
         request.putHeader("Content-type", "application/json");
         request.putHeader("Accept", "text/plain");
@@ -60,7 +76,7 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/tables/"+entryId+""+queryParams.toString()
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
      * 
      */
     public void getEntryId(String entryId, String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
@@ -77,7 +93,7 @@ public class ConfigurationsClient {
         queryParams.append("&");
         if(lang != null) {queryParams.append("lang="+lang);
         queryParams.append("&");}
-        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/tables/"+entryId+""+queryParams.toString());
+        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/entries/"+entryId+""+queryParams.toString());
         request.handler(responseHandler);
         request.putHeader("Accept", "application/json,text/plain");
         request.putHeader("Authorization", tenantId);
@@ -86,10 +102,10 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/tables"+queryParams.toString()
+     * Service endpoint "/configurations/entries"+queryParams.toString()
      * 
      */
-    public void postTables(String lang, org.folio.rest.jaxrs.model.Config Config, Handler<HttpClientResponse> responseHandler)
+    public void postEntries(String lang, org.folio.rest.jaxrs.model.Config Config, Handler<HttpClientResponse> responseHandler)
         throws Exception
     {
         StringBuilder queryParams = new StringBuilder("?");
@@ -97,7 +113,7 @@ public class ConfigurationsClient {
         queryParams.append("&");}
         io.vertx.core.buffer.Buffer buffer = io.vertx.core.buffer.Buffer.buffer();
         buffer.appendString(org.folio.rest.persist.PostgresClient.pojo2json(Config));
-        io.vertx.core.http.HttpClientRequest request = httpClient.post("/configurations/tables"+queryParams.toString());
+        io.vertx.core.http.HttpClientRequest request = httpClient.post("/configurations/entries"+queryParams.toString());
         request.handler(responseHandler);
         request.putHeader("Content-type", "application/json");
         request.putHeader("Accept", "application/json,text/plain");
@@ -110,10 +126,10 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/tables"+queryParams.toString()
+     * Service endpoint "/configurations/entries"+queryParams.toString()
      * 
      */
-    public void getTables(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
+    public void getEntries(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
         if(query != null) {queryParams.append("query="+query);
         queryParams.append("&");}
@@ -127,25 +143,9 @@ public class ConfigurationsClient {
         queryParams.append("&");
         if(lang != null) {queryParams.append("lang="+lang);
         queryParams.append("&");}
-        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/tables"+queryParams.toString());
+        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/entries"+queryParams.toString());
         request.handler(responseHandler);
         request.putHeader("Accept", "application/json,text/plain");
-        request.putHeader("Authorization", tenantId);
-        request.putHeader("x-okapi-tenant", tenantId);
-        request.end();
-    }
-
-    /**
-     * Service endpoint "/configurations/tables/"+entryId+""+queryParams.toString()
-     * 
-     */
-    public void deleteEntryId(String entryId, String lang, Handler<HttpClientResponse> responseHandler) {
-        StringBuilder queryParams = new StringBuilder("?");
-        if(lang != null) {queryParams.append("lang="+lang);
-        queryParams.append("&");}
-        io.vertx.core.http.HttpClientRequest request = httpClient.delete("/configurations/tables/"+entryId+""+queryParams.toString());
-        request.handler(responseHandler);
-        request.putHeader("Accept", "text/plain");
         request.putHeader("Authorization", tenantId);
         request.putHeader("x-okapi-tenant", tenantId);
         request.end();
@@ -160,7 +160,7 @@ public class ConfigurationsClient {
     }
 
     public String checksum() {
-        return "b24774811bb776b7afaf7c4a9bf1f23d";
+        return "7475e07ebd745ff40657150911037d0c";
     }
 
 }

@@ -85,7 +85,7 @@ public class TestClient {
 
 
   public void getConfigs(Async async) {
-    cc.getTables("[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]", null, null, 0, 10, "en", response -> {
+    cc.getEntries("[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]", null, null, 0, 10, "en", response -> {
       response.bodyHandler(body -> {
         System.out.println(body);
         async.countDown();
@@ -97,7 +97,7 @@ public class TestClient {
 
     String content = getFile("kv_configuration.sample");
     Config conf =  new ObjectMapper().readValue(content, Config.class);
-    cc.postTables(null, conf, reply -> {
+    cc.postEntries(null, conf, reply -> {
       reply.bodyHandler( handler -> {
         try {
           System.out.println(new String(handler.getBytes(), "UTF8"));

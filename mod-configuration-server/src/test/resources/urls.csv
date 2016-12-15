@@ -1,4 +1,4 @@
-"GET , http://localhost:<port>/configurations/tables , get list of configuration tables"
-"GET , http://localhost:<port>/configurations/tables/57c552959c79114ef4439edb , get specific table"
-"GET , http://localhost:<port>/configurations/tables?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"
-"GET , http://localhost:<port>/configurations/tables?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/entries , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/entries/57c552959c79114ef4439edb , get specific table"
+"GET , http://localhost:<port>/configurations/entries?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/entries?query=[{"field":"'module'","value":"CIRCULATION","op":"="}] , get list of configuration tables"
