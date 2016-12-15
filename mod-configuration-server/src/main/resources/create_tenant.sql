@@ -2,7 +2,8 @@
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
 -- create tenant user in db
-DROP USER IF EXISTS myuniversity;
+-- DROP USER IF EXISTS myuniversity;
+
 CREATE USER myuniversity WITH ENCRYPTED PASSWORD 'myuniversity';
 ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 
@@ -13,8 +14,7 @@ GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
 CREATE TABLESPACE ts_myuniversity OWNER myuniversity LOCATION 'c:\\git\\postgres';
 SET default_tablespace = ts_myuniversity;
 
-DROP SCHEMA IF EXISTS myuniversity CASCADE;
-
+-- DROP SCHEMA IF EXISTS myuniversity CASCADE;
 -- The schema user wil be the schema name since not given
 CREATE SCHEMA myuniversity AUTHORIZATION myuniversity;
 

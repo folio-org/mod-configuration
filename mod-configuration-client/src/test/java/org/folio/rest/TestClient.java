@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.ConfigurationsClient;
+import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -50,7 +51,7 @@ public class TestClient {
       async.complete();
     }));
 
-    cc = new ConfigurationsClient("localhost", port, "myuniversity");
+    cc = new ConfigurationsClient("localhost", port, "harvard");
 
   }
 
@@ -69,9 +70,8 @@ public class TestClient {
 
     try {
       Async async = context.async(2);
-
-      PostgresClient.getInstance(Vertx.vertx(), "public").runSQLFile(getFile("create_config.sql"),
-        "myuniversity", false, reply -> {
+      TenantClient ac = new TenantClient("localhost", port, "harvard");
+      ac.post(reply -> {
           try {
             postConfigs(async);
           } catch (Exception e) {
