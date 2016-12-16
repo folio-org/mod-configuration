@@ -23,6 +23,7 @@ import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
+import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -43,7 +44,7 @@ public class RestVerticleTest {
   private static Vertx      vertx;
   private ArrayList<String> urls;
   int                       port;
-
+  TenantClient tClient = null;
   /**
    *
    * @param context
@@ -63,7 +64,8 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    AdminClient aClient = new AdminClient("localhost", port, "myuniversity");
+    AdminClient aClient = new AdminClient("localhost", port, "harvard");
+    tClient = new TenantClient("localhost", port, "harvard");
 
 /*    port = 8888;//NetworkUtils.nextFreePort();
 
@@ -80,10 +82,13 @@ public class RestVerticleTest {
       port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
-        aClient.postImportSQL(
-          RestVerticleTest.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
+        tClient.post( response -> {
+          response.bodyHandler( body -> {
+            System.out.println(body.toString());
             async.complete();
           });
+        });
+
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -104,7 +109,17 @@ public class RestVerticleTest {
    */
   @After
   public void tearDown(TestContext context) {
+/*    Async async = context.async();
+
+    tClient.delete( reply -> {
+      reply.bodyHandler( body2 -> {
+        System.out.println(body2.toString());
+        async.complete();
+
+      });
+    });*/
     vertx.close(context.asyncAssertSuccess());
+
   }
 
   /**
@@ -180,8 +195,8 @@ public class RestVerticleTest {
             });
           }
         });
-        request.putHeader("x-okapi-tenant", "myuniversity");
-        request.headers().add("Authorization", "myuniversity");
+        request.putHeader("x-okapi-tenant", "harvard");
+        request.headers().add("Authorization", "harvard");
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -237,8 +252,8 @@ public class RestVerticleTest {
       System.out.println("complete");
     });
     request.setChunked(true);
-    request.putHeader("Authorization", "myuniversity");
-    request.putHeader("x-okapi-tenant", "myuniversity");
+    request.putHeader("Authorization", "harvard");
+    request.putHeader("x-okapi-tenant", "harvard");
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);

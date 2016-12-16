@@ -11,7 +11,7 @@ ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 -- GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
 
 -- create table space per tenant 
-CREATE TABLESPACE ts_myuniversity OWNER myuniversity LOCATION 'c:\\git\\postgres';
+CREATE TABLESPACE ts_myuniversity OWNER myuniversity LOCATION '${tablespace_dir}/myuniversity';
 SET default_tablespace = ts_myuniversity;
 
 -- DROP SCHEMA IF EXISTS myuniversity CASCADE;
