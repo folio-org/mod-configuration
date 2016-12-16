@@ -90,12 +90,13 @@ public class TestClient {
     cc.getEntries("[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]", null, null, 0, 10, "en", response -> {
       response.bodyHandler(body -> {
         System.out.println(body);
-        ac.delete( reply -> {
+        async.countDown();
+/*        ac.delete( reply -> {
           reply.bodyHandler( body2 -> {
             System.out.println(body2);
             async.countDown();
           });
-        });
+        });*/
       });
     });
   }
