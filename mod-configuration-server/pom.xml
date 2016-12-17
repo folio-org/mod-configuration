@@ -10,6 +10,7 @@
 
   <properties>
     <ramlfiles_path>${basedir}/../ramls</ramlfiles_path>
+    <ramlfiles_util_path>${basedir}/../raml-util</ramlfiles_util_path>
     <tablespace_dir>c:\\git\\postgres</tablespace_dir>
   </properties>
 

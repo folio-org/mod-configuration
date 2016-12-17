@@ -21,7 +21,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <aspectj.version>1.8.9</aspectj.version>
     <http.port>8081</http.port>
-    <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <module_name>configuration</module_name>
     <audit_log_path>${basedir}/logs/audit.log</audit_log_path>
     <log_path>${basedir}/logs/configuration.log</log_path>
