@@ -7,6 +7,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 import org.folio.rest.client.AdminClient;
+import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.resource.AdminResource.PersistMethod;
 
 
@@ -34,13 +35,16 @@ public class Test {
     mmp.addBodyPart(bp);
     mmp.addBodyPart(bp2);
     AdminClient aClient = new AdminClient("localhost", 8888, null, false);
+    TenantClient tClient = new TenantClient("localhost", 8888, null, false);
     aClient.postUploadmultipart(PersistMethod.SAVE, null, "abc",
       mmp, reply -> {
       reply.statusCode();
     });
 
-    aClient.postImportSQL(
-      Test.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
+    tClient.post( reply -> {
+      reply.bodyHandler( body -> {
+        System.out.println(body);
+      });
       reply.statusCode();
     });
     aClient.getJstack( trace -> {
