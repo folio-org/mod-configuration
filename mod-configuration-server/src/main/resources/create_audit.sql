@@ -28,6 +28,8 @@ CREATE OR REPLACE FUNCTION audit_changes() RETURNS TRIGGER AS $config_audit$
     END;
 $config_audit$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS audit ON config_data CASCADE;
+
 CREATE TRIGGER audit AFTER INSERT OR UPDATE OR DELETE ON config_data FOR EACH ROW EXECUTE PROCEDURE audit_changes();
 
 GRANT ALL PRIVILEGES ON audit_config TO myuniversity;
