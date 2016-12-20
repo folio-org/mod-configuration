@@ -20,7 +20,13 @@ public class ConfigurationsClient {
         options.setKeepAlive(keepAlive);
         options.setDefaultHost(host);
         options.setDefaultPort(port);
-        httpClient = io.vertx.core.Vertx.vertx().createHttpClient(options);
+        io.vertx.core.Context context = io.vertx.core.Vertx.currentContext();
+        if(context == null){
+          httpClient = io.vertx.core.Vertx.vertx().createHttpClient(options);
+        }
+        else{
+          httpClient = io.vertx.core.Vertx.currentContext().owner().createHttpClient(options);
+        }
     }
 
     public ConfigurationsClient(String host, int port, String tenantId) {
@@ -33,34 +39,6 @@ public class ConfigurationsClient {
      */
     public ConfigurationsClient() {
         this("localhost", 8081, "folio_demo", false);
-    }
-
-    /**
-     * Service endpoint "/configurations/entries"+queryParams.toString()
-     * 
-     */
-    public void getEntries(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
-        StringBuilder queryParams = new StringBuilder("?");
-        if(query != null) {queryParams.append("query="+query);
-        queryParams.append("&");}
-        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
-        queryParams.append("&");}
-        if(order != null) {queryParams.append("order="+order.toString());
-        queryParams.append("&");}
-        queryParams.append("offset="+offset);
-        queryParams.append("&");
-        queryParams.append("limit="+limit);
-        queryParams.append("&");
-        if(lang != null) {queryParams.append("lang="+lang);
-        queryParams.append("&");}
-        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/entries"+queryParams.toString());
-        request.handler(responseHandler);
-        request.putHeader("Accept", "application/json,text/plain");
-        if(tenantId != null){
-         request.putHeader("Authorization", tenantId);
-         request.putHeader("x-okapi-tenant", tenantId);
-        }
-        request.end();
     }
 
     /**
@@ -90,28 +68,30 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     * Service endpoint "/configurations/entries"+queryParams.toString()
      * 
      */
-    public void putEntryId(String entryId, String lang, org.folio.rest.jaxrs.model.Configs Configs, Handler<HttpClientResponse> responseHandler)
-        throws Exception
-    {
+    public void getEntries(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
+        if(query != null) {queryParams.append("query="+query);
+        queryParams.append("&");}
+        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
+        queryParams.append("&");}
+        if(order != null) {queryParams.append("order="+order.toString());
+        queryParams.append("&");}
+        queryParams.append("offset="+offset);
+        queryParams.append("&");
+        queryParams.append("limit="+limit);
+        queryParams.append("&");
         if(lang != null) {queryParams.append("lang="+lang);
         queryParams.append("&");}
-        io.vertx.core.buffer.Buffer buffer = io.vertx.core.buffer.Buffer.buffer();
-        buffer.appendString(org.folio.rest.persist.PostgresClient.pojo2json(Configs));
-        io.vertx.core.http.HttpClientRequest request = httpClient.put("/configurations/entries/"+entryId+""+queryParams.toString());
+        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/entries"+queryParams.toString());
         request.handler(responseHandler);
-        request.putHeader("Content-type", "application/json");
-        request.putHeader("Accept", "text/plain");
+        request.putHeader("Accept", "application/json,text/plain");
         if(tenantId != null){
          request.putHeader("Authorization", tenantId);
          request.putHeader("x-okapi-tenant", tenantId);
         }
-        request.putHeader("Content-Length", buffer.length()+"");
-        request.setChunked(true);
-        request.write(buffer);
         request.end();
     }
 
@@ -158,6 +138,32 @@ public class ConfigurationsClient {
          request.putHeader("Authorization", tenantId);
          request.putHeader("x-okapi-tenant", tenantId);
         }
+        request.end();
+    }
+
+    /**
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     * 
+     */
+    public void putEntryId(String entryId, String lang, org.folio.rest.jaxrs.model.Configs Configs, Handler<HttpClientResponse> responseHandler)
+        throws Exception
+    {
+        StringBuilder queryParams = new StringBuilder("?");
+        if(lang != null) {queryParams.append("lang="+lang);
+        queryParams.append("&");}
+        io.vertx.core.buffer.Buffer buffer = io.vertx.core.buffer.Buffer.buffer();
+        buffer.appendString(org.folio.rest.persist.PostgresClient.pojo2json(Configs));
+        io.vertx.core.http.HttpClientRequest request = httpClient.put("/configurations/entries/"+entryId+""+queryParams.toString());
+        request.handler(responseHandler);
+        request.putHeader("Content-type", "application/json");
+        request.putHeader("Accept", "text/plain");
+        if(tenantId != null){
+         request.putHeader("Authorization", tenantId);
+         request.putHeader("x-okapi-tenant", tenantId);
+        }
+        request.putHeader("Content-Length", buffer.length()+"");
+        request.setChunked(true);
+        request.write(buffer);
         request.end();
     }
 
