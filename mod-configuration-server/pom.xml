@@ -149,8 +149,8 @@
         </executions>
       </plugin>
 
-      <!-- replace the baseuri and the protocol in the ramls that are in 
-        the apidocs directory so that they can at least be used to check via the 
+      <!-- replace the baseuri and the protocol in the ramls that are in
+        the apidocs directory so that they can at least be used to check via the
         html api console on IE -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>

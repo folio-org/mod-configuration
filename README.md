@@ -56,7 +56,7 @@ Note that the embedded PostgreSQL is started on a static port (6000)
 
 ### Documentation of the Service's APIs
 
-Documentation is auto-generated from the RAML file into HTML. 
+Documentation is auto-generated from the RAML file into HTML.
 After the service is started, the documentation can be viewed at:
 
 http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
@@ -104,7 +104,7 @@ http://localhost:8085/configurations/tables
   "value": ""
 }
 
-Deleting / Updating specific entries is possible as well - See circulation.raml file. 
+Deleting / Updating specific entries is possible as well - See circulation.raml file.
 ```
 
 ## Additional information

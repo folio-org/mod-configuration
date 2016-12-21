@@ -9,7 +9,7 @@
     <module>mod-configuration-server</module>
     <module>mod-configuration-client</module>
   </modules>
-  
+
   <licenses>
     <license>
       <name>Apache License 2.0</name>
