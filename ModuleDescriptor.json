@@ -13,7 +13,7 @@
     "permissionsRequired" : [ ],
     "permissionsDesired" : [ ]
   },
-{
+  {
     "methods" : [ "GET", "POST" ],
     "path" : "/configurations/rules",
     "level" : "30",
