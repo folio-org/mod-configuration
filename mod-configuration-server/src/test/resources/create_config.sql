@@ -9,7 +9,7 @@ ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 -- remove this
 GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
 
--- create table space per tenant 
+-- create table space per tenant
 CREATE TABLESPACE ts_myuniversity OWNER myuniversity LOCATION 'c:\\git\\postgres';
 SET default_tablespace = ts_myuniversity;
 
@@ -33,15 +33,15 @@ CREATE TABLE IF NOT EXISTS config_data (
    );
 
 -- index to support @> ops, faster then jsonb_ops
-CREATE INDEX idxgin_conf ON config_data USING gin (jsonb jsonb_path_ops);   
+CREATE INDEX idxgin_conf ON config_data USING gin (jsonb jsonb_path_ops);
 
 -- update the update_date column when record is updated
-CREATE OR REPLACE FUNCTION update_modified_column() 
+CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
 -- NEW to indicate updating the new row value
     NEW.update_date = current_timestamp;
-    RETURN NEW; 
+    RETURN NEW;
 END;
 $$ language 'plpgsql';
 

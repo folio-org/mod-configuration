@@ -3,13 +3,13 @@
 SET search_path TO myuniversity, public;
 
 -- audit table to keep a history of the changes
--- made to a record. 
+-- made to a record.
 CREATE TABLE IF NOT EXISTS audit_config (
    _id UUID PRIMARY KEY,
    orig_id UUID NOT NULL,
    operation char(1) NOT NULL,
    jsonb jsonb,
-   creation_date date not null 
+   creation_date date not null
    );
 
 CREATE OR REPLACE FUNCTION audit_changes() RETURNS TRIGGER AS $config_audit$
@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION audit_changes() RETURNS TRIGGER AS $config_audit$
             INSERT INTO audit_config SELECT gen_random_uuid(), NEW._id, 'I', NEW.jsonb, current_timestamp;
             RETURN NEW;
         END IF;
-        RETURN NULL; 
+        RETURN NULL;
     END;
 $config_audit$ LANGUAGE plpgsql;
 

@@ -35,7 +35,7 @@ public class ConfigurationsClient {
 
     /**
      * Convenience constructor for tests ONLY!<br>Connect to localhost on 8081 as folio_demo tenant.
-     * 
+     *
      */
     public ConfigurationsClient() {
         this("localhost", 8081, "folio_demo", false);
@@ -43,7 +43,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries"+queryParams.toString()
-     * 
+     *
      */
     public void postEntries(String lang, org.folio.rest.jaxrs.model.Config Config, Handler<HttpClientResponse> responseHandler)
         throws Exception
@@ -69,7 +69,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries"+queryParams.toString()
-     * 
+     *
      */
     public void getEntries(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -97,7 +97,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
-     * 
+     *
      */
     public void deleteEntryId(String entryId, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -115,7 +115,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
-     * 
+     *
      */
     public void getEntryId(String entryId, String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -143,7 +143,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
-     * 
+     *
      */
     public void putEntryId(String entryId, String lang, org.folio.rest.jaxrs.model.Configs Configs, Handler<HttpClientResponse> responseHandler)
         throws Exception
@@ -169,7 +169,7 @@ public class ConfigurationsClient {
 
     /**
      * Close the client. Closing will close down any pooled connections. Clients should always be closed after use.
-     * 
+     *
      */
     public void close() {
         httpClient.close();
