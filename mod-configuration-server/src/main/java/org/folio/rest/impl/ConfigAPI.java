@@ -22,10 +22,12 @@ import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.Criteria.Order.ORDER;
+import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
+import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
@@ -40,13 +42,13 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
   private final Messages            messages          = Messages.getInstance();
 
-
   @Validate
   @Override
   public void getConfigurationsEntries(String query, String orderBy,
       Order order, int offset, int limit, String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
+    CQLWrapper cql = getCQL(query,limit, offset);
     /**
     * http://host:port/configurations/tables
     */
@@ -56,7 +58,7 @@ public class ConfigAPI implements ConfigurationsResource {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_COLLECTION, Config.class,
-          getcriterion(query, limit, offset, order, orderBy), true,
+          cql, true,
             reply -> {
               try {
                 Configs configs = new Configs();
@@ -129,6 +131,7 @@ public class ConfigAPI implements ConfigurationsResource {
       String orderBy, Order order, int offset, int limit, String lang, java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
+    CQLWrapper cql = getCQL(query, limit, offset);
     context.runOnContext(v -> {
       try {
         System.out.println("sending... getConfigurationsTablesByTableId");
@@ -139,7 +142,7 @@ public class ConfigAPI implements ConfigurationsResource {
         }
         q.put("_id", entryId);
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_COLLECTION,
-          Config.class, getcriterion(query, limit, offset, order, orderBy), true,
+          Config.class, cql, true,
             reply -> {
               try {
                 Configs configs = new Configs();
@@ -284,4 +287,12 @@ public class ConfigAPI implements ConfigurationsResource {
     return criterion;
   }
 
+  private CQLWrapper getCQL(String query, int limit, int offset){
+    CQLWrapper cql = null;
+    if(query != null){
+      CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_COLLECTION+".jsonb");
+      cql = new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
+    }
+    return cql;
+  }
 }
