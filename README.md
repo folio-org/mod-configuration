@@ -37,8 +37,11 @@ CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 |
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 | base64enc_drools_file| rule file
 
 The above table can be viewed as follows:
+
 Module: **CIRCULATION**
+
 &nbsp;&nbsp;&nbsp;Config name: **patron.drools**
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; row: **rule_name1** (the code of the row)
 
 see configuration schema for an object description:
@@ -97,7 +100,9 @@ https://github.com/folio-org/cql2pgjson-java
 ### Auditing
 Every change to entries is automatically audited by the service.
 To see an audit list:
+
 `http://<host>:<port>/configurations/audit`
+
 CQL syntax is also supported by the audit API 
 
 ### Documentation of the Service's APIs
@@ -128,7 +133,6 @@ Query for a specific module / config / row:
 (GET)
 http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa
 
-Notice that the query parameter 'query' is very similar to the standard PostgreSQL JSONB query syntax.
 
 
 Add an entry:
