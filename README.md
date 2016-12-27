@@ -6,11 +6,11 @@ Copyright (C) 2016 The Open Library Foundation
 This software is distributed under the terms of the Apache License, Version 2.0. See the file ["LICENSE"](https://github.com/folio-org/mod-configuration/blob/master/LICENSE) for more information.
 
 
-#### Demo configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
+#### Configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
 
-This project is built using the raml-module-builder, using the PostgreSQL async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are features that the mod-configuration module inherits from the raml-module-builder framework.
+This project is built using the raml-module-builder, using the PostgreSQL async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are many features that the mod-configuration module inherits from the raml-module-builder framework.
 
-The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation of module configurations. Within a module there are named configurations, and within a configuration there are 1..N 'rows'.
+The idea behind this module is to provide a type of centralized configuration service. The service allows for the creation of module configurations. Within a module there are named configurations, and within a named configuration there are 1..N 'rows'.
 
 ```sh
 -> Module
@@ -36,6 +36,11 @@ CIRCULATION| import.uploads.files | Joe | 1234567890 | 88 | false | true | path_
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 | base64enc_drools_file| rule file
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 | base64enc_drools_file| rule file
 
+The above table can be viewed as follows:
+Module: **CIRCULATION**
+&nbsp;&nbsp;&nbsp;Config name: **patron.drools**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; row: **rule_name1** (the code of the row)
+
 see configuration schema for an object description:
 https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
 
@@ -53,6 +58,47 @@ Or run via Dockerfile
 The Configuration service can be run in both embedded PostgreSQL mode or with a regular PostgreSQL server
 
 Note that the embedded PostgreSQL is started on a static port (6000)
+
+### Connecting to an existing configuration service
+
+The configuration module also comes with a statically typed Java client.
+To use the client via maven, add:
+
+```sh
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>mod-configuration-client</artifactId>
+      <version>0.0.4-SNAPSHOT</version>
+    </dependency>
+```
+
+```sh
+ConfigurationsClient cc = new ConfigurationsClient("config.server.host", port, "mytenantid");
+
+cc.getEntries("module==CIRCULATION", null, null, 0, 10, "en", response -> {
+  response.bodyHandler(body -> {
+    System.out.println(body);
+  });
+});
+
+String content = getFile("kv_configuration.sample");
+Config conf = new ObjectMapper().readValue(content, Config.class);
+cc.postEntries(null, conf, reply -> {
+  reply.bodyHandler( handler -> {
+   System.out.println(new String(handler.getBytes(), "UTF8"));
+  });
+});
+```
+
+#### Query syntax
+The configuration module supports the CQL syntax - please see
+https://github.com/folio-org/cql2pgjson-java
+
+### Auditing
+Every change to entries is automatically audited by the service.
+To see an audit list:
+`http://<host>:<port>/configurations/audit`
+CQL syntax is also supported by the audit API 
 
 ### Documentation of the Service's APIs
 
@@ -75,19 +121,19 @@ Make sure to include appropriate headers as the runtime framework validates them
 
 Query for all tables:
 (GET)
-http://localhost:8085/configurations/tables
+http://localhost:8085/configurations/entries
 
 
 Query for a specific module / config / row:
 (GET)
-http://localhost:8085/configurations/tables?query=[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]
+http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa
 
 Notice that the query parameter 'query' is very similar to the standard PostgreSQL JSONB query syntax.
 
 
 Add an entry:
 (POST)
-http://localhost:8085/configurations/tables
+http://localhost:8085/configurations/entries
 {
   "module": "CIRCULATION",
   "config_name": "validation_rules",
