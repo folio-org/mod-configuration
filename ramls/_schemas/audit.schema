@@ -1,0 +1,31 @@
+{
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "type":"object",
+  "properties":{
+    "_id":{
+      "type":"string"
+    },
+    "orig_id":{
+      "type":"string"
+    },
+    "operation":{
+      "type":"string"
+    },
+    "jsonb":{
+	  "type": "object",
+	    "properties": {
+	      "content": {
+	        "id": "contentData",
+	        "type": "array",
+	        "items": {
+	          "type": "object",
+	          "$ref" : "config"
+	      }
+	    }
+	  }
+    },
+    "creation_date":{
+      "type":"string"
+    }
+  }
+}

@@ -17,6 +17,9 @@
     "update_date":{
       "type":"string"
     },
+    "creation_date":{
+      "type":"string"
+    },
     "scope":{
       "type":"object",
       "properties":{

@@ -75,7 +75,7 @@ public class TestClient {
       ac = new TenantClient("localhost", port, "harvard");
       ac.post(reply -> {
           try {
-            postConfigs(async);
+            postConfigs(async, context);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -86,11 +86,16 @@ public class TestClient {
   }
 
 
-  public void getConfigs(Async async) {
-    cc.getEntries("[{\"field\":\"'module'\",\"value\":\"CIRCULATION\",\"op\":\"=\"}]", null, null, 0, 10, "en", response -> {
+  public void getConfigs(Async async, TestContext context) {
+    cc.getEntries("module==CIRCULATION", null, null, 0, 10, "en", response -> {
       response.bodyHandler(body -> {
         System.out.println(body);
-        async.countDown();
+        if(response.statusCode() == 500){
+          context.fail("status " + response.statusCode());
+        }
+        else{
+          async.countDown();
+        }
 /*        ac.delete( reply -> {
           reply.bodyHandler( body2 -> {
             System.out.println(body2);
@@ -101,7 +106,7 @@ public class TestClient {
     });
   }
 
-  public void postConfigs(Async async) throws Exception {
+  public void postConfigs(Async async, TestContext context) throws Exception {
     String content = getFile("kv_configuration.sample");
     Config conf =  new ObjectMapper().readValue(content, Config.class);
     cc.postEntries(null, conf, reply -> {
@@ -109,7 +114,7 @@ public class TestClient {
         try {
           System.out.println(new String(handler.getBytes(), "UTF8"));
           async.countDown();
-          getConfigs(async);
+          getConfigs(async, context);
         } catch (Exception e) {
           e.printStackTrace();
           async.complete();

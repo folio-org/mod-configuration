@@ -8,12 +8,15 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Audit;
+import org.folio.rest.jaxrs.model.Audits;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Configs;
 import org.folio.rest.jaxrs.resource.ConfigurationsResource;
@@ -32,7 +35,9 @@ import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
 
-  public static final String        CONFIG_COLLECTION = "config_data";
+  public static final String        CONFIG_TABLE      = "config_data";
+  public static final String        AUDIT_TABLE       = "audit_config";
+
   public static final String        METHOD_GET        = "get";
   public static final String        METHOD_POST       = "post";
   public static final String        METHOD_PUT        = "put";
@@ -50,15 +55,15 @@ public class ConfigAPI implements ConfigurationsResource {
 
     CQLWrapper cql = getCQL(query,limit, offset);
     /**
-    * http://host:port/configurations/tables
+    * http://host:port/configurations/entries
     */
     context.runOnContext(v -> {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
-        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_COLLECTION, Config.class,
-          cql, true,
+        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class,
+          new String[]{"*"}, cql, true,
             reply -> {
               try {
                 Configs configs = new Configs();
@@ -76,9 +81,12 @@ public class ConfigAPI implements ConfigurationsResource {
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
+        String message = messages.getMessage(lang, MessageConsts.InternalServerError);
+        if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
+          message = " CQL parse error " + e.getLocalizedMessage();
+        }
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
-          .withPlainInternalServerError(messages.getMessage(
-            lang, MessageConsts.InternalServerError))));
+          .withPlainInternalServerError(message)));
       }
     });
   }
@@ -93,7 +101,7 @@ public class ConfigAPI implements ConfigurationsResource {
         System.out.println("sending... postConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         PostgresClient.getInstance(context.owner(), tenantId).save(
-          CONFIG_COLLECTION,
+          CONFIG_TABLE,
           entity,
           reply -> {
             try {
@@ -141,8 +149,8 @@ public class ConfigAPI implements ConfigurationsResource {
           q = new JsonObject(query);
         }
         q.put("_id", entryId);
-        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_COLLECTION,
-          Config.class, cql, true,
+        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE,
+          Config.class, new String[]{"update_date, creation_date"}, cql, true,
             reply -> {
               try {
                 Configs configs = new Configs();
@@ -184,7 +192,7 @@ public class ConfigAPI implements ConfigurationsResource {
         System.out.println("sending... deleteConfigurationsTablesByTableId");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         try {
-          PostgresClient.getInstance(context.owner(), tenantId).delete(CONFIG_COLLECTION, c,
+          PostgresClient.getInstance(context.owner(), tenantId).delete(CONFIG_TABLE, c,
             reply -> {
               try {
                 if(reply.succeeded()){
@@ -228,7 +236,7 @@ public class ConfigAPI implements ConfigurationsResource {
       String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
       try {
         PostgresClient.getInstance(context.owner(), tenantId).update(
-          CONFIG_COLLECTION, entity, entryId,
+          CONFIG_TABLE, entity, entryId,
           reply -> {
             try {
               if(reply.succeeded()){
@@ -290,9 +298,54 @@ public class ConfigAPI implements ConfigurationsResource {
   private CQLWrapper getCQL(String query, int limit, int offset){
     CQLWrapper cql = null;
     if(query != null){
-      CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_COLLECTION+".jsonb");
+      CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
       cql = new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
     }
     return cql;
+  }
+
+  @Validate
+  @Override
+  public void getConfigurationsAudit(String query, String orderBy, Order order, int offset,
+      int limit, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+
+    CQLWrapper cql = getCQL(query,limit, offset);
+    /**
+    * http://host:port/configurations/tables
+    */
+    vertxContext.runOnContext(v -> {
+      try {
+        System.out.println("sending... getConfigurationsTables");
+        String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
+
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
+          new String[]{"jsonb", "orig_id", "creation_date", "operation"}, cql, true,
+            reply -> {
+              try {
+                Audits auditRecords = new Audits();
+                List<Audit> auditList = (List<Audit>) reply.result()[0];
+                auditRecords.setAudits(auditList);
+                auditRecords.setTotalRecords((Integer)reply.result()[1]);
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
+                  auditRecords)));
+              } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse
+                  .withPlainInternalServerError(messages.getMessage(
+                    lang, MessageConsts.InternalServerError))));
+              }
+            });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        String message = messages.getMessage(lang, MessageConsts.InternalServerError);
+        if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
+          message = " CQL parse error " + e.getLocalizedMessage();
+        }
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse
+          .withPlainInternalServerError(message)));
+      }
+    });
+
   }
 }

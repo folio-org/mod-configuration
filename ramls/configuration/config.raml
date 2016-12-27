@@ -13,7 +13,9 @@ schemas:
   - configs: !include ../_schemas/kv_configurations.schema
   - config: !include ../_schemas/kv_configuration.schema
   - libraries: !include ../_schemas/library.schema
-
+  - audits: !include ../_schemas/audits.schema
+  - audit: !include ../_schemas/audit.schema
+  
 traits:
   - secured: !include ../../raml-util/traits/auth.raml
   - orderable: !include ../../raml-util/traits/orderable.raml
@@ -25,7 +27,6 @@ resourceTypes:
   - collection: !include ../../raml-util/rtypes/collection.raml
   - collection-item: !include ../../raml-util/rtypes/item-collection.raml
   - get-only: !include ../../raml-util/rtypes/get-only.raml
-  - post-empty-body: !include ../../raml-util/rtypes/post-empty-body.raml
 
 /configurations:
   /entries:
@@ -39,7 +40,7 @@ resourceTypes:
         exampleItem: !include ../_examples/kv_configuration.sample
     get:
       is: [
-        searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "{\"module\":\"CIRCULATION\"}"},
+        searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
         orderable: {fieldsList: "module"},
         pageable
       ]
@@ -52,7 +53,20 @@ resourceTypes:
           exampleItem: !include ../_examples/kv_configuration.sample
       get:
         is: [
-          searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "[\"name\", \"renewals_allowed_count\", \"=\"]"},
+          searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "scope.institution_id=aaa"},
           orderable: {fieldsList: "module"},
           pageable
         ]
+  /audit:
+    displayName: Audit Configurations
+    description: Retrieve entries from the audit configuration table.
+    type:
+      get-only:
+        schema: audits
+        exampleCollection: ../_examples/audit.sample
+    get:
+      is: [
+        searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
+        orderable: {fieldsList: "module"},
+        pageable
+      ]

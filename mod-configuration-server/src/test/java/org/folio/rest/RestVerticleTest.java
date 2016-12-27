@@ -1,5 +1,6 @@
 package org.folio.rest;
 
+
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -156,6 +157,7 @@ public class RestVerticleTest {
 
     try {
       urls = urlsFromFile();
+      Thread.sleep(2000);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -190,6 +192,7 @@ public class RestVerticleTest {
               public void handle(Buffer buffer) {
                 int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
                 System.out.println("-------->"+records);
+                System.out.println(buffer.toString());
                 async.complete();
               }
             });
