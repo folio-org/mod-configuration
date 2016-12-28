@@ -147,6 +147,14 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf), "application/json", 201);
 
+      conf.setEnabled(false);
+
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+
       //delete non existent record
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
         "", "application/json", 404);

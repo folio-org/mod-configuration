@@ -42,34 +42,6 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/audit"+queryParams.toString()
-     * 
-     */
-    public void getAudit(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
-        StringBuilder queryParams = new StringBuilder("?");
-        if(query != null) {queryParams.append("query="+query);
-        queryParams.append("&");}
-        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
-        queryParams.append("&");}
-        if(order != null) {queryParams.append("order="+order.toString());
-        queryParams.append("&");}
-        queryParams.append("offset="+offset);
-        queryParams.append("&");
-        queryParams.append("limit="+limit);
-        queryParams.append("&");
-        if(lang != null) {queryParams.append("lang="+lang);
-        queryParams.append("&");}
-        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/audit"+queryParams.toString());
-        request.handler(responseHandler);
-        request.putHeader("Accept", "application/json,text/plain");
-        if(tenantId != null){
-         request.putHeader("Authorization", tenantId);
-         request.putHeader("x-okapi-tenant", tenantId);
-        }
-        request.end();
-    }
-
-    /**
      * Service endpoint "/configurations/entries"+queryParams.toString()
      * 
      */
@@ -99,13 +71,9 @@ public class ConfigurationsClient {
      * Service endpoint "/configurations/entries"+queryParams.toString()
      * 
      */
-    public void getEntries(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
+    public void getEntries(String query, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
         if(query != null) {queryParams.append("query="+query);
-        queryParams.append("&");}
-        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
-        queryParams.append("&");}
-        if(order != null) {queryParams.append("order="+order.toString());
         queryParams.append("&");}
         queryParams.append("offset="+offset);
         queryParams.append("&");
@@ -124,21 +92,35 @@ public class ConfigurationsClient {
     }
 
     /**
-     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     * Service endpoint "/configurations/audit"+queryParams.toString()
      * 
      */
-    public void getEntryId(String entryId, String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
+    public void getAudit(String query, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
         if(query != null) {queryParams.append("query="+query);
-        queryParams.append("&");}
-        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
-        queryParams.append("&");}
-        if(order != null) {queryParams.append("order="+order.toString());
         queryParams.append("&");}
         queryParams.append("offset="+offset);
         queryParams.append("&");
         queryParams.append("limit="+limit);
         queryParams.append("&");
+        if(lang != null) {queryParams.append("lang="+lang);
+        queryParams.append("&");}
+        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/audit"+queryParams.toString());
+        request.handler(responseHandler);
+        request.putHeader("Accept", "application/json,text/plain");
+        if(tenantId != null){
+         request.putHeader("Authorization", tenantId);
+         request.putHeader("x-okapi-tenant", tenantId);
+        }
+        request.end();
+    }
+
+    /**
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     * 
+     */
+    public void getEntryId(String entryId, String lang, Handler<HttpClientResponse> responseHandler) {
+        StringBuilder queryParams = new StringBuilder("?");
         if(lang != null) {queryParams.append("lang="+lang);
         queryParams.append("&");}
         io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/entries/"+entryId+""+queryParams.toString());
@@ -204,7 +186,7 @@ public class ConfigurationsClient {
     }
 
     public String checksum() {
-        return "d65dda7d4c1e981e13e7bab88a43b44f";
+        return "d925c3b0c7e3007bf474cae8af50a966";
     }
 
 }

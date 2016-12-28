@@ -41,22 +41,15 @@ resourceTypes:
     get:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
-        orderable: {fieldsList: "module"},
         pageable
       ]
     /{entryId}:
       displayName: Module configurations
-      description: <ul><li>Delete or Update a specific module from the configuration table<br>An example of this would be to add a configuration to the circulation table or to delete a configuration from the circulation table. The query parameters can be used to filter for the desired module's configuration</li><li>Get a specified module's configurations</li></ul><br>The JWT token limits the returned configurations to those of the calling institution
+      description: Get, Delete or Update a specific entry
       type:
         collection-item:
           schema: configs
           exampleItem: !include ../_examples/kv_configuration.sample
-      get:
-        is: [
-          searchable: {description: "with valid searchable fields: for example name = renewals_allowed_count", example: "scope.institution_id=aaa"},
-          orderable: {fieldsList: "module"},
-          pageable
-        ]
   /audit:
     displayName: Audit Configurations
     description: Retrieve entries from the audit configuration table.
@@ -67,6 +60,5 @@ resourceTypes:
     get:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
-        orderable: {fieldsList: "module"},
         pageable
       ]

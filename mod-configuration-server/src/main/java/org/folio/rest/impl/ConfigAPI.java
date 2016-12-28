@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -21,10 +20,10 @@ import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Configs;
 import org.folio.rest.jaxrs.resource.ConfigurationsResource;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.Criteria.Order.ORDER;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
@@ -49,8 +48,8 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsEntries(String query, String orderBy,
-      Order order, int offset, int limit, String lang,java.util.Map<String, String>okapiHeaders,
+  public void getConfigurationsEntries(String query, int offset, int limit,
+      String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
     CQLWrapper cql = getCQL(query,limit, offset);
@@ -66,12 +65,19 @@ public class ConfigAPI implements ConfigurationsResource {
           new String[]{"*"}, cql, true,
             reply -> {
               try {
-                Configs configs = new Configs();
-                List<Config> config = (List<Config>) reply.result()[0];
-                configs.setConfigs(config);
-                configs.setTotalRecords(config.size());
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse.withJsonOK(
-                  configs)));
+                if(reply.succeeded()){
+                  Configs configs = new Configs();
+                  List<Config> config = (List<Config>) reply.result()[0];
+                  configs.setConfigs(config);
+                  configs.setTotalRecords((Integer)reply.result()[1]);
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse.withJsonOK(
+                    configs)));
+                }
+                else{
+                  log.error(reply.cause().getMessage(), reply.cause());
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
+                    .withPlainBadRequest(reply.cause().getMessage())));
+                }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
@@ -135,22 +141,18 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsEntriesByEntryId(String entryId, String query,
-      String orderBy, Order order, int offset, int limit, String lang, java.util.Map<String, String>okapiHeaders,
+  public void getConfigurationsEntriesByEntryId(String entryId, String lang, java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
-    CQLWrapper cql = getCQL(query, limit, offset);
     context.runOnContext(v -> {
       try {
-        System.out.println("sending... getConfigurationsTablesByTableId");
+        System.out.println("sending... getConfigurationsEntriesByEntryId");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        JsonObject q = new JsonObject();
-        if (query != null) {
-          q = new JsonObject(query);
-        }
-        q.put("_id", entryId);
-        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE,
-          Config.class, new String[]{"update_date, creation_date"}, cql, true,
+
+        Criterion c = new Criterion(
+          new Criteria().addField("_id").setJSONB(false).setOperation("=").setValue("'"+entryId+"'"));
+
+        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, true,
             reply -> {
               try {
                 Configs configs = new Configs();
@@ -161,7 +163,7 @@ public class ConfigAPI implements ConfigurationsResource {
                 }
                 else{
                   configs.setConfigs(config);
-                  configs.setTotalRecords(config.size());
+                  configs.setTotalRecords((Integer)reply.result()[1]);
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
                     .withJsonOK(configs)));
                 }
@@ -268,45 +270,14 @@ public class ConfigAPI implements ConfigurationsResource {
     });
   }
 
-  private org.folio.rest.persist.Criteria.Order getOrder(Order order, String field) {
-
-    if (field == null) {
-      return null;
-    }
-
-    String sortOrder = org.folio.rest.persist.Criteria.Order.ASC;
-    if (order.name().equals("asc")) {
-      sortOrder = org.folio.rest.persist.Criteria.Order.DESC;
-    }
-
-    return new org.folio.rest.persist.Criteria.Order(field, ORDER.valueOf(sortOrder.toUpperCase()));
-  }
-
-  private Criterion getcriterion(String query, int limit, int offset, Order order, String fieldld){
-    if(query == null || query.length() == 0){
-      return null;
-    }
-    Criterion criterion = Criterion.json2Criterion(query);
-    criterion.setLimit(new Limit(limit)).setOffset(new Offset(offset));
-    org.folio.rest.persist.Criteria.Order or = getOrder(order, fieldld);
-    if (or != null) {
-      criterion.setOrder(or);
-    }
-    return criterion;
-  }
-
   private CQLWrapper getCQL(String query, int limit, int offset){
-    CQLWrapper cql = null;
-    if(query != null){
-      CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
-      cql = new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
-    }
-    return cql;
+    CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
+    return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
 
   @Validate
   @Override
-  public void getConfigurationsAudit(String query, String orderBy, Order order, int offset,
+  public void getConfigurationsAudit(String query, int offset,
       int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
