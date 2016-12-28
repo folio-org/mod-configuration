@@ -1,5 +1,5 @@
 "GET , http://localhost:<port>/configurations/entries , get list of configuration tables"
-"GET , http://localhost:<port>/configurations/entries/57c552959c79114ef4439edb , get specific table"
+"GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d34-39cd9fedd8b5 , get specific table"
 "GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION , get list of configuration tables"
-"GET , http://localhost:<port>/configurations/entries?query=scope.institution_id==aaa%20sortBy%20enabled , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/audit , get list of audit records"
