@@ -71,7 +71,7 @@ To use the client via maven, add:
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>mod-configuration-client</artifactId>
-      <version>0.0.4-SNAPSHOT</version>
+      <version>0.0.5-SNAPSHOT</version>
     </dependency>
 ```
 
