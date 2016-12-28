@@ -103,7 +103,7 @@ To see an audit list:
 
 `http://<host>:<port>/configurations/audit`
 
-CQL syntax is also supported by the audit API 
+CQL syntax is also supported by the audit API
 
 ### Documentation of the Service's APIs
 
