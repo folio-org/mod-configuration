@@ -35,15 +35,46 @@ public class ConfigurationsClient {
 
     /**
      * Convenience constructor for tests ONLY!<br>Connect to localhost on 8081 as folio_demo tenant.
-     * 
+     *
      */
     public ConfigurationsClient() {
         this("localhost", 8081, "folio_demo", false);
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Service endpoint "/configurations/audit"+queryParams.toString()
+     *
+     */
+    public void getAudit(String query, String orderBy, org.folio.rest.jaxrs.resource.ConfigurationsResource.Order order, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
+        StringBuilder queryParams = new StringBuilder("?");
+        if(query != null) {queryParams.append("query="+query);
+        queryParams.append("&");}
+        if(orderBy != null) {queryParams.append("orderBy="+orderBy);
+        queryParams.append("&");}
+        if(order != null) {queryParams.append("order="+order.toString());
+        queryParams.append("&");}
+        queryParams.append("offset="+offset);
+        queryParams.append("&");
+        queryParams.append("limit="+limit);
+        queryParams.append("&");
+        if(lang != null) {queryParams.append("lang="+lang);
+        queryParams.append("&");}
+        io.vertx.core.http.HttpClientRequest request = httpClient.get("/configurations/audit"+queryParams.toString());
+        request.handler(responseHandler);
+        request.putHeader("Accept", "application/json,text/plain");
+        if(tenantId != null){
+         request.putHeader("Authorization", tenantId);
+         request.putHeader("x-okapi-tenant", tenantId);
+        }
+        request.end();
+    }
+
+    /**
+>>>>>>> origin/master
      * Service endpoint "/configurations/entries"+queryParams.toString()
-     * 
+     *
      */
     public void postEntries(String lang, org.folio.rest.jaxrs.model.Config Config, Handler<HttpClientResponse> responseHandler)
         throws Exception
@@ -69,7 +100,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries"+queryParams.toString()
-     * 
+     *
      */
     public void getEntries(String query, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -92,8 +123,13 @@ public class ConfigurationsClient {
     }
 
     /**
+<<<<<<< HEAD
      * Service endpoint "/configurations/audit"+queryParams.toString()
      * 
+=======
+     * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
+     *
+>>>>>>> origin/master
      */
     public void getAudit(String query, int offset, int limit, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -135,7 +171,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
-     * 
+     *
      */
     public void deleteEntryId(String entryId, String lang, Handler<HttpClientResponse> responseHandler) {
         StringBuilder queryParams = new StringBuilder("?");
@@ -153,7 +189,7 @@ public class ConfigurationsClient {
 
     /**
      * Service endpoint "/configurations/entries/"+entryId+""+queryParams.toString()
-     * 
+     *
      */
     public void putEntryId(String entryId, String lang, org.folio.rest.jaxrs.model.Configs Configs, Handler<HttpClientResponse> responseHandler)
         throws Exception
@@ -179,7 +215,7 @@ public class ConfigurationsClient {
 
     /**
      * Close the client. Closing will close down any pooled connections. Clients should always be closed after use.
-     * 
+     *
      */
     public void close() {
         httpClient.close();

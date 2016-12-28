@@ -12,17 +12,17 @@
       "type":"string"
     },
     "jsonb":{
-	  "type": "object",
-	    "properties": {
-	      "content": {
-	        "id": "contentData",
-	        "type": "array",
-	        "items": {
-	          "type": "object",
-	          "$ref" : "config"
-	      }
-	    }
-	  }
+      "type": "object",
+        "properties": {
+          "content": {
+            "id": "contentData",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref" : "config"
+          }
+        }
+      }
     },
     "creation_date":{
       "type":"string"

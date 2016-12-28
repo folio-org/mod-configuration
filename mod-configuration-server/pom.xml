@@ -13,7 +13,7 @@
     <ramlfiles_util_path>${basedir}/../raml-util</ramlfiles_util_path>
     <tablespace_dir>c:\\git\\postgres</tablespace_dir>
   </properties>
-  
+
   <build>
     <resources>
       <resource>
