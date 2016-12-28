@@ -78,7 +78,7 @@ To use the client via maven, add:
 ```sh
 ConfigurationsClient cc = new ConfigurationsClient("config.server.host", port, "mytenantid");
 
-cc.getEntries("module==CIRCULATION", null, null, 0, 10, "en", response -> {
+cc.getEntries("module==CIRCULATION", 0, 10, "en", response -> {
   response.bodyHandler(body -> {
     System.out.println(body);
   });
