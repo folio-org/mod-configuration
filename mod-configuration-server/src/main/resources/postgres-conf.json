@@ -3,7 +3,7 @@
   "port" : 6000,
   "maxPoolSize" : 50,
   "username" : "username",
-  "password" : "password",
+  "password" : "GanU/uZmfJOaxn6PaUjDeQ==",
   "database" : "postgres",
   "charset"  : "UTF8",
   "queryTimeout" : 10000
