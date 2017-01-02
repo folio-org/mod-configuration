@@ -23,7 +23,7 @@
     </resources>
     <plugins>
 
-      <plugin>
+<!--       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
         <version>1.0.0</version>
@@ -43,7 +43,7 @@
           </execution>
         </executions>
       </plugin>
-
+ -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -53,6 +53,10 @@
             <property>
               <name>http.port</name>
               <value>8887</value>
+            </property>
+            <property>
+              <name>postgres_secretkey_4_embeddedmode</name>
+              <value>b2+S+X4F/NFys/0jMaEG1A</value>
             </property>
           </systemProperties>
         </configuration>
