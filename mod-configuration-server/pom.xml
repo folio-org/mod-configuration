@@ -54,10 +54,10 @@
               <name>http.port</name>
               <value>8887</value>
             </property>
-            <property>
+<!--             <property>
               <name>postgres_secretkey_4_embeddedmode</name>
               <value>b2+S+X4F/NFys/0jMaEG1A</value>
-            </property>
+            </property> -->
           </systemProperties>
         </configuration>
       </plugin>
