@@ -27,6 +27,7 @@ import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +47,7 @@ public class RestVerticleTest {
   private ArrayList<String> urls;
   int                       port;
   TenantClient tClient = null;
+  AdminClient aClient  = null;
   /**
    *
    * @param context
@@ -56,6 +58,7 @@ public class RestVerticleTest {
     vertx = Vertx.vertx();
 
     try {
+      AES.setSecretKey("b2+S+X4F/NFys/0jMaEG1A");
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
@@ -65,7 +68,7 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    AdminClient aClient = new AdminClient("localhost", port, "harvard");
+    aClient = new AdminClient("localhost", port, "harvard");
     tClient = new TenantClient("localhost", port, "harvard");
 
 /*    port = 8888;//NetworkUtils.nextFreePort();
@@ -201,7 +204,13 @@ public class RestVerticleTest {
                 int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
                 System.out.println("-------->"+records);
                 System.out.println(buffer.toString());
-                async.complete();
+                aClient.getModuleStats( res -> {
+                  res.bodyHandler( b -> {
+                    System.out.println(b.toString());
+                    async.complete();
+
+                  });
+                });
               }
             });
           }
