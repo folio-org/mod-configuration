@@ -1,15 +1,37 @@
 package org.folio.rest;
 
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.client.ConfigurationsClient;
+import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.utils.NetworkUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 /**
  * @author shale
  *
  */
 
-//@RunWith(VertxUnitRunner.class)
+@RunWith(VertxUnitRunner.class)
 public class TestClient {
 
-/*  private static Vertx      vertx;
+  private static Vertx      vertx;
   private ArrayList<String> urls;
   int                       port;
   ConfigurationsClient cc = null;
@@ -45,8 +67,8 @@ public class TestClient {
     vertx.close(context.asyncAssertSuccess());
   }
 
-  @Test
-  public void test(TestContext context){
+  @org.junit.Test
+  public void test1(TestContext context){
 
     try {
       Async async = context.async(2);
@@ -105,6 +127,6 @@ public class TestClient {
 
   private static String getFile(String filename) throws IOException {
     return IOUtils.toString(TestClient.class.getClassLoader().getResourceAsStream(filename), "UTF-8");
-  }*/
+  }
 
 }
