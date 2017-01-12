@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS config_data (
    update_date date not null default current_timestamp
    );
 
--- index to support @> ops, faster then jsonb_ops
+-- index to support @> ops, faster than jsonb_ops
 CREATE INDEX idxgin_conf ON config_data USING gin (jsonb jsonb_path_ops);
 
 -- update the update_date column when record is updated
