@@ -14,7 +14,7 @@
     <ramlfiles_path>${basedir}/../ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.folio</groupId>
@@ -64,7 +64,7 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <resources>
       <resource>
