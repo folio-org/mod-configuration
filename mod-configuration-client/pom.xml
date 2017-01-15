@@ -19,13 +19,13 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>mod-configuration-server</artifactId>
-      <version>0.0.5-SNAPSHOT</version>
+      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-interface-extensions</artifactId>
-      <version>2.3.2-SNAPSHOT</version>
+      <version>2.3.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
