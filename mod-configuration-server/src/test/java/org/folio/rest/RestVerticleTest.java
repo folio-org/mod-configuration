@@ -207,8 +207,12 @@ public class RestVerticleTest {
                 aClient.getModuleStats( res -> {
                   res.bodyHandler( b -> {
                     System.out.println(b.toString());
-                    async.complete();
-
+                    aClient.getHealth( r -> {
+                      r.bodyHandler( bh -> {
+                        System.out.println(bh.toString());
+                        async.complete();
+                      });
+                    });
                   });
                 });
               }
