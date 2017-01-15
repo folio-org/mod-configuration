@@ -34,5 +34,5 @@ public class InitConfigService implements PostDeployVerticle {
     handler.handle(io.vertx.core.Future.succeededFuture(true));
 
   }
-
 }
+

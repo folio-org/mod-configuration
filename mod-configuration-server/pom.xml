@@ -18,18 +18,26 @@
   <dependencies>
     <dependency>
       <groupId>org.folio</groupId>
-      <artifactId>domain-models-api-interfaces</artifactId>
-      <version>2.3.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.folio</groupId>
-      <artifactId>domain-models-api-aspects</artifactId>
-      <version>2.3.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
       <version>2.3.3-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-collections</artifactId>
+          <groupId>commons-collections</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jsr311-api</artifactId>
+          <groupId>javax.ws.rs</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xmlParserAPIs</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xpp3_min</artifactId>
+          <groupId>xpp3</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
@@ -262,6 +270,32 @@
               </transformers>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
+              <filters>             
+                <filter>
+                  <artifact>org.folio:domain-models-api-interfaces</artifact>
+                  <excludes>
+                    <exclude>org/folio/rest/jaxrs/resource/support/**</exclude>
+                  </excludes>
+                </filter>      
+                <filter>
+                  <artifact>com.sun.xml.bind:jaxb-xjc</artifact>
+                  <excludes>
+                    <exclude>com/sun/codemodel/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.apache.httpcomponents:httpcore</artifact>
+                  <excludes>
+                    <exclude>org/apache/http/annotation/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>xpp3:xpp3</artifact>
+                  <excludes>
+                    <exclude>org/xmlpull/v1/**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

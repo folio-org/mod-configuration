@@ -38,5 +38,5 @@ public class CustomHealthCheck extends AdminAPI {
         withPlainOK( o.encodePrettily() )));
     }, vertxContext);
   }
-
 }
+
