@@ -270,13 +270,13 @@
               </transformers>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-              <filters>             
+              <filters>
                 <filter>
                   <artifact>org.folio:domain-models-api-interfaces</artifact>
                   <excludes>
                     <exclude>org/folio/rest/jaxrs/resource/support/**</exclude>
                   </excludes>
-                </filter>      
+                </filter>
                 <filter>
                   <artifact>com.sun.xml.bind:jaxb-xjc</artifact>
                   <excludes>
