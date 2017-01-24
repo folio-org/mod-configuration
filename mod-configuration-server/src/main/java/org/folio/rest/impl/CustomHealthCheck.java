@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.rest.tools.utils.OutStream;
+
 /**
  * @author shale
  *
@@ -20,8 +22,12 @@ public class CustomHealthCheck extends AdminAPI {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
     super.getAdminHealth(okapiHeaders,  res -> {
+
+      OutStream stream = new OutStream();
+      stream.setData("OK");
+
       System.out.println(" --- this is an over ride of the health API by the config module "+res.result().getStatus());
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminHealthResponse.withOK()));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminHealthResponse.withAnyOK(stream)));
     }, vertxContext);
   }
 
