@@ -113,16 +113,16 @@ public class RestVerticleTest {
    */
   @After
   public void tearDown(TestContext context) {
-/*    Async async = context.async();
+    Async async = context.async();
 
     tClient.delete( reply -> {
       reply.bodyHandler( body2 -> {
         System.out.println(body2.toString());
-        async.complete();
-
+        vertx.close(context.asyncAssertSuccess( res-> {
+          async.complete();
+        }));
       });
-    });*/
-    vertx.close(context.asyncAssertSuccess());
+    });
 
   }
 
@@ -165,6 +165,20 @@ public class RestVerticleTest {
     } catch (Exception e) {
       e.printStackTrace();
     }
+
+    Async async = context.async();
+    PostgresClient.getInstance(vertx, "harvard").persistentlyCacheResult("mytablecache",
+      "select * from harvard.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
+        if(reply.succeeded()){
+          PostgresClient.getInstance(vertx, "harvard").select("select * from harvard.mytablecache", r3 -> {
+            System.out.println(r3.result().getResults().size());
+            PostgresClient.getInstance(vertx, "harvard").removePersistentCacheResult("mytablecache",  r4 -> {
+              System.out.println(r4.succeeded());
+              async.complete();
+            });
+          });
+        }
+      });
 
     try {
       urls = urlsFromFile();
