@@ -114,11 +114,11 @@ public class RestVerticleTest {
   @After
   public void tearDown(TestContext context) {
     Async async = context.async();
-
     tClient.delete( reply -> {
       reply.bodyHandler( body2 -> {
         System.out.println(body2.toString());
         vertx.close(context.asyncAssertSuccess( res-> {
+          PostgresClient.stopEmbeddedPostgres();
           async.complete();
         }));
       });
@@ -191,6 +191,7 @@ public class RestVerticleTest {
     runGETURLoop(context);
 
   }
+
 
   private void runGETURLoop(TestContext context){
     try {
