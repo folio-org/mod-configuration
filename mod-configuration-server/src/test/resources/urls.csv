@@ -3,3 +3,4 @@
 "GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/audit , get list of audit records"
+"GET , http://localhost:<port>/admin/list_locking_queries , list blocking queries"
