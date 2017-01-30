@@ -162,6 +162,9 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
         "", "application/json", 404);
 
+      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
+        "", "application/json", 404);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -174,7 +177,24 @@ public class RestVerticleTest {
             System.out.println(r3.result().getResults().size());
             PostgresClient.getInstance(vertx, "harvard").removePersistentCacheResult("mytablecache",  r4 -> {
               System.out.println(r4.succeeded());
+
+              /** this will probably cause a deadlock as the saveBatch runs within a transaction */
+
+             /*
+             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
+                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
+              try {
+                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
+                  if(reply1.succeeded()){
+                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
+                  }
+                  async.complete();
+                  });
+              } catch (Exception e1) {
+                e1.printStackTrace();
+              }*/
               async.complete();
+
             });
           });
         }
@@ -216,20 +236,26 @@ public class RestVerticleTest {
             httpClientResponse.bodyHandler(new Handler<Buffer>() {
               @Override
               public void handle(Buffer buffer) {
-                int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
-                System.out.println("-------->"+records);
-                System.out.println(buffer.toString());
-                aClient.getModuleStats( res -> {
-                  res.bodyHandler( b -> {
-                    System.out.println(b.toString());
-                    aClient.getHealth( r -> {
-                      r.bodyHandler( bh -> {
-                        System.out.println(bh.toString());
-                        async.complete();
+                if(buffer.length() < 5){
+                  //assume empty body / empty array of data
+                  async.complete();
+                }
+                else{
+                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
+                  System.out.println("-------->"+records);
+                  System.out.println(buffer.toString());
+                  aClient.getModuleStats( res -> {
+                    res.bodyHandler( b -> {
+                      System.out.println(urlInfo[1] + "  "+b.toString());
+                      aClient.getHealth( r -> {
+                        r.bodyHandler( bh -> {
+                          System.out.println(urlInfo[1] + "  "+bh.toString());
+                          async.complete();
+                        });
                       });
                     });
                   });
-                });
+                }
               }
             });
           }
