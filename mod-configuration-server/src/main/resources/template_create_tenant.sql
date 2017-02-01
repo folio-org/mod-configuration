@@ -16,14 +16,14 @@ ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 
 -- DROP SCHEMA IF EXISTS myuniversity CASCADE;
 -- The schema user wil be the schema name since not given
-CREATE SCHEMA myuniversity AUTHORIZATION myuniversity;
+CREATE SCHEMA myuniversity_mymodule AUTHORIZATION myuniversity;
 
 -- for uuid generator -> gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Set the new schema first so that we dont have to namespace when creating tables
 -- add the postgres to the search path so that we can use the pgcrypto extension
-SET search_path TO myuniversity, public;
+SET search_path TO myuniversity_mymodule, public;
 
 CREATE TABLE IF NOT EXISTS config_data (
    _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,4 +48,4 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_date BEFORE UPDATE ON config_data FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
 
 -- give the user PRIVILEGES after everything is created by script
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity TO myuniversity;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity_mymodule TO myuniversity;
