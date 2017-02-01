@@ -4,8 +4,8 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 -- create tenant user in db
 -- DROP USER IF EXISTS myuniversity;
 
-CREATE USER myuniversity WITH ENCRYPTED PASSWORD 'myuniversity';
-ALTER USER myuniversity WITH CONNECTION LIMIT 50;
+CREATE USER myuniversity_mymodule WITH ENCRYPTED PASSWORD 'myuniversity';
+ALTER USER myuniversity_mymodule WITH CONNECTION LIMIT 50;
 
 -- remove this
 -- GRANT ALL PRIVILEGES ON DATABASE postgres TO myuniversity;
@@ -16,7 +16,7 @@ ALTER USER myuniversity WITH CONNECTION LIMIT 50;
 
 -- DROP SCHEMA IF EXISTS myuniversity CASCADE;
 -- The schema user wil be the schema name since not given
-CREATE SCHEMA myuniversity_mymodule AUTHORIZATION myuniversity;
+CREATE SCHEMA myuniversity_mymodule AUTHORIZATION myuniversity_mymodule;
 
 -- for uuid generator -> gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -48,4 +48,4 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_date BEFORE UPDATE ON config_data FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
 
 -- give the user PRIVILEGES after everything is created by script
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity_mymodule TO myuniversity;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity_mymodule TO myuniversity_mymodule;
