@@ -171,9 +171,9 @@ public class RestVerticleTest {
 
     Async async = context.async();
     PostgresClient.getInstance(vertx, "harvard").persistentlyCacheResult("mytablecache",
-      "select * from harvard_mod_configuration_server.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
+      "select * from harvard_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
         if(reply.succeeded()){
-          PostgresClient.getInstance(vertx, "harvard").select("select * from harvard_mod_configuration_server.mytablecache", r3 -> {
+          PostgresClient.getInstance(vertx, "harvard").select("select * from harvard_configuration.mytablecache", r3 -> {
             System.out.println(r3.result().getResults().size());
             PostgresClient.getInstance(vertx, "harvard").removePersistentCacheResult("mytablecache",  r4 -> {
               System.out.println(r4.succeeded());
