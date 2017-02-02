@@ -58,12 +58,23 @@
             <property>
               <name>http.port</name>
               <value>8887</value>
-            </property>
-<!--             <property>
+            </property>       
+            <!--             
+            <property>
               <name>postgres_secretkey_4_embeddedmode</name>
               <value>b2+S+X4F/NFys/0jMaEG1A</value>
-            </property> -->
+            </property> 
+            -->
           </systemProperties>
+          <environmentVariables>
+            <db.host>localhost</db.host>
+            <db.port>6000</db.port>
+            <db.database>postgres</db.database>
+            <db.username>username</db.username>
+            <db.password>GanU/uZmfJOaxn6PaUjDeQ==</db.password>
+            <db.charset>UTF8</db.charset>
+            <db.queryTimeout>10000</db.queryTimeout>
+          </environmentVariables>
         </configuration>
       </plugin>
 
