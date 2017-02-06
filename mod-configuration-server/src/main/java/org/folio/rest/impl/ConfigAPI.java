@@ -297,6 +297,7 @@ public class ConfigAPI implements ConfigurationsResource {
             reply -> {
               try {
                 Audits auditRecords = new Audits();
+                @SuppressWarnings("unchecked")
                 List<Audit> auditList = (List<Audit>) reply.result()[0];
                 auditRecords.setAudits(auditList);
                 auditRecords.setTotalRecords((Integer)reply.result()[1]);
