@@ -67,6 +67,7 @@ public class ConfigAPI implements ConfigurationsResource {
               try {
                 if(reply.succeeded()){
                   Configs configs = new Configs();
+                  @SuppressWarnings("unchecked")
                   List<Config> config = (List<Config>) reply.result()[0];
                   configs.setConfigs(config);
                   configs.setTotalRecords((Integer)reply.result()[1]);
@@ -156,6 +157,7 @@ public class ConfigAPI implements ConfigurationsResource {
             reply -> {
               try {
                 Configs configs = new Configs();
+                @SuppressWarnings("unchecked")
                 List<Config> config = (List<Config>) reply.result()[0];
                 if(config.isEmpty()){
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
