@@ -199,7 +199,7 @@
           <execution>
             <phase>prepare-package</phase>
             <configuration>
-              <tasks>
+              <target>
                 <replace token="baseUri: http://github.com/org/folio/lsp-apis"
                   value="baseUri: http://localhost:${http.port}/apis"
                   dir="${basedir}/target/classes/apidocs/raml/configuration">
@@ -209,7 +209,7 @@
                   dir="${basedir}/target/classes/apidocs/raml/configuration">
                   <include name="**/*.raml" />
                 </replace>
-              </tasks>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
