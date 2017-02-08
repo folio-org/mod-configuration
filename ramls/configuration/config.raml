@@ -56,7 +56,7 @@ resourceTypes:
     type:
       get-only:
         schema: audits
-        exampleCollection: ../_examples/audit.sample
+        exampleCollection: !include ../_examples/audits.sample
     get:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
