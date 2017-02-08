@@ -36,7 +36,7 @@ resourceTypes:
       collection:
         schemaCollection: configs
         schemaItem: config
-        exampleCollection: !include ../_examples/kv_configuration.sample
+        exampleCollection: !include ../_examples/kv_configurations.sample
         exampleItem: !include ../_examples/kv_configuration.sample
     get:
       is: [
@@ -49,7 +49,7 @@ resourceTypes:
       type:
         collection-item:
           schema: configs
-          exampleItem: !include ../_examples/kv_configuration.sample
+          exampleItem: !include ../_examples/kv_configurations.sample
   /audit:
     displayName: Audit Configurations
     description: Retrieve entries from the audit configuration table.
