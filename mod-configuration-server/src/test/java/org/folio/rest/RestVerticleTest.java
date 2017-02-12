@@ -102,6 +102,7 @@ public class RestVerticleTest {
 
   private static void setupPostgres() throws Exception {
     PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
