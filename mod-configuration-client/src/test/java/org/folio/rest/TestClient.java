@@ -8,6 +8,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
@@ -87,23 +88,27 @@ public class TestClient {
 
 
   public void getConfigs(Async async, TestContext context) {
-    cc.getEntries("module==CIRCULATION", 0, 10, "en", response -> {
-      response.bodyHandler(body -> {
-        System.out.println(body);
-        if(response.statusCode() == 500){
-          context.fail("status " + response.statusCode());
-        }
-        else{
-          async.countDown();
-        }
-        ac.delete( reply -> {
-          reply.bodyHandler( body2 -> {
-            System.out.println(body2);
+    try {
+      cc.getEntries("module==CIRCULATION", 0, 10, "en", response -> {
+        response.bodyHandler(body -> {
+          System.out.println(body);
+          if(response.statusCode() == 500){
+            context.fail("status " + response.statusCode());
+          }
+          else{
             async.countDown();
+          }
+          ac.delete( reply -> {
+            reply.bodyHandler( body2 -> {
+              System.out.println(body2);
+              async.countDown();
+            });
           });
         });
       });
-    });
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
   }
 
   public void postConfigs(Async async, TestContext context) throws Exception {
