@@ -1,5 +1,7 @@
 package org.folio.rest;
 
+import java.io.StringReader;
+
 import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 
@@ -18,8 +20,8 @@ public class Test {
    */
   public static void main(String[] args) throws Exception {
 
-    AdminClient aClient = new AdminClient("localhost", 8888, "nyu", false);
-    TenantClient tClient = new TenantClient("localhost", 8888, "nyu", false);
+    AdminClient aClient = new AdminClient("localhost", 8888, "harvard", false);
+    TenantClient tClient = new TenantClient("localhost", 8888, "harvard", false);
 
 /*    MimeMultipart mmp = new MimeMultipart();
     BodyPart bp = new MimeBodyPart(new FileInputStream("C:\\Git\\mod-files\\ramls\\mod-files\\files.raml"));
@@ -36,7 +38,17 @@ public class Test {
       reply.statusCode();
     });*/
 
-    tClient.post( reply -> {
+    aClient.getModuleStats( res -> {
+      res.bodyHandler( b -> {
+        System.out.println(b.toString());
+        aClient.getHealth( r -> {
+          r.bodyHandler( bh -> {
+            System.out.println(bh.toString());
+          });
+        });
+      });
+    });
+    tClient.post(new StringReader("[{\"fromVersion\":\"aaa\",\"value\":\"aa\"},{  \"key\":\"aaa\",\"value\":\"aa\"}]"), reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body);
       });

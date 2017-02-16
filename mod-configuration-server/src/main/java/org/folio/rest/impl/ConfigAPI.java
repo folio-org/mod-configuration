@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -46,6 +47,15 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
   private final Messages            messages          = Messages.getInstance();
 
+  private String idFieldName                          = "_id";
+  public ConfigAPI(Vertx vertx, String tenantId) {
+    long nano = System.nanoTime();
+    System.out.println("set id to id" );
+    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+    long nanoend = System.nanoTime();
+    System.out.println("total in milli " + ((nanoend-nano)/1000000));
+  }
+
   @Validate
   @Override
   public void getConfigurationsEntries(String query, int offset, int limit,
@@ -62,7 +72,7 @@ public class ConfigAPI implements ConfigurationsResource {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class,
-          new String[]{"*"}, cql, true,
+          new String[]{"*"}, cql, true, true,
             reply -> {
               try {
                 if(reply.succeeded()){
@@ -151,7 +161,7 @@ public class ConfigAPI implements ConfigurationsResource {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         Criterion c = new Criterion(
-          new Criteria().addField("_id").setJSONB(false).setOperation("=").setValue("'"+entryId+"'"));
+          new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue("'"+entryId+"'"));
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, true,
             reply -> {

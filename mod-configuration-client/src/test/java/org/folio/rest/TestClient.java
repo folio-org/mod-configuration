@@ -60,6 +60,7 @@ public class TestClient {
 
   private static void setupPostgres() throws Exception {
     PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
@@ -74,7 +75,7 @@ public class TestClient {
     try {
       Async async = context.async(2);
       ac = new TenantClient("localhost", port, "harvard");
-      ac.post(reply -> {
+      ac.post(null,reply -> {
           try {
             postConfigs(async, context);
           } catch (Exception e) {

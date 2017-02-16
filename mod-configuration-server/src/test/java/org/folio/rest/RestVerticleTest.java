@@ -86,7 +86,8 @@ public class RestVerticleTest {
       port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
-        tClient.post( response -> {
+        //tClient.post(new StringReader("{\"module_to\":\"v1\",\"module_from\":\"aa\"}"), response -> {
+        tClient.post(null, response -> {
           response.bodyHandler( body -> {
             System.out.println(body.toString());
             async.complete();
@@ -168,6 +169,13 @@ public class RestVerticleTest {
 
     } catch (Exception e) {
       e.printStackTrace();
+    }
+
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
     }
 
     Async async = context.async();

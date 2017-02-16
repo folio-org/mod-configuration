@@ -19,7 +19,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
+      <version>8.0.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
@@ -74,6 +74,7 @@
             <db.password>GanU/uZmfJOaxn6PaUjDeQ==</db.password>
             <db.charset>UTF8</db.charset>
             <db.queryTimeout>10000</db.queryTimeout>
+            <db.maxPoolSize>25</db.maxPoolSize>
           </environmentVariables>
         </configuration>
       </plugin>
