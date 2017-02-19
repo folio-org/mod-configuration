@@ -86,7 +86,9 @@ public class RestVerticleTest {
       port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
-        //tClient.post(new StringReader("{\"module_to\":\"v1\",\"module_from\":\"aa\"}"), response -> {
+        //TenantAttributes ta = new TenantAttributes();
+        //ta.setModuleFrom("v1");
+        //ta.setModuleTo("v2");
         tClient.post(null, response -> {
           response.bodyHandler( body -> {
             System.out.println(body.toString());

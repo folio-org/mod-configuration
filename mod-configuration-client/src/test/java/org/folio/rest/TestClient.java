@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.ConfigurationsClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
@@ -75,7 +76,9 @@ public class TestClient {
     try {
       Async async = context.async(2);
       ac = new TenantClient("localhost", port, "harvard");
-      ac.post(null,reply -> {
+      TenantAttributes ta = new TenantAttributes();
+      ta.setModuleTo("v1");
+      ac.post(ta,reply -> {
           try {
             postConfigs(async, context);
           } catch (Exception e) {

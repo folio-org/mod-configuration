@@ -1,9 +1,8 @@
 package org.folio.rest;
 
-import java.io.StringReader;
-
 import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.TenantAttributes;
 
 
 
@@ -48,7 +47,7 @@ public class Test {
         });
       });
     });
-    tClient.post(new StringReader("[{\"fromVersion\":\"aaa\",\"value\":\"aa\"},{  \"key\":\"aaa\",\"value\":\"aa\"}]"), reply -> {
+    tClient.post(new TenantAttributes(), reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body);
       });
