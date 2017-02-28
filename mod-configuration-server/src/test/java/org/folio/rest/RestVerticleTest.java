@@ -311,6 +311,17 @@ public class RestVerticleTest {
       context.fail(error.getMessage());
     }).handler(response -> {
       int statusCode = response.statusCode();
+      if(method == HttpMethod.POST){
+        try {
+          System.out.println("Location - " + response.getHeader("Location"));
+          String content2 = getFile("kv_configuration.sample");
+          Config conf =  new ObjectMapper().readValue(content2, Config.class);
+          mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
+            new ObjectMapper().writeValueAsString(conf), "application/json", 204);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
       System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
       if(errorCode == statusCode){
         context.assertTrue(true);

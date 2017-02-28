@@ -166,18 +166,23 @@ public class ConfigAPI implements ConfigurationsResource {
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, true,
             reply -> {
               try {
-                Configs configs = new Configs();
-                @SuppressWarnings("unchecked")
-                List<Config> config = (List<Config>) reply.result()[0];
-                if(config.isEmpty()){
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                    .withPlainNotFound(entryId)));
+                if(reply.succeeded()){
+                  @SuppressWarnings("unchecked")
+                  List<Config> config = (List<Config>) reply.result()[0];
+                  if(config.isEmpty()){
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
+                      .withPlainNotFound(entryId)));
+                  }
+                  else{
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
+                      .withJsonOK(config.get(0))));
+                  }
                 }
                 else{
-                  configs.setConfigs(config);
-                  configs.setTotalRecords((Integer)reply.result()[1]);
+                  log.error(reply.cause().getMessage(), reply.cause());
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                    .withJsonOK(configs)));
+                    .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError) + " " +
+                        reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -241,15 +246,15 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void putConfigurationsEntriesByEntryId(String entryId, String lang, Configs entity,
-      java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
-          throws Exception {
+  public void putConfigurationsEntriesByEntryId(String entryId, String lang, Config entity,
+      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
+      Context vertxContext) throws Exception {
 
-    context.runOnContext(v -> {
+    vertxContext.runOnContext(v -> {
       System.out.println("sending... putConfigurationsTablesByTableId");
       String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
       try {
-        PostgresClient.getInstance(context.owner(), tenantId).update(
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
           CONFIG_TABLE, entity, entryId,
           reply -> {
             try {
@@ -332,4 +337,5 @@ public class ConfigAPI implements ConfigurationsResource {
     });
 
   }
+
 }
