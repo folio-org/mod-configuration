@@ -50,7 +50,7 @@ public class ConfigAPI implements ConfigurationsResource {
   private String idFieldName                          = "_id";
   public ConfigAPI(Vertx vertx, String tenantId) {
     long nano = System.nanoTime();
-    System.out.println("set id to id" );
+    System.out.println("set id to " + idFieldName);
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
     long nanoend = System.nanoTime();
     System.out.println("total in milli " + ((nanoend-nano)/1000000));
@@ -204,14 +204,11 @@ public class ConfigAPI implements ConfigurationsResource {
       java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
           throws Exception {
 
-      Config c = new Config();
-      c.setId(entryId);
-
       context.runOnContext(v -> {
         System.out.println("sending... deleteConfigurationsTablesByTableId");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         try {
-          PostgresClient.getInstance(context.owner(), tenantId).delete(CONFIG_TABLE, c,
+          PostgresClient.getInstance(context.owner(), tenantId).delete(CONFIG_TABLE, entryId,
             reply -> {
               try {
                 if(reply.succeeded()){

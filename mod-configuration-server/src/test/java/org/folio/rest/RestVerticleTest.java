@@ -162,9 +162,9 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf), "application/json", 201);
 
-      //delete non existent record
+      //attempt to delete invalud id (not uuid)
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
-        "", "application/json", 404);
+        "", "application/json", 500);
 
       mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
         "", "application/json", 404);
