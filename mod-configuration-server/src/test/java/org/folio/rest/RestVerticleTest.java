@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -86,14 +87,25 @@ public class RestVerticleTest {
       port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
-        //TenantAttributes ta = new TenantAttributes();
-        //ta.setModuleFrom("v1");
+        TenantAttributes ta = new TenantAttributes();
+        ta.setModuleFrom("v1");
         //ta.setModuleTo("v2");
-        tClient.post(null, response -> {
-          response.bodyHandler( body -> {
-            System.out.println(body.toString());
-            async.complete();
-          });
+        tClient.post(ta, response -> {
+          if(422 == response.statusCode()){
+            try {
+              tClient.post(null, responseHandler -> {
+                responseHandler.bodyHandler( body -> {
+                  System.out.println(body.toString());
+                  async.complete();
+                });
+              });
+            } catch (Exception e) {
+              context.fail(e.getMessage());
+            }
+          }
+          else{
+            context.fail("excepted code 422 for validation error but received " + response.statusCode());
+          }
         });
 
       } catch (Exception e) {
