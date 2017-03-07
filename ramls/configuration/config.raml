@@ -15,13 +15,17 @@ schemas:
   - libraries: !include ../_schemas/library.schema
   - audits: !include ../_schemas/audits.schema
   - audit: !include ../_schemas/audit.schema
-
+  - errors: !include ../../raml-util/schemas/errors.schema
+  - error: !include ../../raml-util/schemas/error.schema
+  - parameters: !include ../../raml-util/schemas/parameters.schema
+  
 traits:
   - secured: !include ../../raml-util/traits/auth.raml
   - orderable: !include ../../raml-util/traits/orderable.raml
   - pageable:  !include ../../raml-util/traits/pageable.raml
   - searchable: !include ../../raml-util/traits/searchable.raml
   - language: !include ../../raml-util/traits/language.raml
+  - validate: !include ../../raml-util/traits/validation.raml
 
 resourceTypes:
   - collection: !include ../../raml-util/rtypes/collection.raml
@@ -43,6 +47,8 @@ resourceTypes:
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
         pageable
       ]
+    post:
+      is: [validate]
     /{entryId}:
       displayName: Module configurations
       description: Get, Delete or Update a specific entry
@@ -50,6 +56,8 @@ resourceTypes:
         collection-item:
           schema: config
           exampleItem: !include ../_examples/kv_configuration.sample
+      put:
+        is: [validate]
   /audit:
     displayName: Audit Configurations
     description: Retrieve entries from the audit configuration table.
