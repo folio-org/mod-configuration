@@ -31,6 +31,7 @@ import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
+import org.z3950.zing.cql.cql2pgjson.FieldException;
 
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
@@ -62,7 +63,6 @@ public class ConfigAPI implements ConfigurationsResource {
       String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
-    CQLWrapper cql = getCQL(query,limit, offset);
     /**
     * http://host:port/configurations/entries
     */
@@ -70,6 +70,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
+        CQLWrapper cql = getCQL(query,limit, offset);
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class,
           new String[]{"*"}, cql, true, true,
@@ -284,7 +285,7 @@ public class ConfigAPI implements ConfigurationsResource {
     });
   }
 
-  private CQLWrapper getCQL(String query, int limit, int offset){
+  private CQLWrapper getCQL(String query, int limit, int offset) throws FieldException {
     CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
@@ -295,7 +296,6 @@ public class ConfigAPI implements ConfigurationsResource {
       int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
 
-    CQLWrapper cql = getCQL(query,limit, offset);
     /**
     * http://host:port/configurations/tables
     */
@@ -303,6 +303,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
+        CQLWrapper cql = getCQL(query,limit, offset);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
           new String[]{"jsonb", "orig_id", "creation_date", "operation"}, cql, true,
