@@ -1,0 +1,7 @@
+{
+  "srvcId" : "mod-configuration",
+  "nodeId": "localhost",
+  "descriptor" : {
+    "exec" : "java -Dport=%p -jar ../configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p"
+  }
+}

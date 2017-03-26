@@ -3,18 +3,29 @@
   "name" : "Configuration",
   "provides" : [ {
     "id" : "configuration",
-    "version" : "0.1.1"
-  } ],
+    "version" : "0.0.8"
+    },
+    {
+      "id": "_tenant",
+      "version": "1.0.0"
+    }
+  ],
   "routingEntries" : [ {
-    "methods" : [ "GET", "POST" ],
-    "path" : "/configurations/entries",
+    "methods" : [ "GET", "POST" , "DELETE", "PUT" ],
+    "path" : "/configurations",
     "level" : "30",
     "type" : "request-response",
     "permissionsRequired" : [ ],
     "permissionsDesired" : [ ]
   }],
   "launchDescriptor" : {
-    "dockerImage" : "mod-configuration",
-    "dockerCMD" : [ "embed_postgres=true" ]
-  }
+	  "exec" : "java -Dport=%p -jar ../configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
+	   "env" : [
+	    {"name":"DB_HOST", "value":"localhost"},
+	    {"name":"DB_PORT", "value":5432},
+	    {"name":"DB_DATABASE", "value":"postgres"},
+	    {"name":"DB_USERNAME", "value":"postgres"},
+	    {"name":"DB_PASSWORD", "value":"password"}
+	    ]
+    }
 }
