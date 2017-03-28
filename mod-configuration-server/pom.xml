@@ -217,6 +217,7 @@
         html api console on IE -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
         <executions>
           <execution>
             <phase>prepare-package</phase>
