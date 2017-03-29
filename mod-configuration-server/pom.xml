@@ -212,9 +212,8 @@
         </executions>
       </plugin>
 
-      <!-- replace the baseuri and the protocol in the ramls that are in
-        the apidocs directory so that they can at least be used to check via the
-        html api console on IE -->
+      <!-- Replace the baseUri and the protocols in the RAMLs that have been copied to
+        apidocs directory so that they can be used via the local html api console. -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.8</version>
@@ -224,7 +223,7 @@
             <configuration>
               <target>
                 <replace token="baseUri: http://github.com/org/folio/lsp-apis"
-                  value="baseUri: http://localhost:${http.port}/apis"
+                  value="baseUri: http://localhost:{http.port}"
                   dir="${basedir}/target/classes/apidocs/raml/configuration">
                   <include name="**/*.raml" />
                 </replace>
