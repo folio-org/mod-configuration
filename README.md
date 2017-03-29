@@ -36,7 +36,7 @@ CIRCULATION| import.uploads.files | Joe | 1234567890 | 88 | false | true | path_
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 | base64enc_drools_file| rule file
 CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 | base64enc_drools_file| rule file
 
-The above table can be viewed as follows:
+The above table can be interpreted as follows:
 
 Module: **CIRCULATION**
 
@@ -58,7 +58,7 @@ Run:
 
 Or run via Dockerfile
 
-The Configuration service can be run in both embedded PostgreSQL mode or with a regular PostgreSQL server
+The Configuration service can be run in either embedded PostgreSQL mode or with a regular PostgreSQL server.
 
 Note that the embedded PostgreSQL is started on a static port (6000)
 
