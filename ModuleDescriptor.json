@@ -19,7 +19,7 @@
     "permissionsDesired" : [ ]
   }],
   "launchDescriptor" : {
-	  "exec" : "java -Dport=%p -jar ../configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
+	  "exec" : "java -Dport=%p -jar ../mod-configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
 	   "env" : [
 	    {"name":"DB_HOST", "value":"localhost"},
 	    {"name":"DB_PORT", "value":5432},
