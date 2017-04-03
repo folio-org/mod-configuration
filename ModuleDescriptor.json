@@ -19,13 +19,13 @@
     "permissionsDesired" : [ ]
   }],
   "launchDescriptor" : {
-	  "exec" : "java -Dport=%p -jar ../mod-configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
-	   "env" : [
-	    {"name":"DB_HOST", "value":"localhost"},
-	    {"name":"DB_PORT", "value":5432},
-	    {"name":"DB_DATABASE", "value":"postgres"},
-	    {"name":"DB_USERNAME", "value":"postgres"},
-	    {"name":"DB_PASSWORD", "value":"password"}
-	    ]
-    }
+    "exec" : "java -Dport=%p -jar ../mod-configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
+    "env" : [
+      {"name":"DB_HOST", "value":"localhost"},
+      {"name":"DB_PORT", "value":5432},
+      {"name":"DB_DATABASE", "value":"postgres"},
+      {"name":"DB_USERNAME", "value":"postgres"},
+      {"name":"DB_PASSWORD", "value":"password"}
+    ]
+  }
 }
