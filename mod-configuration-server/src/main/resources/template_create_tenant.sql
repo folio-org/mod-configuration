@@ -49,3 +49,5 @@ CREATE TRIGGER update_date BEFORE UPDATE ON config_data FOR EACH ROW EXECUTE PRO
 
 -- give the user PRIVILEGES after everything is created by script
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity_mymodule TO myuniversity_mymodule;
+
+COPY config_data (jsonb) FROM 'data/locales.data' ENCODING 'UTF8';

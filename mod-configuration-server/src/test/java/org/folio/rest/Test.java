@@ -58,17 +58,17 @@ public class Test {
         System.out.println(content);
       });
     });
-    aClient.getPostgresActiveSessions("postgres",  reply -> {
+    aClient.getPostgresActiveSessions("postgres", reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });
     });
-    aClient.getPostgresLoad("postgres",  reply -> {
+    aClient.getPostgresLoad("postgres", reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });
     });
-    aClient.getPostgresTableAccessStats( reply -> {
+    aClient.getPostgresTableAccessStats(reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });

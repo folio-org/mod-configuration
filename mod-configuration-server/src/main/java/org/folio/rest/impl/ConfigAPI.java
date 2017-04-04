@@ -1,12 +1,5 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +26,13 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
 
@@ -50,11 +50,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   private String idFieldName                          = "_id";
   public ConfigAPI(Vertx vertx, String tenantId) {
-    long nano = System.nanoTime();
-    System.out.println("set id to " + idFieldName);
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-    long nanoend = System.nanoTime();
-    System.out.println("total in milli " + ((nanoend-nano)/1000000));
   }
 
   @Validate
