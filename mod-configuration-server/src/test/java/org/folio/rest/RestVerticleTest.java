@@ -104,7 +104,7 @@ public class RestVerticleTest {
             }
           }
           else{
-            context.fail("excepted code 422 for validation error but received " + response.statusCode());
+            context.fail("expected code 422 for validation error but received " + response.statusCode());
           }
         });
 
