@@ -5,6 +5,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 -- DROP USER IF EXISTS myuniversity;
 
 CREATE USER myuniversity_mymodule WITH ENCRYPTED PASSWORD 'myuniversity';
+GRANT myuniversity_mymodule TO CURRENT_USER;
 ALTER USER myuniversity_mymodule WITH CONNECTION LIMIT 50;
 
 -- remove this
