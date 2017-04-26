@@ -21,7 +21,7 @@ public class InitConfigService implements PostDeployVerticle {
     //** hard code the secret key  - in production env - read from a secure place *//
     String secretKey = "b2+S+X4F/NFys/0jMaEG1A";
     int port = context.config().getInteger("http.port");
-    AES.setSecretKey(secretKey);
+    //AES.setSecretKey(secretKey);
 /*    AdminClient ac = new AdminClient("localhost", port, null);
     ac.postSetAESKey(secretKey, reply -> {
       if(reply.statusCode() == 204){
