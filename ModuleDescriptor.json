@@ -1,31 +1,107 @@
 {
   "id" : "mod-configuration",
   "name" : "Configuration",
-  "provides" : [ {
-    "id" : "configuration",
-    "version" : "0.0.8"
+  "provides" : [
+    {
+      "id" : "configuration",
+      "version" : "0.0.8",
+      "handlers" : [
+        {
+          "methods" : ["GET"],
+          "pathPattern" : "/configurations/entries",
+          "permissionsRequired" : ["mod-configuration.entries.collection.get"]
+        },
+        {
+          "methods" : ["GET"],
+          "pathPattern" : "/configurations/entries/{id}",
+          "permissionsRequired" : ["mod-configuration.entries.item.get"]
+        },
+        {
+          "methods" : ["POST"],
+          "pathPattern" : "/configurations/entries",
+          "permissionsRequired" : ["mod-configuration.entries.item.post"]
+        },
+        {
+          "methods" : ["PUT"],
+          "pathPattern" : "/configurations/entries/{id}",
+          "permissionsRequired" : ["mod-configuration.entries.item.put"]
+        },
+        {
+          "methods" : ["DELETE"],
+          "pathPattern" : "/configurations/entries/{id}",
+          "permissionsRequired" : ["mod-configuration.entries.item.delete"]
+        },
+        {
+          "methods" : ["GET"],
+          "pathPattern" : "/configurations/audit",
+          "permissionsRequired" : ["mod-configuration.audit.collection.get"]
+        }
+      ]
     },
     {
       "id": "_tenant",
-      "version": "1.0.0"
+      "version": "1.0",
+      "interfaceType" : "system",
+      "handlers": [
+        {
+          "methods" : ["POST"],
+          "pathPattern": "/_/tenant"
+        },
+        {
+          "methods" : ["DELETE"],
+          "pathPattern" : "/_/tenant"
+        }
+      ]
     }
   ],
-  "routingEntries" : [ {
-    "methods" : [ "GET", "POST" , "DELETE", "PUT" ],
-    "path" : "/configurations",
-    "level" : "30",
-    "type" : "request-response",
-    "permissionsRequired" : [ ],
-    "permissionsDesired" : [ ]
-  }],
-  "launchDescriptor" : {
-    "exec" : "java -Dport=%p -jar ../mod-configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p",
-    "env" : [
-      {"name":"DB_HOST", "value":"localhost"},
-      {"name":"DB_PORT", "value":5432},
-      {"name":"DB_DATABASE", "value":"postgres"},
-      {"name":"DB_USERNAME", "value":"postgres"},
-      {"name":"DB_PASSWORD", "value":"password"}
-    ]
-  }
+  "permissionSets" : [
+    {
+      "permissionName" : "mod-configuration.entries.collection.get",
+      "displayName" : "configuration - get configuration entries collection",
+      "description" : "get configuration entries from storage"
+    },
+    {
+      "permissionName" : "mod-configuration.entries.item.get",
+      "displayName" : "configuration - get configuration entry",
+      "description" : "get individual configuration entry from storage"
+    },
+    {
+      "permissionName" : "mod-configuration.entries.item.post",
+      "displayName" : "configuration - create configuration entry",
+      "description" : "create individual configuration entry in storage"
+    },
+    {
+      "permissionName" : "mod-configuration.entries.item.put",
+      "displayName" : "configuration - modify configuration entry",
+      "description" : "modify individual configuration entry in storage"
+    },
+    {
+      "permissionName" : "mod-configuration.entries.item.put",
+      "displayName" : "configuration - modify configuration entry",
+      "description" : "modify individual configuration entry in storage"
+    },
+    {
+      "permissionName" : "mod-configuration.entries.item.delete",
+      "displayName" : "configuration - delete configuration entry",
+      "description" : "delete individual configuration entry in storage"
+    },
+    {
+      "permissionName" : "mod-configuration.audit.collection.get",
+      "displayName" : "configuration - get configuration audit entries collection",
+      "description" : "get configuration audit entries from storage"
+    },
+    {
+      "permissionName" : "mod-configuration.all",
+      "displayName" : "configuration module - all permissions",
+      "description" : "entire set of permissions needed to use the configuration module",
+      "subPermissions" : [
+        "mod-configuration.entries.collection.get",
+        "mod-configuration.entries.item.get",
+        "mod-configuration.entries.item.post",
+        "mod-configuration.entries.item.put",
+        "mod-configuration.entries.item.delete",
+        "mod-configuration.audit.collection.get"
+      ]
+    }
+  ]
 }
