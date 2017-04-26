@@ -27,7 +27,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 SET search_path TO myuniversity_mymodule, public;
 
 CREATE TABLE IF NOT EXISTS config_data (
-   _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
    jsonb jsonb,
    creation_date date not null default current_timestamp,
    update_date date not null default current_timestamp

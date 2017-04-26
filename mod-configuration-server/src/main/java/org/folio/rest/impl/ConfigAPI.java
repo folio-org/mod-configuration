@@ -48,7 +48,8 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
   private final Messages            messages          = Messages.getInstance();
 
-  private String idFieldName                          = "_id";
+  private String idFieldName                          = "id";
+
   public ConfigAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
