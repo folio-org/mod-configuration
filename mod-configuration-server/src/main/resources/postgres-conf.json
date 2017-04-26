@@ -1,9 +1,9 @@
 {
   "host" : "localhost",
-  "port" : 6000,
+  "port" : 5432,
   "maxPoolSize" : 50,
-  "username" : "username",
-  "password" : "GanU/uZmfJOaxn6PaUjDeQ==",
+  "username" : "postgres",
+  "password" : "password",
   "database" : "postgres",
   "charset"  : "UTF8",
   "queryTimeout" : 10000
