@@ -1,5 +1,5 @@
 {
-  "id" : "mod-configuration",
+  "id" : "configuration",
   "name" : "Configuration",
   "provides" : [
     {
@@ -9,32 +9,32 @@
         {
           "methods" : ["GET"],
           "pathPattern" : "/configurations/entries",
-          "permissionsRequired" : ["mod-configuration.entries.collection.get"]
+          "permissionsRequired" : ["configuration.entries.collection.get"]
         },
         {
           "methods" : ["GET"],
           "pathPattern" : "/configurations/entries/{id}",
-          "permissionsRequired" : ["mod-configuration.entries.item.get"]
+          "permissionsRequired" : ["configuration.entries.item.get"]
         },
         {
           "methods" : ["POST"],
           "pathPattern" : "/configurations/entries",
-          "permissionsRequired" : ["mod-configuration.entries.item.post"]
+          "permissionsRequired" : ["configuration.entries.item.post"]
         },
         {
           "methods" : ["PUT"],
           "pathPattern" : "/configurations/entries/{id}",
-          "permissionsRequired" : ["mod-configuration.entries.item.put"]
+          "permissionsRequired" : ["configuration.entries.item.put"]
         },
         {
           "methods" : ["DELETE"],
           "pathPattern" : "/configurations/entries/{id}",
-          "permissionsRequired" : ["mod-configuration.entries.item.delete"]
+          "permissionsRequired" : ["configuration.entries.item.delete"]
         },
         {
           "methods" : ["GET"],
           "pathPattern" : "/configurations/audit",
-          "permissionsRequired" : ["mod-configuration.audit.collection.get"]
+          "permissionsRequired" : ["configuration.audit.collection.get"]
         }
       ]
     },
@@ -56,51 +56,51 @@
   ],
   "permissionSets" : [
     {
-      "permissionName" : "mod-configuration.entries.collection.get",
+      "permissionName" : "configuration.entries.collection.get",
       "displayName" : "configuration - get configuration entries collection",
       "description" : "get configuration entries from storage"
     },
     {
-      "permissionName" : "mod-configuration.entries.item.get",
+      "permissionName" : "configuration.entries.item.get",
       "displayName" : "configuration - get configuration entry",
       "description" : "get individual configuration entry from storage"
     },
     {
-      "permissionName" : "mod-configuration.entries.item.post",
+      "permissionName" : "configuration.entries.item.post",
       "displayName" : "configuration - create configuration entry",
       "description" : "create individual configuration entry in storage"
     },
     {
-      "permissionName" : "mod-configuration.entries.item.put",
+      "permissionName" : "configuration.entries.item.put",
       "displayName" : "configuration - modify configuration entry",
       "description" : "modify individual configuration entry in storage"
     },
     {
-      "permissionName" : "mod-configuration.entries.item.put",
+      "permissionName" : "configuration.entries.item.put",
       "displayName" : "configuration - modify configuration entry",
       "description" : "modify individual configuration entry in storage"
     },
     {
-      "permissionName" : "mod-configuration.entries.item.delete",
+      "permissionName" : "configuration.entries.item.delete",
       "displayName" : "configuration - delete configuration entry",
       "description" : "delete individual configuration entry in storage"
     },
     {
-      "permissionName" : "mod-configuration.audit.collection.get",
+      "permissionName" : "configuration.audit.collection.get",
       "displayName" : "configuration - get configuration audit entries collection",
       "description" : "get configuration audit entries from storage"
     },
     {
-      "permissionName" : "mod-configuration.all",
+      "permissionName" : "configuration.all",
       "displayName" : "configuration module - all permissions",
       "description" : "entire set of permissions needed to use the configuration module",
       "subPermissions" : [
-        "mod-configuration.entries.collection.get",
-        "mod-configuration.entries.item.get",
-        "mod-configuration.entries.item.post",
-        "mod-configuration.entries.item.put",
-        "mod-configuration.entries.item.delete",
-        "mod-configuration.audit.collection.get"
+        "configuration.entries.collection.get",
+        "configuration.entries.item.get",
+        "configuration.entries.item.post",
+        "configuration.entries.item.put",
+        "configuration.entries.item.delete",
+        "configuration.audit.collection.get"
       ]
     }
   ]
