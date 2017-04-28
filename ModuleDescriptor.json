@@ -76,11 +76,6 @@
       "description" : "modify individual configuration entry in storage"
     },
     {
-      "permissionName" : "configuration.entries.item.put",
-      "displayName" : "configuration - modify configuration entry",
-      "description" : "modify individual configuration entry in storage"
-    },
-    {
       "permissionName" : "configuration.entries.item.delete",
       "displayName" : "configuration - delete configuration entry",
       "description" : "delete individual configuration entry in storage"
