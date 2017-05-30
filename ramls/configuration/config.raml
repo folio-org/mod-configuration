@@ -11,13 +11,13 @@ documentation:
 
 schemas:
   - configs: !include ../_schemas/kv_configurations.schema
-  - config: !include ../_schemas/kv_configuration.schema
+  - kv_configuration.schema: !include ../_schemas/kv_configuration.schema
   - libraries: !include ../_schemas/library.schema
   - audits: !include ../_schemas/audits.schema
-  - audit: !include ../_schemas/audit.schema
+  - audit.schema: !include ../_schemas/audit.schema
   - errors: !include ../../raml-util/schemas/errors.schema
-  - error: !include ../../raml-util/schemas/error.schema
-  - parameters: !include ../../raml-util/schemas/parameters.schema
+  - error.schema: !include ../../raml-util/schemas/error.schema
+  - parameters.schema: !include ../../raml-util/schemas/parameters.schema
 
 traits:
   - secured: !include ../../raml-util/traits/auth.raml
@@ -39,7 +39,7 @@ resourceTypes:
     type:
       collection:
         schemaCollection: configs
-        schemaItem: config
+        schemaItem: kv_configuration.schema
         exampleCollection: !include ../_examples/kv_configurations.sample
         exampleItem: !include ../_examples/kv_configuration.sample
     get:
@@ -54,7 +54,7 @@ resourceTypes:
       description: Get, Delete or Update a specific entry
       type:
         collection-item:
-          schema: config
+          schema: kv_configuration.schema
           exampleItem: !include ../_examples/kv_configuration.sample
       put:
         is: [validate]
