@@ -7,7 +7,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "$ref" : "audit"
+        "$ref" : "audit.schema"
       }
     },
     "total_records": {
