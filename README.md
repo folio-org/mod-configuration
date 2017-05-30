@@ -131,7 +131,7 @@ http://localhost:8085/configurations/entries
 
 Query for a specific module / config / row:
 (GET)
-http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa
+http://localhost:<port>/configurations/entries?query=code=PATRON_RULE
 
 
 
@@ -143,10 +143,6 @@ http://localhost:8085/configurations/entries
   "config_name": "validation_rules",
   "updated_by": "joe",
   "update_date": "2016.06.27.10.56.03",
-  "scope": {
-    "institution_id" : "aaa",
-    "library_id" : "vvv"
-  },
   "code": "PATRON_RULE",
   "description": "for patrons",
   "default": true,
