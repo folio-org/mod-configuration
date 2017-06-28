@@ -10,12 +10,12 @@
         "$ref": "audit.schema"
       }
     },
-    "total_records": {
+    "totalRecords": {
       "type": "integer"
     }
   },
   "required": [
     "audits",
-    "total_records"
+    "totalRecords"
   ]
 }

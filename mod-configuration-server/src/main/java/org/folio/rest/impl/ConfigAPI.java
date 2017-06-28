@@ -303,16 +303,24 @@ public class ConfigAPI implements ConfigurationsResource {
         CQLWrapper cql = getCQL(query,limit, offset);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
-          new String[]{"jsonb", "orig_id", "creation_date", "operation"}, cql, true,
+          new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
             reply -> {
               try {
-                Audits auditRecords = new Audits();
-                @SuppressWarnings("unchecked")
-                List<Audit> auditList = (List<Audit>) reply.result()[0];
-                auditRecords.setAudits(auditList);
-                auditRecords.setTotalRecords((Integer)reply.result()[1]);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
-                  auditRecords)));
+                if(reply.succeeded()){
+                  Audits auditRecords = new Audits();
+                  @SuppressWarnings("unchecked")
+                  List<Audit> auditList = (List<Audit>) reply.result()[0];
+                  auditRecords.setAudits(auditList);
+                  auditRecords.setTotalRecords((Integer)reply.result()[1]);
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
+                    auditRecords)));
+                }
+                else{
+                  log.error(reply.cause().getMessage(), reply.cause());
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse
+                    .withPlainInternalServerError(messages.getMessage(
+                      lang, MessageConsts.InternalServerError))));
+                }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse

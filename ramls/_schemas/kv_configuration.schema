@@ -1,6 +1,6 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "type":"object",
   "properties": {
     "id": {
       "type": "string"
@@ -8,16 +8,16 @@
     "module": {
       "type": "string"
     },
-    "config_name": {
+    "configName": {
       "type": "string"
     },
-    "updated_by": {
+    "updatedBy": {
       "type": "string"
     },
-    "update_date": {
+    "updatedDate": {
       "type": "string"
     },
-    "creation_date": {
+    "createdDate": {
       "type": "string"
     },
     "code": {
@@ -34,11 +34,14 @@
     },
     "value": {
       "type": "string"
+    },
+    "userId": {
+      "type": "string"
     }
   },
   "additionalProperties": false,
   "required": [
     "module",
-    "config_name"
+    "configName"
   ]
 }

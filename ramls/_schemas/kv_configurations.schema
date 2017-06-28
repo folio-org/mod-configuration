@@ -10,13 +10,13 @@
         "$ref": "kv_configuration.schema"
       }
     },
-    "total_records": {
+    "totalRecords": {
       "type": "integer"
     }
   },
   "additionalProperties": false,
   "required": [
     "configs",
-    "total_records"
+    "totalRecords"
   ]
 }

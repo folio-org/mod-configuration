@@ -1,19 +1,6 @@
 package org.folio.rest;
 
 
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,6 +24,19 @@ import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
+
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -264,7 +264,7 @@ public class RestVerticleTest {
                   async.complete();
                 }
                 else{
-                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("total_records");
+                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
                   System.out.println("-------->"+records);
                   System.out.println(buffer.toString());
                   aClient.getModuleStats( res -> {
@@ -359,7 +359,7 @@ public class RestVerticleTest {
   }
 
   private ArrayList<String> urlsFromFile() throws IOException {
-    ArrayList<String> ret = new ArrayList<String>();
+    ArrayList<String> ret = new ArrayList<>();
     byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
     InputStream is = null;
     BufferedReader bfReader = null;

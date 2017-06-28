@@ -29,8 +29,8 @@ SET search_path TO myuniversity_mymodule, public;
 CREATE TABLE IF NOT EXISTS config_data (
    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
    jsonb jsonb,
-   creation_date date not null default current_timestamp,
-   update_date date not null default current_timestamp
+   created_date date not null default current_timestamp,
+   updated_date date not null default current_timestamp
    );
 
 -- index to support @> ops, faster than jsonb_ops
@@ -41,7 +41,7 @@ CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
 -- NEW to indicate updating the new row value
-    NEW.update_date = current_timestamp;
+    NEW.updated_date = current_timestamp;
     RETURN NEW;
 END;
 $$ language 'plpgsql';

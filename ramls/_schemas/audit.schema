@@ -13,18 +13,18 @@
     },
     "jsonb": {
       "type": "object",
-      "properties": {
-        "content": {
-          "id": "contentData",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "kv_configuration.schema"
+	  "properties": {
+	    "content": {
+	      "id": "contentData",
+	      "type": "array",
+	      "items": {
+	        "type": "object",
+	        "$ref": "kv_configuration.schema"
           }
         }
       }
     },
-    "creation_date": {
+    "createdDate": {
       "type": "string"
     }
   }
