@@ -6,8 +6,8 @@
       "updated_by": "joe",
       "update_date": "2016.06.27.10.56.03",
       "scope": {
-        "institution_id" : "aaa",
-        "library_id" : "vvv"
+        "institution_id": "aaa",
+        "library_id": "vvv"
       },
       "code": "PATRON_RULE",
       "description": "for patrons",
@@ -16,5 +16,5 @@
       "value": ""
     }
   ],
-  "total_records" : 1
+  "total_records": 1
 }

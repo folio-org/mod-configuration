@@ -7,7 +7,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "$ref" : "kv_configuration.schema"
+        "$ref": "kv_configuration.schema"
       }
     },
     "total_records": {
