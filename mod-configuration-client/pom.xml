@@ -11,7 +11,6 @@
   </parent>
 
   <properties>
-    <ramlfiles_path>${basedir}/../ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
