@@ -6,7 +6,7 @@
       "resource_sharing": false,
       "name": "My Library",
       "description": "aaaa",
-      "scope":{
+      "scope": {
         "institution_id": "univ.inst",
         "library_id": "mylib"
       }

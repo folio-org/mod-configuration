@@ -23,7 +23,7 @@
             "type": "string"
           },
           "scope": {
-            "type" : "object",
+            "type": "object",
             "properties": {
               "institution_id": {
                 "type": "string"

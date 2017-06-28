@@ -1,31 +1,31 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "properties":{
-    "id":{
-      "type":"string"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
     },
-    "orig_id":{
-      "type":"string"
+    "orig_id": {
+      "type": "string"
     },
-    "operation":{
-      "type":"string"
+    "operation": {
+      "type": "string"
     },
-    "jsonb":{
+    "jsonb": {
       "type": "object",
-        "properties": {
-          "content": {
-            "id": "contentData",
-            "type": "array",
-            "items": {
-              "type": "object",
-              "$ref" : "kv_configuration.schema"
+      "properties": {
+        "content": {
+          "id": "contentData",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "kv_configuration.schema"
           }
         }
       }
     },
-    "creation_date":{
-      "type":"string"
+    "creation_date": {
+      "type": "string"
     }
   }
 }
