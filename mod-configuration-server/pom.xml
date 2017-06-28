@@ -9,8 +9,6 @@
   <artifactId>mod-configuration-server</artifactId>
 
   <properties>
-    <ramlfiles_path>${basedir}/../ramls</ramlfiles_path>
-    <ramlfiles_util_path>${basedir}/../raml-util</ramlfiles_util_path>
     <tablespace_dir>c:\\git\\postgres</tablespace_dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -188,22 +186,6 @@
               <resources>
                 <resource>
                   <directory>${ramlfiles_path}</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-resources-2</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/classes/apidocs/raml-util</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${ramlfiles_util_path}</directory>
                   <filtering>true</filtering>
                 </resource>
               </resources>

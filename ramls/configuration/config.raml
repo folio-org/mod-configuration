@@ -15,22 +15,22 @@ schemas:
   - libraries: !include ../_schemas/library.schema
   - audits: !include ../_schemas/audits.schema
   - audit.schema: !include ../_schemas/audit.schema
-  - errors: !include ../../raml-util/schemas/errors.schema
-  - error.schema: !include ../../raml-util/schemas/error.schema
-  - parameters.schema: !include ../../raml-util/schemas/parameters.schema
+  - errors: !include ../raml-util/schemas/errors.schema
+  - error.schema: !include ../raml-util/schemas/error.schema
+  - parameters.schema: !include ../raml-util/schemas/parameters.schema
 
 traits:
-  - secured: !include ../../raml-util/traits/auth.raml
-  - orderable: !include ../../raml-util/traits/orderable.raml
-  - pageable:  !include ../../raml-util/traits/pageable.raml
-  - searchable: !include ../../raml-util/traits/searchable.raml
-  - language: !include ../../raml-util/traits/language.raml
-  - validate: !include ../../raml-util/traits/validation.raml
+  - secured: !include ../raml-util/traits/auth.raml
+  - orderable: !include ../raml-util/traits/orderable.raml
+  - pageable:  !include ../raml-util/traits/pageable.raml
+  - searchable: !include ../raml-util/traits/searchable.raml
+  - language: !include ../raml-util/traits/language.raml
+  - validate: !include ../raml-util/traits/validation.raml
 
 resourceTypes:
-  - collection: !include ../../raml-util/rtypes/collection.raml
-  - collection-item: !include ../../raml-util/rtypes/item-collection.raml
-  - get-only: !include ../../raml-util/rtypes/get-only.raml
+  - collection: !include ../raml-util/rtypes/collection.raml
+  - collection-item: !include ../raml-util/rtypes/item-collection.raml
+  - get-only: !include ../raml-util/rtypes/get-only.raml
 
 /configurations:
   /entries:
