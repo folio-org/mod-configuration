@@ -1,6 +1,6 @@
 {
   "module": "CIRCULATION",
-  "config_name": "renewals_allowed_count",
+  "configName": "renewals_allowed_count",
   "institution_id": "aaa",
   "library_id": "vvv"
 }

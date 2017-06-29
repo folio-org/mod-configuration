@@ -2,9 +2,9 @@
   "configs": [
     {
       "module": "CIRCULATION",
-      "config_name": "validation_rules",
-      "updated_by": "joe",
-      "update_date": "2016.06.27.10.56.03",
+      "configName": "validation_rules",
+      "updatedBy": "joe",
+      "updatedDate": "2016.06.27.10.56.03",
       "scope": {
         "institution_id": "aaa",
         "library_id": "vvv"
