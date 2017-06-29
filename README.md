@@ -29,12 +29,12 @@ The idea behind this module is to provide a type of centralized configuration se
 
 This would in turn look something like:
 
-Module| config_name | updated_by | update_date | scope | default | enabled | code | value | desc
------------- | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------  | -------------
+Module| configName | updatedBy | default | enabled | code | value | desc | userId
+------------ | ------------- | -------------  | -------------  | -------------  | -------------  | -------------  | ------------- | -------------
  |  |
-CIRCULATION| import.uploads.files | Joe | 1234567890 | 88 | false | true | path_2_file | PENDING | file to import
-CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name1 | base64enc_drools_file| rule file
-CIRCULATION| patron.drools | Joe | 1234567890 | 88 | false | true | rule_name2 | base64enc_drools_file| rule file
+CIRCULATION| import.uploads.files | Joe | false | true | path_2_file | PENDING | file to import | uid
+CIRCULATION| patron.drools | Joe | false | true | rule_name1 | base64enc_drools_file| rule file | 
+CIRCULATION| patron.drools | Joe | false | true | rule_name2 | base64enc_drools_file| rule file | uid
 
 The above table can be interpreted as follows:
 
@@ -43,6 +43,8 @@ Module: **CIRCULATION**
 &nbsp;&nbsp;&nbsp;Config name: **patron.drools**
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; row: **rule_name1** (the code of the row)
+
+Note that each tenant has its own schema with its own configuration tables. The userId field can be populated to associate an entry in the table with a specific user.
 
 see configuration schema for an object description:
 https://github.com/folio-org/mod-configuration/blob/master/ramls/_schemas/kv_configuration.schema
@@ -71,7 +73,7 @@ To use the client via maven, add:
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>mod-configuration-client</artifactId>
-      <version>0.0.8-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 ```
 
@@ -140,14 +142,13 @@ Add an entry:
 http://localhost:8085/configurations/entries
 {
   "module": "CIRCULATION",
-  "config_name": "validation_rules",
-  "updated_by": "joe",
-  "update_date": "2016.06.27.10.56.03",
+  "configName": "validation_rules",
+  "updatedBy": "joe",
   "code": "PATRON_RULE",
   "description": "for patrons",
   "default": true,
   "enabled": true,
-  "value": ""
+  "value": "any value"
 }
 
 Deleting / Updating specific entries is possible as well - See circulation.raml file.
