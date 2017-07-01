@@ -13,7 +13,7 @@ COPY docker/docker-entrypoint.sh $VERTICLE_HOME/docker-entrypoint.sh
 RUN groupadd folio && \
     useradd -r -d $VERTICLE_HOME -g folio -M folio && \
     chown -R folio.folio $VERTICLE_HOME && \
-    chmod +x ${VERTICLE_HOME}/docker-entrypoint.sh 
+    chmod +x ${VERTICLE_HOME}/docker-entrypoint.sh
 
 # Run as this user
 USER folio
