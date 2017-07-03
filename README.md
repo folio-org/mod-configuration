@@ -107,8 +107,7 @@ To see an audit list:
 
 CQL syntax is also supported by the audit API
 
-<span id="local-apidocs"/>
-### Documentation of the Service's APIs
+### <a id="local-apidocs"></a>Documentation of the Service's APIs
 
 Documentation is auto-generated from the RAML files into HTML.
 After the service is started, the documentation can be viewed at:
