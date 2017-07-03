@@ -33,7 +33,7 @@ Module| configName | updatedBy | default | enabled | code | value | desc | userI
 ------------ | ------------- | -------------  | -------------  | -------------  | -------------  | -------------  | ------------- | -------------
  |  |
 CIRCULATION| import.uploads.files | Joe | false | true | path_2_file | PENDING | file to import | uid
-CIRCULATION| patron.drools | Joe | false | true | rule_name1 | base64enc_drools_file| rule file | 
+CIRCULATION| patron.drools | Joe | false | true | rule_name1 | base64enc_drools_file| rule file |
 CIRCULATION| patron.drools | Joe | false | true | rule_name2 | base64enc_drools_file| rule file | uid
 
 The above table can be interpreted as follows:
@@ -107,9 +107,9 @@ To see an audit list:
 
 CQL syntax is also supported by the audit API
 
-### Documentation of the Service's APIs
+### <a id="local-apidocs"></a>Documentation of the Service's APIs
 
-Documentation is auto-generated from the RAML file into HTML.
+Documentation is auto-generated from the RAML files into HTML.
 After the service is started, the documentation can be viewed at:
 
 http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
@@ -156,11 +156,39 @@ Deleting / Updating specific entries is possible as well - See circulation.raml 
 
 ## Additional information
 
+### Other documentation
+
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
 
-Other [modules](http://dev.folio.org/source-code/#server-side).
+Other [modules](http://dev.folio.org/source-code/#server-side) are described,
+with further FOLIO Developer documentation at [dev.folio.org](http://dev.folio.org/)
 
-See project [DMOD](https://issues.folio.org/browse/DMOD)
+### API documentation
+
+This module's [API documentation](http://dev.folio.org/doc/api/#mod-configuration)
+and the [local docs](#local-apidocs).
+
+### Issue tracker
+
+See project [MODCONF](https://issues.folio.org/browse/MODCONF)
 at the [FOLIO issue tracker](http://dev.folio.org/community/guide-issues).
 
-Other FOLIO Developer documentation is at [dev.folio.org](http://dev.folio.org/)
+### Quick start
+
+Compile with `mvn clean install` and see further [instructions](#instructions).
+
+Run the local stand-alone instance:
+
+```
+java -jar mod-configuration-server/target/mod-configuration-server-fat.jar \
+  -Dhttp.port=8085 embed_postgres=true
+```
+
+Additional command-line [options](#instructions) and information.
+
+### Download and configuration
+
+The built artifacts for this module are available.
+See [configuration](http://dev.folio.org/doc/artifacts) for repository access,
+and the [Docker image](https://hub.docker.com/r/folioorg/mod-configuration/).
+
