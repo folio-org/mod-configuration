@@ -6,25 +6,29 @@ import java.util.Map;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Audit;
 import org.folio.rest.jaxrs.model.Audits;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Configs;
+import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.resource.ConfigurationsResource;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
+import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
+import org.folio.rest.tools.utils.JsonUtils;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
-import org.z3950.zing.cql.cql2pgjson.FieldException;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -46,11 +50,26 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
+  private static final String       CONFIG_SCHEMA_NAME= "apidocs/raml/_schemas/kv_configuration.schema";
+  private static String             CONFIG_SCHEMA     =  null;
+
   private final Messages            messages          = Messages.getInstance();
 
   private String idFieldName                          = "id";
 
+  private void initCQLValidation() {
+    String path = CONFIG_SCHEMA_NAME;
+    try {
+      CONFIG_SCHEMA = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
+    } catch (Exception e) {
+      log.error("unable to load schema - " +path+ ", validation of query fields will not be active");
+    }
+  }
+
   public ConfigAPI(Vertx vertx, String tenantId) {
+    if(CONFIG_SCHEMA == null){
+      initCQLValidation();
+    }
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
@@ -60,6 +79,7 @@ public class ConfigAPI implements ConfigurationsResource {
       String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
+
     /**
     * http://host:port/configurations/entries
     */
@@ -67,7 +87,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset);
+        CQLWrapper cql = getCQL(query,limit, offset, CONFIG_SCHEMA);
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class,
           new String[]{"*"}, cql, true, true,
@@ -94,7 +114,19 @@ public class ConfigAPI implements ConfigurationsResource {
                     lang, MessageConsts.InternalServerError))));
               }
             });
-      } catch (Exception e) {
+      }
+      catch(CQLQueryValidationException e1){
+        int start = e1.getMessage().indexOf("'");
+        int end = e1.getMessage().lastIndexOf("'");
+        String field = e1.getMessage();
+        if(start != -1 && end != -1){
+          field = field.substring(start+1, end);
+        }
+        Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
+          .withPlainBadRequest(JsonUtils.entity2String(e))));
+      }
+      catch (Exception e) {
         log.error(e.getMessage(), e);
         String message = messages.getMessage(lang, MessageConsts.InternalServerError);
         if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
@@ -282,8 +314,13 @@ public class ConfigAPI implements ConfigurationsResource {
     });
   }
 
-  private CQLWrapper getCQL(String query, int limit, int offset) throws FieldException {
-    CQL2PgJSON cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
+  private CQLWrapper getCQL(String query, int limit, int offset, String schema) throws Exception {
+    CQL2PgJSON cql2pgJson = null;
+    if(schema != null){
+      cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb", schema);
+    } else {
+      cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
+    }
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
 
@@ -300,7 +337,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset);
+        CQLWrapper cql = getCQL(query,limit, offset, CONFIG_SCHEMA);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
           new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
@@ -328,7 +365,19 @@ public class ConfigAPI implements ConfigurationsResource {
                     lang, MessageConsts.InternalServerError))));
               }
             });
-      } catch (Exception e) {
+      }
+      catch(CQLQueryValidationException e1){
+        int start = e1.getMessage().indexOf("'");
+        int end = e1.getMessage().lastIndexOf("'");
+        String field = e1.getMessage();
+        if(start != -1 && end != -1){
+          field = field.substring(start+1, end);
+        }
+        Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
+          .withPlainBadRequest(JsonUtils.entity2String(e))));
+      }
+      catch (Exception e) {
         log.error(e.getMessage(), e);
         String message = messages.getMessage(lang, MessageConsts.InternalServerError);
         if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){

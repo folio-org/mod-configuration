@@ -315,6 +315,9 @@ public class RestVerticleTest {
     else if (method == HttpMethod.DELETE) {
       request = client.deleteAbs(api);
     }
+    else if (method == HttpMethod.GET) {
+      request = client.getAbs(api);
+    }
     else {
       request = client.putAbs(api);
     }

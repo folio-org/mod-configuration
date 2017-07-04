@@ -45,7 +45,8 @@ resourceTypes:
     get:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
-        pageable
+        pageable,
+        validate
       ]
     post:
       is: [validate]
@@ -68,5 +69,6 @@ resourceTypes:
     get:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
-        pageable
+        pageable,
+        validate
       ]
