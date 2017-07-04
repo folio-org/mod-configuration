@@ -24,7 +24,6 @@ import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.JsonUtils;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
@@ -124,7 +123,7 @@ public class ConfigAPI implements ConfigurationsResource {
         }
         Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
-          .withPlainBadRequest(JsonUtils.entity2String(e))));
+          .withJsonUnprocessableEntity(e)));
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
@@ -375,7 +374,7 @@ public class ConfigAPI implements ConfigurationsResource {
         }
         Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
-          .withPlainBadRequest(JsonUtils.entity2String(e))));
+          .withJsonUnprocessableEntity(e)));
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
