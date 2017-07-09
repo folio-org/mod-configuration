@@ -69,8 +69,8 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    aClient = new AdminClient("localhost", port, "harvard");
-    tClient = new TenantClient("localhost", port, "harvard");
+    aClient = new AdminClient("localhost", port, "harvard", "harvard");
+    tClient = new TenantClient("localhost", port, "harvard", "harvard");
 
 /*    port = 8888;//NetworkUtils.nextFreePort();
 

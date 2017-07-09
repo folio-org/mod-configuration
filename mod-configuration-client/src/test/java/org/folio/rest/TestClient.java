@@ -1,12 +1,5 @@
 package org.folio.rest;
 
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -23,6 +16,13 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 
 /**
@@ -55,7 +55,7 @@ public class TestClient {
       async.complete();
     }));
 
-    cc = new ConfigurationsClient("localhost", port, "harvard");
+    cc = new ConfigurationsClient("localhost", port, "harvard", "harvard");
 
   }
 
@@ -75,7 +75,7 @@ public class TestClient {
 
     try {
       Async async = context.async(2);
-      ac = new TenantClient("localhost", port, "harvard");
+      ac = new TenantClient("localhost", port, "harvard", "harvard");
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
       ac.post(ta,reply -> {

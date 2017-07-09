@@ -19,8 +19,8 @@ public class Test {
    */
   public static void main(String[] args) throws Exception {
 
-    AdminClient aClient = new AdminClient("localhost", 8888, "harvard", false);
-    TenantClient tClient = new TenantClient("localhost", 8888, "harvard", false);
+    AdminClient aClient = new AdminClient("localhost", 8888, "harvard", "harvard", false);
+    TenantClient tClient = new TenantClient("localhost", 8888, "harvard", "harvard", false);
 
 /*    MimeMultipart mmp = new MimeMultipart();
     BodyPart bp = new MimeBodyPart(new FileInputStream("C:\\Git\\mod-files\\ramls\\mod-files\\files.raml"));
