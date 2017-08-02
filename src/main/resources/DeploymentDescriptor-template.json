@@ -1,5 +1,5 @@
 {
-  "srvcId": "configuration",
+  "srvcId": "${artifactId}-${version}",
   "nodeId": "localhost",
   "descriptor": {
     "exec": "java -Dport=%p -jar ../mod-configuration/mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=%p"
