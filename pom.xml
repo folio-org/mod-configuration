@@ -137,7 +137,7 @@
               <outputDirectory>${project.build.directory}</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${basedir}/src/main/resources</directory>
+                  <directory>${basedir}/descriptors</directory>
                   <include>*Descriptor-template.json</include>
                   <filtering>true</filtering>
                 </resource>
