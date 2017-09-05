@@ -29,24 +29,64 @@ SET search_path TO myuniversity_mymodule, public;
 CREATE TABLE IF NOT EXISTS config_data (
    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
    jsonb jsonb,
-   created_date date not null default current_timestamp,
-   updated_date date not null default current_timestamp
+   creation_date timestamp WITH TIME ZONE,
+   created_by text
    );
 
 -- index to support @> ops, faster than jsonb_ops
 CREATE INDEX idxgin_conf ON config_data USING gin (jsonb jsonb_path_ops);
 
--- update the update_date column when record is updated
-CREATE OR REPLACE FUNCTION update_modified_column()
+-- on create of user record - pull creation date and creator into dedicated column - rmb auto-populates these fields in the md fields
+  
+CREATE OR REPLACE FUNCTION set_md()
 RETURNS TRIGGER AS $$
 BEGIN
--- NEW to indicate updating the new row value
-    NEW.updated_date = current_timestamp;
-    RETURN NEW;
+  NEW.creation_date = to_timestamp(NEW.jsonb->'metadata'->>'createdDate', 'YYYY-MM-DD"T"HH24:MI:SS.MS');
+  NEW.created_by = NEW.jsonb->'metadata'->>'createdByUserId';
+  RETURN NEW;
 END;
 $$ language 'plpgsql';
+CREATE TRIGGER set_md_trigger BEFORE INSERT ON myuniversity_mymodule.config_data
+   FOR EACH ROW EXECUTE PROCEDURE  set_md();
 
-CREATE TRIGGER update_date BEFORE UPDATE ON config_data FOR EACH ROW EXECUTE PROCEDURE  update_modified_column();
+-- on update populate md fields from the creation date and creator fields
+CREATE OR REPLACE FUNCTION set_md_json()
+RETURNS TRIGGER AS $$
+DECLARE
+  createdDate timestamp WITH TIME ZONE;
+  createdBy text ;
+  updatedDate timestamp WITH TIME ZONE;
+  updatedBy text ;
+  injectedId text;
+BEGIN
+  createdBy = NEW.created_by;
+  createdDate = NEW.creation_date;
+  updatedDate = NEW.jsonb->'metadata'->>'updatedDate';
+  updatedBy = NEW.jsonb->'metadata'->>'updatedByUserId';
+
+  if createdBy ISNULL then
+    createdBy = 'undefined';
+  end if;
+  if updatedBy ISNULL then
+    updatedBy = 'undefined';
+  end if;
+  if createdDate IS NOT NULL then
+-- creation date and update date will always be injected by rmb - if created date is null it means that there is no meta data object
+-- associated with this object - so only add the meta data if created date is not null -- created date being null may be a problem
+-- and should be handled at the app layer for now -- currently this protects against an exception in the db if no md is present in the json
+    injectedId = '{"createdDate":"'||to_char(createdDate,'YYYY-MM-DD"T"HH24:MI:SS.MS')||'" , "createdByUserId":"'||createdBy||'", "updatedDate":"'||to_char(updatedDate,'YYYY-MM-DD"T"HH24:MI:SS.MSOF')||'" , "updatedByUserId":"'||updatedBy||'"}';
+    NEW.jsonb = jsonb_set(NEW.jsonb, '{metadata}' ,  injectedId::jsonb , false);
+  else 
+    NEW.jsonb = NEW.jsonb;
+  end if;
+RETURN NEW;
+
+END;
+$$ language 'plpgsql';
+CREATE TRIGGER set_md_json_trigger BEFORE UPDATE ON myuniversity_mymodule.config_data
+  FOR EACH ROW EXECUTE PROCEDURE set_md_json();
+
+-- --- end auto populate meta data schema ------------
 
 -- give the user PRIVILEGES after everything is created by script
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA myuniversity_mymodule TO myuniversity_mymodule;

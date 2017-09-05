@@ -93,7 +93,7 @@ public class TestClient {
 
   public void getConfigs(Async async, TestContext context) {
     try {
-      cc.getEntries("module==CIRCULATION", 0, 10, "en", response -> {
+      cc.getEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en", response -> {
         response.bodyHandler(body -> {
           System.out.println(body);
           if(response.statusCode() == 500){

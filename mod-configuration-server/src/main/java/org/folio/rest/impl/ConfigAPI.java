@@ -22,6 +22,8 @@ import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.cql.CQLWrapper;
+import org.folio.rest.persist.facets.FacetField;
+import org.folio.rest.persist.facets.FacetManager;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
@@ -74,7 +76,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
   @Validate
   @Override
-  public void getConfigurationsEntries(String query, int offset, int limit,
+  public void getConfigurationsEntries(String query, int offset, int limit, List<String> facets,
       String lang,java.util.Map<String, String>okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
 
@@ -88,16 +90,19 @@ public class ConfigAPI implements ConfigurationsResource {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         CQLWrapper cql = getCQL(query,limit, offset, CONFIG_SCHEMA);
 
+        List<FacetField> facetList = FacetManager.convertFacetStrings2FacetFields(facets, "jsonb");
+
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class,
-          new String[]{"*"}, cql, true, true,
+          new String[]{"*"}, cql, true, true, facetList,
             reply -> {
               try {
                 if(reply.succeeded()){
                   Configs configs = new Configs();
                   @SuppressWarnings("unchecked")
-                  List<Config> config = (List<Config>) reply.result()[0];
+                  List<Config> config = (List<Config>) reply.result().getResults();
                   configs.setConfigs(config);
-                  configs.setTotalRecords((Integer)reply.result()[1]);
+                  configs.setResultInfo(reply.result().getResultInfo());
+                  configs.setTotalRecords(reply.result().getResultInfo().getTotalRecords());
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse.withJsonOK(
                     configs)));
                 }
@@ -197,7 +202,7 @@ public class ConfigAPI implements ConfigurationsResource {
               try {
                 if(reply.succeeded()){
                   @SuppressWarnings("unchecked")
-                  List<Config> config = (List<Config>) reply.result()[0];
+                  List<Config> config = (List<Config>) reply.result().getResults();
                   if(config.isEmpty()){
                     asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
                       .withPlainNotFound(entryId)));
@@ -345,9 +350,9 @@ public class ConfigAPI implements ConfigurationsResource {
                 if(reply.succeeded()){
                   Audits auditRecords = new Audits();
                   @SuppressWarnings("unchecked")
-                  List<Audit> auditList = (List<Audit>) reply.result()[0];
+                  List<Audit> auditList = (List<Audit>) reply.result().getResults();
                   auditRecords.setAudits(auditList);
-                  auditRecords.setTotalRecords((Integer)reply.result()[1]);
+                  auditRecords.setTotalRecords(reply.result().getResultInfo().getTotalRecords());
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
                     auditRecords)));
                 }

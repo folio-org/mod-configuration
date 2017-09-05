@@ -18,7 +18,8 @@ schemas:
   - errors: !include ../raml-util/schemas/errors.schema
   - error.schema: !include ../raml-util/schemas/error.schema
   - parameters.schema: !include ../raml-util/schemas/parameters.schema
-
+  - ../raml-util/schemas/resultInfo.schema: !include ../raml-util/schemas/resultInfo.schema
+  - ../raml-util/schemas/metadata.schema: !include ../raml-util/schemas/metadata.schema
 traits:
   - secured: !include ../raml-util/traits/auth.raml
   - orderable: !include ../raml-util/traits/orderable.raml
@@ -26,7 +27,7 @@ traits:
   - searchable: !include ../raml-util/traits/searchable.raml
   - language: !include ../raml-util/traits/language.raml
   - validate: !include ../raml-util/traits/validation.raml
-
+  - facets: !include ../raml-util/traits/facets.raml
 resourceTypes:
   - collection: !include ../raml-util/rtypes/collection.raml
   - collection-item: !include ../raml-util/rtypes/item-collection.raml
@@ -46,7 +47,8 @@ resourceTypes:
       is: [
         searchable: {description: "with valid searchable fields: for example module = CIRCULATION", example: "scope.institution_id=aaa"},
         pageable,
-        validate
+        validate,
+        facets
       ]
     post:
       is: [validate]

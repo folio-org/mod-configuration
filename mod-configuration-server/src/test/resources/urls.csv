@@ -1,4 +1,4 @@
-"GET , http://localhost:<port>/configurations/entries , get list of configuration tables"
+"GET , http://localhost:<port>/configurations/entries?facets=code&facets=module , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d34-39cd9fedd8b5 , get specific table"
 "GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION , get list of configuration tables"
 "GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables"

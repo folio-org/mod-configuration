@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.folio</groupId>
     <artifactId>mod-configuration</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>mod-configuration-server</artifactId>
 
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>13.0.0</version>
+      <version>14.0.0</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
@@ -35,6 +35,12 @@
           <groupId>xpp3</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+      <version>3.3.3</version>
     </dependency>
   </dependencies>
 

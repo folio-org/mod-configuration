@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS audit_config (
    orig_id UUID NOT NULL,
    operation char(1) NOT NULL,
    jsonb jsonb,
-   created_date date not null
+   created_date timestamp not null
    );
 
 CREATE OR REPLACE FUNCTION audit_changes() RETURNS TRIGGER AS $config_audit$
