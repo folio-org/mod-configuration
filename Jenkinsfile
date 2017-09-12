@@ -1,3 +1,4 @@
+@Library('folio_jenkins_shared_libs@test-mvnDeploy') _
 
 buildMvnMod { 
   doDocker = 'yes'
