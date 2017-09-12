@@ -1,0 +1,4 @@
+*
+!Dockerfile
+!docker*
+!mod-configuration-server/target/*.jar
