@@ -183,6 +183,7 @@ public class RestVerticleTest {
 
     } catch (Exception e) {
       e.printStackTrace();
+      context.assertTrue(false, e.getMessage());
     }
 
     try {
