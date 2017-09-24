@@ -1,9 +1,11 @@
 {
-  "tables":[{
-    "tableName": "config_data",
-    "withMetadata": true,
-    "withAuditing": true,
-    "generateId": true
-  }],
- "endScript": "COPY config_data (jsonb) FROM 'data/locales.data' ENCODING 'UTF8';" 
+  "tables": [
+    {
+      "tableName": "config_data",
+      "withMetadata": true,
+      "withAuditing": true,
+      "generateId": true
+    }
+  ],
+  "endScript": "COPY config_data (jsonb) FROM 'data/locales.data' ENCODING 'UTF8';"
 }
