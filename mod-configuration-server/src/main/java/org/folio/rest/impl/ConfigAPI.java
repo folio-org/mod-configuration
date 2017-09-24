@@ -52,26 +52,26 @@ public class ConfigAPI implements ConfigurationsResource {
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
   private static final String       CONFIG_SCHEMA_NAME= "apidocs/raml/_schemas/kv_configuration.schema";
-  private static String             CONFIG_SCHEMA     =  null;
+  private static String             configSchema      =  null;
 
   private final Messages            messages          = Messages.getInstance();
 
   private String idFieldName                          = "id";
 
-  private void initCQLValidation() {
-    String path = CONFIG_SCHEMA_NAME;
-    try {
-      CONFIG_SCHEMA = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
-    } catch (Exception e) {
-      log.error("unable to load schema - " +path+ ", validation of query fields will not be active");
-    }
-  }
-
   public ConfigAPI(Vertx vertx, String tenantId) {
-    if(CONFIG_SCHEMA == null){
+    if(configSchema == null){
       initCQLValidation();
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+  }
+
+  private void initCQLValidation() {
+    String path = CONFIG_SCHEMA_NAME;
+    try {
+      configSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
+    } catch (Exception e) {
+      log.error("unable to load schema - " +path+ ", validation of query fields will not be active");
+    }
   }
 
   @Validate
@@ -88,7 +88,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset, CONFIG_SCHEMA);
+        CQLWrapper cql = getCQL(query,limit, offset, configSchema);
 
         List<FacetField> facetList = FacetManager.convertFacetStrings2FacetFields(facets, "jsonb");
 
@@ -341,7 +341,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset, CONFIG_SCHEMA);
+        CQLWrapper cql = getCQL(query,limit, offset, configSchema);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
           new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
