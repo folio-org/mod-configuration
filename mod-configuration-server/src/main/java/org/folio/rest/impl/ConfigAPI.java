@@ -42,7 +42,7 @@ import io.vertx.core.logging.LoggerFactory;
 public class ConfigAPI implements ConfigurationsResource {
 
   public static final String        CONFIG_TABLE      = "config_data";
-  public static final String        AUDIT_TABLE       = "audit_config";
+  public static final String        AUDIT_TABLE       = "audit_config_data";
 
   public static final String        METHOD_GET        = "get";
   public static final String        METHOD_POST       = "post";
