@@ -250,35 +250,45 @@ public class RestVerticleTest {
           public void handle(HttpClientResponse httpClientResponse) {
             int statusCode = httpClientResponse.statusCode();
             System.out.println("Status - " + statusCode + " " + urlInfo[1]);
-            if (httpClientResponse.statusCode() == 200) {
+            if (httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])) {
               context.assertTrue(true);
             }
-            else if(httpClientResponse.statusCode() == 404){
+            else if(httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])){
+              context.assertTrue(true);
+              async.complete();
+            }
+            else if(httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])){
               context.assertTrue(true);
               async.complete();
             }
             httpClientResponse.bodyHandler(new Handler<Buffer>() {
               @Override
               public void handle(Buffer buffer) {
-                if(buffer.length() < 5){
+                if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
                   //assume empty body / empty array of data
                   async.complete();
                 }
                 else{
-                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
-                  System.out.println("-------->"+records);
-                  System.out.println(buffer.toString());
-                  aClient.getModuleStats( res -> {
-                    res.bodyHandler( b -> {
-                      System.out.println(urlInfo[1] + "  "+b.toString());
-                      aClient.getHealth( r -> {
-                        r.bodyHandler( bh -> {
-                          System.out.println(urlInfo[1] + "  "+bh.toString());
-                          async.complete();
+                  try{
+                    System.out.println(buffer.toString());
+                    int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
+                    System.out.println("-------->"+records);
+                    aClient.getModuleStats( res -> {
+                      res.bodyHandler( b -> {
+                        System.out.println(urlInfo[1] + "  "+b.toString());
+                        aClient.getHealth( r -> {
+                          r.bodyHandler( bh -> {
+                            System.out.println(urlInfo[1] + "  "+bh.toString());
+                            async.complete();
+                          });
                         });
                       });
                     });
-                  });
+                  }
+                  catch(Exception e){
+                    e.printStackTrace();
+                    context.fail(e.getMessage());
+                  }
                 }
               }
             });
