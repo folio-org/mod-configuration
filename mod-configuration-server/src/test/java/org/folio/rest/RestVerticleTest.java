@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
@@ -181,6 +182,14 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
         "", "application/json", 404);
 
+      //check read only
+      Config conf2 =  new ObjectMapper().readValue(content, Config.class);
+      Metadata md = new Metadata();
+      md.setCreatedByUserId("123456");
+      conf2.setMetadata(md);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+        new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
+
     } catch (Exception e) {
       e.printStackTrace();
       context.assertTrue(false, e.getMessage());
@@ -252,13 +261,10 @@ public class RestVerticleTest {
             System.out.println("Status - " + statusCode + " " + urlInfo[1]);
             if (httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])) {
               context.assertTrue(true);
-            }
-            else if(httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])){
-              context.assertTrue(true);
               async.complete();
             }
-            else if(httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])){
-              context.assertTrue(true);
+            else{
+              context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
               async.complete();
             }
             httpClientResponse.bodyHandler(new Handler<Buffer>() {
@@ -337,7 +343,7 @@ public class RestVerticleTest {
       context.fail(error.getMessage());
     }).handler(response -> {
       int statusCode = response.statusCode();
-      if(method == HttpMethod.POST){
+      if(method == HttpMethod.POST && statusCode == 201){
         try {
           System.out.println("Location - " + response.getHeader("Location"));
           String content2 = getFile("kv_configuration.sample");
