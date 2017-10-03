@@ -28,10 +28,10 @@
     },
     "userId": {
       "type": "string"
-    },       
+    },
     "metadata": {
       "$ref": "../raml-util/schemas/metadata.schema",
-      "readonly" : true
+      "readonly": true
     }
   },
   "additionalProperties": false,

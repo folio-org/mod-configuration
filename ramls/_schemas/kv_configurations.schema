@@ -15,7 +15,7 @@
     },
     "resultInfo": {
       "$ref": "../raml-util/schemas/resultInfo.schema",
-      "readonly" : true
+      "readonly": true
     }
   },
   "additionalProperties": false,

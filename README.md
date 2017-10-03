@@ -186,6 +186,10 @@ java -jar mod-configuration-server/target/mod-configuration-server-fat.jar \
 
 Additional command-line [options](#instructions) and information.
 
+### Code analysis
+
+[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio.rest%3Amod-configuration).
+
 ### Download and configuration
 
 The built artifacts for this module are available.
