@@ -3,7 +3,7 @@
     {
       "run": "after",
       "snippet": "COPY config_data (jsonb) FROM 'data/locales.data' ENCODING 'UTF8';",
-      "fromModuleVersion" : 0
+      "fromModuleVersion": 0
     }
   ],
   "tables": [
