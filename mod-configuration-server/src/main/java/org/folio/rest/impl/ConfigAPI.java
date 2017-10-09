@@ -126,6 +126,7 @@ public class ConfigAPI implements ConfigurationsResource {
         if(start != -1 && end != -1){
           field = field.substring(start+1, end);
         }
+        log.error(e1.getMessage());
         Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
         asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
           .withJsonUnprocessableEntity(e)));

@@ -35,6 +35,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -50,6 +51,10 @@ public class RestVerticleTest {
   int                       port;
   TenantClient tClient = null;
   AdminClient aClient  = null;
+
+  static {
+    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
+  }
   /**
    *
    * @param context
@@ -300,6 +305,7 @@ public class RestVerticleTest {
             });
           }
         });
+        request.putHeader("X-Okapi-Request-Id", "999999999999");
         request.putHeader("x-okapi-tenant", "harvard");
         request.headers().add("Authorization", "harvard");
         request.headers().add("Accept", "application/json");
@@ -371,6 +377,7 @@ public class RestVerticleTest {
       System.out.println("complete");
     });
     request.setChunked(true);
+    request.putHeader("X-Okapi-Request-Id", "999999999999");
     request.putHeader("Authorization", "harvard");
     request.putHeader("x-okapi-tenant", "harvard");
     request.putHeader("Accept", "application/json,text/plain");
