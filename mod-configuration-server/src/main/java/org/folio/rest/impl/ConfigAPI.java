@@ -215,9 +215,15 @@ public class ConfigAPI implements ConfigurationsResource {
                 }
                 else{
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                    .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError) + " " +
-                        reply.cause().getMessage())));
+                  if(isInvalidUUID(reply.cause().getMessage())){
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
+                      .withPlainNotFound(entryId)));
+                  }
+                  else{
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesByEntryIdResponse
+                      .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError) + " " +
+                          reply.cause().getMessage())));
+                  }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -259,8 +265,14 @@ public class ConfigAPI implements ConfigurationsResource {
                 }
                 else{
                   log.error(reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                    .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  if(isInvalidUUID(reply.cause().getMessage())){
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
+                      .withPlainNotFound(entryId)));
+                  }
+                  else{
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
+                      .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -393,6 +405,15 @@ public class ConfigAPI implements ConfigurationsResource {
       }
     });
 
+  }
+
+  private boolean isInvalidUUID(String errorMessage){
+    if(errorMessage != null && errorMessage.contains("invalid input syntax for uuid")){
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
 }

@@ -1,5 +1,6 @@
 GET , http://localhost:<port>/configurations/entries?facets=code&facets=module , get list of configuration tables , 200
 GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d34-39cd9fedd8b5 , get specific table , 404
+GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d3439cd9fedd8b5 , get specific table , 404
 GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION , get list of configuration tables , 200
 GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables , 422
 GET , http://localhost:<port>/configurations/audit , get list of audit records , 200
