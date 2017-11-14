@@ -62,6 +62,11 @@ public class ConfigAPI implements ConfigurationsResource {
     if(configSchema == null){
       initCQLValidation();
     }
+
+    //calculate facets on all results, this shouldnt be a performance issue as the amount of
+    //records in a configuration result set shouldnt get too high
+    //FacetManager.setCalculateOnFirst(0);
+
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
@@ -198,7 +203,7 @@ public class ConfigAPI implements ConfigurationsResource {
         Criterion c = new Criterion(
           new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue("'"+entryId+"'"));
 
-        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, true,
+        PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, false,
             reply -> {
               try {
                 if(reply.succeeded()){

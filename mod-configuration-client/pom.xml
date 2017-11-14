@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>15.0.1-SNAPSHOT</version>
+      <version>15.0.3-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>

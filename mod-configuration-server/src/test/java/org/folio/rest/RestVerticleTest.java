@@ -195,6 +195,9 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
+      mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
+        HttpMethod.PUT,"",  "application/json", 200);
+
     } catch (Exception e) {
       e.printStackTrace();
       context.assertTrue(false, e.getMessage());
@@ -348,6 +351,9 @@ public class RestVerticleTest {
       async.complete();
       context.fail(error.getMessage());
     }).handler(response -> {
+      response.headers().forEach( header -> {
+        System.out.println(header.getKey() + " " + header.getValue());
+      });
       int statusCode = response.statusCode();
       if(method == HttpMethod.POST && statusCode == 201){
         try {

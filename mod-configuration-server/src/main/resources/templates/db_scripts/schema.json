@@ -11,7 +11,20 @@
       "tableName": "config_data",
       "withMetadata": true,
       "withAuditing": true,
-      "generateId": true
+      "generateId": true,
+      "likeIndex": [
+        {
+          "fieldName": "configName",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "whereClause": "WHERE ((jsonb->>'enabled'))::boolean = true"
+        },
+        {
+          "fieldName": "code",
+          "tOps": "ADD",
+          "caseSensitive": true
+        }
+      ]
     }
   ]
 }

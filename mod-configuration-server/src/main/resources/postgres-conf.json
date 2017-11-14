@@ -6,5 +6,5 @@
   "password" : "password",
   "database" : "postgres",
   "charset"  : "UTF8",
-  "queryTimeout" : 10000
+  "queryTimeout" : 100000
 }
