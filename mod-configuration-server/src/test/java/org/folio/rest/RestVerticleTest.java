@@ -267,11 +267,7 @@ public class RestVerticleTest {
           public void handle(HttpClientResponse httpClientResponse) {
             int statusCode = httpClientResponse.statusCode();
             System.out.println("Status - " + statusCode + " " + urlInfo[1]);
-            if (httpClientResponse.statusCode() == Integer.parseInt(urlInfo[3])) {
-              context.assertTrue(true);
-              async.complete();
-            }
-            else{
+            if (httpClientResponse.statusCode() != Integer.parseInt(urlInfo[3])) {
               context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
               async.complete();
             }
@@ -287,7 +283,16 @@ public class RestVerticleTest {
                     System.out.println(buffer.toString());
                     int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
                     System.out.println("-------->"+records);
-                    aClient.getModuleStats( res -> {
+                    if(httpClientResponse.statusCode() == 200){
+                      if(records != Integer.parseInt(urlInfo[4])){
+                        context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
+                        async.complete();
+                      }
+                      else{
+                        async.complete();
+                      }
+                    }
+/*                    aClient.getModuleStats( res -> {
                       res.bodyHandler( b -> {
                         System.out.println(urlInfo[1] + "  "+b.toString());
                         aClient.getHealth( r -> {
@@ -297,7 +302,7 @@ public class RestVerticleTest {
                           });
                         });
                       });
-                    });
+                    });*/
                   }
                   catch(Exception e){
                     e.printStackTrace();
