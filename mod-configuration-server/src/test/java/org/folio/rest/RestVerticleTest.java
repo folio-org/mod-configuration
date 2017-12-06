@@ -8,11 +8,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.Configs;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
@@ -197,6 +200,19 @@ public class RestVerticleTest {
 
       mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
         HttpMethod.PUT,"",  "application/json", 200);
+
+/*      conf2.setMetadata(null);
+      conf2.setModule("BATCH");
+      conf2.setValue("what1");
+      Config conf3 = (Config)BeanUtils.cloneBean(conf2);
+      conf3.setValue("what2");
+      Configs c = new Configs();
+      List<Config> configArray = new ArrayList<>();
+      configArray.add(conf2);
+      configArray.add(conf3);
+      c.setConfigs(configArray);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.PUT,
+        new ObjectMapper().writeValueAsString(c), "application/json", 204);*/
 
     } catch (Exception e) {
       e.printStackTrace();
