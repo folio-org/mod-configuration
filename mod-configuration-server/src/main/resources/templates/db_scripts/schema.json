@@ -12,18 +12,40 @@
       "withMetadata": true,
       "withAuditing": true,
       "generateId": true,
+      "ginIndex": [
+        {
+          "fieldName": "value",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true
+        } 
+      ],
       "likeIndex": [
         {
           "fieldName": "configName",
           "tOps": "ADD",
           "caseSensitive": false,
-          "whereClause": "WHERE ((jsonb->>'enabled'))::boolean = true"
+          "whereClause": "WHERE ((jsonb->>'enabled'))::boolean = true",
+          "removeAccents": false
         },
         {
           "fieldName": "code",
           "tOps": "ADD",
-          "caseSensitive": true
+          "caseSensitive": false,
+          "removeAccents": false
         }
+      ],
+      "index": [
+        {
+          "fieldName": "module",
+          "tOps": "ADD",
+          "removeAccents": false
+        },
+        {
+          "fieldName": "default",
+          "tOps": "ADD",
+          "stringType": false
+        }    
       ]
     }
   ]

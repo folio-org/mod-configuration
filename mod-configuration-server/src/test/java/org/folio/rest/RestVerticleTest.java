@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
@@ -195,8 +196,30 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
+      md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
+      md.setCreatedDate(new Date());
+      md.setUpdatedDate(new Date());
+      conf2.setModule("NOTHING");
+      String updatedConf = new ObjectMapper().writeValueAsString(conf2);
+      System.out.println(updatedConf);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+        updatedConf, "application/json", 201);
+
       mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
         HttpMethod.PUT,"",  "application/json", 200);
+
+/*      conf2.setMetadata(null);
+      conf2.setModule("BATCH");
+      conf2.setValue("what1");
+      Config conf3 = (Config)BeanUtils.cloneBean(conf2);
+      conf3.setValue("what2");
+      Configs c = new Configs();
+      List<Config> configArray = new ArrayList<>();
+      configArray.add(conf2);
+      configArray.add(conf3);
+      c.setConfigs(configArray);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.PUT,
+        new ObjectMapper().writeValueAsString(c), "application/json", 204);*/
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -363,8 +386,9 @@ public class RestVerticleTest {
       if(method == HttpMethod.POST && statusCode == 201){
         try {
           System.out.println("Location - " + response.getHeader("Location"));
-          String content2 = getFile("kv_configuration.sample");
-          Config conf =  new ObjectMapper().readValue(content2, Config.class);
+          //String content2 = getFile("kv_configuration.sample");
+          Config conf =  new ObjectMapper().readValue(content, Config.class);
+          conf.setDescription(conf.getDescription());
           mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
             new ObjectMapper().writeValueAsString(conf), "application/json", 204);
         } catch (Exception e) {
