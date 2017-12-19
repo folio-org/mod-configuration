@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM folioci/openjdk8-jre:latest
 
 ENV VERTICLE_FILE mod-configuration-server/target/mod-configuration-server-fat.jar
 
@@ -6,22 +6,7 @@ ENV VERTICLE_FILE mod-configuration-server/target/mod-configuration-server-fat.j
 ENV VERTICLE_HOME /usr/verticles
 
 # Copy your fat jar to the container
-COPY $VERTICLE_FILE $VERTICLE_HOME/module.jar
-COPY docker/docker-entrypoint.sh $VERTICLE_HOME/docker-entrypoint.sh
+COPY target/${VERTICLE_FILE} ${VERTICLE_HOME}/${VERTICLE_FILE}
 
-# Create user/group 'folio'
-RUN groupadd folio && \
-    useradd -r -d $VERTICLE_HOME -g folio -M folio && \
-    chown -R folio.folio $VERTICLE_HOME && \
-    chmod +x ${VERTICLE_HOME}/docker-entrypoint.sh
-
-# Run as this user
-USER folio
-
-# Launch the verticle
-WORKDIR $VERTICLE_HOME
-
-# Expose this port locally in the container
+# Expose this port locally in the container.
 EXPOSE 8081
-
-ENTRYPOINT ["./docker-entrypoint.sh"]
