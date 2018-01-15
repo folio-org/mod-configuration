@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.AdminClient;
@@ -20,7 +21,9 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,6 +50,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
 
+  private static Locale     oldLocale;
   private static Vertx      vertx;
   private ArrayList<String> urls;
   int                       port;
@@ -56,6 +60,18 @@ public class RestVerticleTest {
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
   }
+
+  @BeforeClass
+  public static void setUpClass() {
+    oldLocale = Locale.getDefault();
+    Locale.setDefault(Locale.US);
+  }
+
+  @AfterClass
+  public static void tearDownClass() {
+    Locale.setDefault(oldLocale);
+  }
+
   /**
    *
    * @param context
