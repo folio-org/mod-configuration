@@ -413,7 +413,9 @@ public class ConfigAPI implements ConfigurationsResource {
   }
 
   private boolean isInvalidUUID(String errorMessage){
-    if(errorMessage != null && errorMessage.contains("invalid input syntax for uuid")){
+    if(errorMessage != null &&
+        (errorMessage.contains("invalid input syntax for type uuid") /*postgres v10*/ ||
+            errorMessage.contains("invalid input syntax for uuid") /*postgres v9.6*/)){
       return true;
     }
     else{
