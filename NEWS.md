@@ -1,3 +1,7 @@
+## 4.0.1 2018-02-19
+* MODCONF-15 - move to rmb v18
+* MODCONF-14 - unit test should stop embedded postgres when complete
+
 ## 4.0.0
 * MODCONF-12 - upgrade to rmb 16.0.2, read-only fields are removed and do not return a 422
 
