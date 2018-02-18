@@ -72,7 +72,11 @@ public class TestClient {
 
   @After
   public void tearDown(TestContext context) {
-    vertx.close(context.asyncAssertSuccess());
+    Async async = context.async();
+    vertx.close(context.asyncAssertSuccess( res-> {
+      PostgresClient.stopEmbeddedPostgres();
+      async.complete();
+    }));
   }
 
   @org.junit.Test

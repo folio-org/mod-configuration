@@ -12,6 +12,7 @@
       "withMetadata": true,
       "withAuditing": true,
       "generateId": true,
+      "populateJsonWithId": true,
       "ginIndex": [
         {
           "fieldName": "value",
