@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.folio</groupId>
     <artifactId>mod-configuration</artifactId>
-    <version>4.0.2-SNAPSHOT</version>
+    <version>4.0.3-SNAPSHOT</version>
   </parent>
   <artifactId>mod-configuration-server</artifactId>
 
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>18.0.0</version>
+      <version>19.0.0</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
@@ -258,13 +258,12 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/raml-jaxrs</source>
               </sources>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>

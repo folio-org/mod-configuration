@@ -1,3 +1,6 @@
+## 4.0.2 2018-03-03
+* MODCONF-16 - move to rmb v19 - generated sources will be moved to /classes
+
 ## 4.0.1 2018-02-19
 * MODCONF-15 - move to rmb v18
 * MODCONF-14 - unit test should stop embedded postgres when complete
