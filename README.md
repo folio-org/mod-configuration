@@ -188,7 +188,7 @@ Additional command-line [options](#instructions) and information.
 
 ### Code analysis
 
-[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio.rest%3Amod-configuration).
+[SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio%3Amod-configuration).
 
 ### Download and configuration
 
