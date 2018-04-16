@@ -160,18 +160,18 @@ Deleting / Updating specific entries is possible as well - See circulation.raml 
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
 
-Other [modules](http://dev.folio.org/source-code/#server-side) are described,
-with further FOLIO Developer documentation at [dev.folio.org](http://dev.folio.org/)
+Other [modules](https://dev.folio.org/source-code/#server-side) are described,
+with further FOLIO Developer documentation at [dev.folio.org](https://dev.folio.org/)
 
 ### API documentation
 
-This module's [API documentation](http://dev.folio.org/doc/api/#mod-configuration)
+This module's [API documentation](https://dev.folio.org/reference/api/#mod-configuration)
 and the [local docs](#local-apidocs).
 
 ### Issue tracker
 
 See project [MODCONF](https://issues.folio.org/browse/MODCONF)
-at the [FOLIO issue tracker](http://dev.folio.org/community/guide-issues).
+at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker/).
 
 ### Quick start
 
@@ -193,6 +193,6 @@ Additional command-line [options](#instructions) and information.
 ### Download and configuration
 
 The built artifacts for this module are available.
-See [configuration](http://dev.folio.org/doc/artifacts) for repository access,
+See [configuration](https://dev.folio.org/download/artifacts/) for repository access,
 and the [Docker image](https://hub.docker.com/r/folioorg/mod-configuration/).
 
