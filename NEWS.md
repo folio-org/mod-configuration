@@ -1,3 +1,6 @@
+## 4.0.3 2018-04-24
+* MODCONF-17 - 500 and 422 errors while querying configurations/audit
+
 ## 4.0.2 2018-03-03
 * MODCONF-16 - move to rmb v19 - generated sources will be moved to /classes
 
