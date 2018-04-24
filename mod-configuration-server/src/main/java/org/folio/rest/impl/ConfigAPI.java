@@ -93,7 +93,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset, configSchema);
+        CQLWrapper cql = getCQL(CONFIG_TABLE, query,limit, offset, configSchema);
 
         List<FacetField> facetList = FacetManager.convertFacetStrings2FacetFields(facets, "jsonb");
 
@@ -336,12 +336,12 @@ public class ConfigAPI implements ConfigurationsResource {
     });
   }
 
-  private CQLWrapper getCQL(String query, int limit, int offset, String schema) throws Exception {
+  private CQLWrapper getCQL(String table, String query, int limit, int offset, String schema) throws Exception {
     CQL2PgJSON cql2pgJson = null;
     if(schema != null){
-      cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb", schema);
+      cql2pgJson = new CQL2PgJSON(table+".jsonb", schema);
     } else {
-      cql2pgJson = new CQL2PgJSON(CONFIG_TABLE+".jsonb");
+      cql2pgJson = new CQL2PgJSON(table+".jsonb");
     }
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
@@ -359,7 +359,7 @@ public class ConfigAPI implements ConfigurationsResource {
       try {
         System.out.println("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(query,limit, offset, configSchema);
+        CQLWrapper cql = getCQL(AUDIT_TABLE, query,limit, offset, null);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
           new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
