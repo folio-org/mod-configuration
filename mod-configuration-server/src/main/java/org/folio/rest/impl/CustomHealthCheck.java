@@ -4,6 +4,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.util.Map;
 
@@ -12,10 +14,10 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.tools.utils.OutStream;
 
 /**
- * @author shale
- *
+ * Pass through AdminAPI
  */
 public class CustomHealthCheck extends AdminAPI {
+  private static final Logger log = LoggerFactory.getLogger(CustomHealthCheck.class);
 
   @Override
   public void getAdminHealth(Map<String, String> okapiHeaders,
@@ -26,7 +28,7 @@ public class CustomHealthCheck extends AdminAPI {
       OutStream stream = new OutStream();
       stream.setData("OK");
 
-      System.out.println(" --- this is an over ride of the health API by the config module "+res.result().getStatus());
+      log.info(" --- this is an over ride of the health API by the config module "+res.result().getStatus());
       asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminHealthResponse.withAnyOK(stream)));
     }, vertxContext);
   }
@@ -39,7 +41,7 @@ public class CustomHealthCheck extends AdminAPI {
 
       JsonObject o = new JsonObject(res.result().getEntity().toString());
 
-      System.out.println(" --- this is an over ride of the Module Stats API by the config module ");
+      log.info(" --- this is an over ride of the Module Stats API by the config module ");
       asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminModuleStatsResponse.
         withPlainOK( o.encodePrettily() )));
     }, vertxContext);
