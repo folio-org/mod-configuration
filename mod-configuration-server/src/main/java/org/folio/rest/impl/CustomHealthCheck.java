@@ -16,7 +16,7 @@ import org.folio.rest.tools.utils.OutStream;
 /**
  * Pass through AdminAPI
  */
-public class CustomHealthCheck extends AdminAPI {
+public class CustomHealthCheck extends org.folio.rest.impl.AdminAPI {
   private static final Logger log = LoggerFactory.getLogger(CustomHealthCheck.class);
 
   @Override
