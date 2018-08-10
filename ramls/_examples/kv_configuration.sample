@@ -3,6 +3,7 @@
   "configName": "validation_rules",
   "code": "PATRON_RULE",
   "description": "for patrons",
+  "updatedFor": "fred",
   "default": true,
   "enabled": true,
   "value": ""
