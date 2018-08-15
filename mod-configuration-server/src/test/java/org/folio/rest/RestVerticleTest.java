@@ -2,7 +2,6 @@ package org.folio.rest;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.ByteStreams;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -28,11 +27,8 @@ import org.junit.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -400,28 +396,15 @@ public class RestVerticleTest {
     request.end(buffer);
   }
 
-  private ArrayList<String> urlsFromFile() throws IOException {
+  private ArrayList<String> urlsFromFile() {
     ArrayList<String> ret = new ArrayList<>();
-    byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
-    InputStream is = null;
-    BufferedReader bfReader = null;
-    try {
-      is = new ByteArrayInputStream(content);
-      bfReader = new BufferedReader(new InputStreamReader(is));
-      String temp = null;
-      while ((temp = bfReader.readLine()) != null) {
-        ret.add(temp);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (is != null)
-          is.close();
-      } catch (Exception ex) {
 
+    try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/urls.csv"))) {
+    while(scanner.hasNext()) {
+        ret.add(scanner.nextLine());
       }
     }
+
     return ret;
   }
 
