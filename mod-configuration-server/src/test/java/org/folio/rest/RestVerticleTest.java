@@ -131,9 +131,16 @@ public class RestVerticleTest {
   @Test
   public void checkURLs(TestContext context) {
     createSampleRecords(context);
+    changeLogLevel(context);
     waitForTwoSeconds();
     checkPersistentCaching(context);
     checkResultsFromVariousUrls(context);
+  }
+
+  private void changeLogLevel(TestContext context) {
+    mutateURLs("http://localhost:" + port +
+        "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist",
+      context, HttpMethod.PUT,"",  "application/json", 200);
   }
 
   private void checkResultsFromVariousUrls(TestContext context) {
@@ -232,9 +239,6 @@ public class RestVerticleTest {
       System.out.println(updatedConf);
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         updatedConf, "application/json", 201);
-
-      mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
-        HttpMethod.PUT,"",  "application/json", 200);
 
     } catch (Exception e) {
       e.printStackTrace();
