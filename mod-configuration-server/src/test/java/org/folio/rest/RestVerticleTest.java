@@ -1,34 +1,8 @@
 package org.folio.rest;
 
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
-
-import org.apache.commons.io.IOUtils;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.jaxrs.model.Config;
-import org.folio.rest.jaxrs.model.Metadata;
-import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.security.AES;
-import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.ByteStreams;
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -42,6 +16,23 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.Config;
+import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.security.AES;
+import org.folio.rest.tools.utils.NetworkUtils;
+import org.junit.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -70,11 +61,6 @@ public class RestVerticleTest {
     Locale.setDefault(oldLocale);
   }
 
-  /**
-   *
-   * @param context
-   *          the test context.
-   */
   @Before
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
@@ -141,12 +127,6 @@ public class RestVerticleTest {
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
-  /**
-   * This method, called after our test, just cleanup everything by closing the vert.x instance
-   *
-   * @param context
-   *          the test context
-   */
   @After
   public void tearDown(TestContext context) {
     Async async = context.async();
@@ -159,19 +139,15 @@ public class RestVerticleTest {
         }));
       });
     });
-
   }
 
   /**
    * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
-   *
-   * @param context the test context
    */
   @Test
   public void checkURLs(TestContext context) {
 
     try {
-
       //save config entry
       String content = getFile("kv_configuration.sample");
       Config conf =  new ObjectMapper().readValue(content, Config.class);
@@ -289,7 +265,6 @@ public class RestVerticleTest {
 
   }
 
-
   private void runGETURLoop(TestContext context){
     try {
       int[] urlCount = { urls.size() };
@@ -361,14 +336,6 @@ public class RestVerticleTest {
     }
   }
 
-  /**
-   * for POST / PUT / DELETE
-   * @param api
-   * @param context
-   * @param method
-   * @param content
-   * @param id
-   */
   private void mutateURLs(String api, TestContext context, HttpMethod method, String content,
       String contentType, int errorCode) {
     Async async = context.async();
@@ -461,5 +428,4 @@ public class RestVerticleTest {
   private String getFile(String filename) throws IOException {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
-
 }
