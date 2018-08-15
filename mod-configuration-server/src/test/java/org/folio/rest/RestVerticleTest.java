@@ -37,7 +37,6 @@ import java.util.*;
 public class RestVerticleTest {
   private static Locale oldLocale;
   private static Vertx vertx;
-  private ArrayList<String> urls;
   private int port;
   private TenantClient tClient = null;
 
@@ -142,7 +141,62 @@ public class RestVerticleTest {
    */
   @Test
   public void checkURLs(TestContext context) {
+    createSampleRecords(context);
+    waitForTwoSeconds();
+    checkPersistentCaching(context);
+    checkResultsFromVariousUrls(context);
+  }
 
+  private void checkResultsFromVariousUrls(TestContext context) {
+    runGETURLoop(context, urlsFromFile());
+  }
+
+  private void checkPersistentCaching(TestContext context) {
+    Async async = context.async();
+
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
+
+    postgresClient.persistentlyCacheResult("mytablecache",
+      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
+        if(reply.succeeded()){
+          postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
+            System.out.println(r3.result().getResults().size());
+            postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
+              System.out.println(r4.succeeded());
+
+              /** this will probably cause a deadlock as the saveBatch runs within a transaction */
+
+             /*
+             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
+                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
+              try {
+                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
+                  if(reply1.succeeded()){
+                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
+                  }
+                  async.complete();
+                  });
+              } catch (Exception e1) {
+                e1.printStackTrace();
+              }*/
+              async.complete();
+
+            });
+          });
+        }
+      });
+  }
+
+  private void waitForTwoSeconds() {
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+  }
+
+  private void createSampleRecords(TestContext context) {
     try {
       //save config entry
       String content = getFile("kv_configuration.sample");
@@ -210,61 +264,11 @@ public class RestVerticleTest {
       e.printStackTrace();
       context.assertTrue(false, e.getMessage());
     }
-
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-
-    Async async = context.async();
-    PostgresClient.getInstance(vertx, "harvard").persistentlyCacheResult("mytablecache",
-      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
-        if(reply.succeeded()){
-          PostgresClient.getInstance(vertx, "harvard").select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            System.out.println(r3.result().getResults().size());
-            PostgresClient.getInstance(vertx, "harvard").removePersistentCacheResult("mytablecache",  r4 -> {
-              System.out.println(r4.succeeded());
-
-              /** this will probably cause a deadlock as the saveBatch runs within a transaction */
-
-             /*
-             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
-                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
-              try {
-                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
-                  if(reply1.succeeded()){
-                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
-                  }
-                  async.complete();
-                  });
-              } catch (Exception e1) {
-                e1.printStackTrace();
-              }*/
-              async.complete();
-
-            });
-          });
-        }
-      });
-
-    try {
-      urls = urlsFromFile();
-      Thread.sleep(2000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //run get queries from the csv file
-    runGETURLoop(context);
-
   }
 
-  private void runGETURLoop(TestContext context){
+  private void runGETURLoop(TestContext context, ArrayList<String> urlsToCheck){
     try {
-      int[] urlCount = { urls.size() };
-      urls.forEach(url -> {
+      urlsToCheck.forEach(url -> {
         Async async = context.async();
         String[] urlInfo = url.split(" , ");
         HttpClient client = vertx.createHttpClient();
@@ -332,24 +336,30 @@ public class RestVerticleTest {
     }
   }
 
-  private void mutateURLs(String api, TestContext context, HttpMethod method, String content,
-      String contentType, int errorCode) {
+  private void mutateURLs(
+    String url,
+    TestContext context,
+    HttpMethod method,
+    String content,
+    String contentType,
+    int expectedStatusCode) {
+
     Async async = context.async();
     HttpClient client = vertx.createHttpClient();
     HttpClientRequest request;
     Buffer buffer = Buffer.buffer(content);
 
     if (method == HttpMethod.POST) {
-      request = client.postAbs(api);
+      request = client.postAbs(url);
     }
     else if (method == HttpMethod.DELETE) {
-      request = client.deleteAbs(api);
+      request = client.deleteAbs(url);
     }
     else if (method == HttpMethod.GET) {
-      request = client.getAbs(api);
+      request = client.getAbs(url);
     }
     else {
-      request = client.putAbs(api);
+      request = client.putAbs(url);
     }
     request.exceptionHandler(error -> {
       async.complete();
@@ -371,16 +381,16 @@ public class RestVerticleTest {
           e.printStackTrace();
         }
       }
-      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
-      if(errorCode == statusCode){
+      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
+      if(expectedStatusCode == statusCode){
         context.assertTrue(true);
       }
-      else if(errorCode == 0){
+      else if(expectedStatusCode == 0){
         //currently dont care about return value
         context.assertTrue(true);
       }
       else {
-        context.fail("expected " + errorCode +" code, but got " + statusCode);
+        context.fail("expected " + expectedStatusCode +" code, but got " + statusCode);
       }
       if(!async.isCompleted()){
         async.complete();
