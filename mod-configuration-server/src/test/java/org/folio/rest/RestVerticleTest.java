@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
-import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -54,7 +53,6 @@ public class RestVerticleTest {
   private ArrayList<String> urls;
   private int port;
   private TenantClient tClient = null;
-  private AdminClient aClient  = null;
 
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
@@ -92,7 +90,6 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    aClient = new AdminClient("localhost", port, "harvard", "harvard");
     tClient = new TenantClient("localhost", port, "harvard", "harvard");
 
 /*    port = 8888;//NetworkUtils.nextFreePort();
