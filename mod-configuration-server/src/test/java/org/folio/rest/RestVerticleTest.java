@@ -73,24 +73,13 @@ public class RestVerticleTest {
 
     tClient = new TenantClient("localhost", port, "harvard", "harvard");
 
-/*    port = 8888;//NetworkUtils.nextFreePort();
+    DeploymentOptions options = new DeploymentOptions().setConfig(
+      new JsonObject().put("http.port", port));
 
-    AdminClient aClient = new AdminClient("localhost", port, "myuniversity");
-    try {
-      aClient.postImportSQL(
-        RestVerticleTest.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
-          async.complete();
-        });
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-      port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleFrom("v1");
-        //ta.setModuleTo("v2");
         tClient.post(ta, response -> {
           if(422 == response.statusCode()){
             try {
@@ -247,19 +236,6 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
         HttpMethod.PUT,"",  "application/json", 200);
 
-/*      conf2.setMetadata(null);
-      conf2.setModule("BATCH");
-      conf2.setValue("what1");
-      Config conf3 = (Config)BeanUtils.cloneBean(conf2);
-      conf3.setValue("what2");
-      Configs c = new Configs();
-      List<Config> configArray = new ArrayList<>();
-      configArray.add(conf2);
-      configArray.add(conf3);
-      c.setConfigs(configArray);
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.PUT,
-        new ObjectMapper().writeValueAsString(c), "application/json", 204);*/
-
     } catch (Exception e) {
       e.printStackTrace();
       context.assertTrue(false, e.getMessage());
@@ -303,17 +279,6 @@ public class RestVerticleTest {
                         async.complete();
                       }
                     }
-/*                    aClient.getModuleStats( res -> {
-                      res.bodyHandler( b -> {
-                        System.out.println(urlInfo[1] + "  "+b.toString());
-                        aClient.getHealth( r -> {
-                          r.bodyHandler( bh -> {
-                            System.out.println(urlInfo[1] + "  "+bh.toString());
-                            async.complete();
-                          });
-                        });
-                      });
-                    });*/
                   }
                   catch(Exception e){
                     e.printStackTrace();
@@ -372,7 +337,6 @@ public class RestVerticleTest {
       if(method == HttpMethod.POST && statusCode == 201){
         try {
           System.out.println("Location - " + response.getHeader("Location"));
-          //String content2 = getFile("kv_configuration.sample");
           Config conf =  new ObjectMapper().readValue(content, Config.class);
           conf.setDescription(conf.getDescription());
           mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
@@ -386,7 +350,7 @@ public class RestVerticleTest {
         context.assertTrue(true);
       }
       else if(expectedStatusCode == 0){
-        //currently dont care about return value
+        //currently don't care about return value
         context.assertTrue(true);
       }
       else {
