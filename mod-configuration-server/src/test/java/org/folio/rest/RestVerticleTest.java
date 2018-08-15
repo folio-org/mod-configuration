@@ -49,16 +49,16 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
-
-  private static Locale     oldLocale;
-  private static Vertx      vertx;
+  private static Locale oldLocale;
+  private static Vertx vertx;
   private ArrayList<String> urls;
-  int                       port;
-  TenantClient tClient = null;
-  AdminClient aClient  = null;
+  private int port;
+  private TenantClient tClient = null;
+  private AdminClient aClient  = null;
 
   static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
+    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
+      "io.vertx.core.logging.Log4jLogDelegateFactory");
   }
 
   @BeforeClass
