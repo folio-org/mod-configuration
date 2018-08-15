@@ -58,7 +58,7 @@ public class RestVerticleTest {
   }
 
   @Before
-  public void setUp(TestContext context) throws IOException {
+  public void setUp(TestContext context) {
     vertx = Vertx.vertx();
 
     try {
@@ -117,7 +117,7 @@ public class RestVerticleTest {
 
   }
 
-  private static void setupPostgres() throws Exception {
+  private static void setupPostgres() throws IOException {
     PostgresClient.setIsEmbedded(true);
     PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
