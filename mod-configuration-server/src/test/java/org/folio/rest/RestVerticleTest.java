@@ -125,22 +125,8 @@ public class RestVerticleTest {
       context, HttpMethod.PUT,"",  "application/json", 200);
   }
 
-  /**
-   * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
-   */
   @Test
-  public void checkURLs(TestContext context) {
-    createSampleRecords(context);
-    waitForTwoSeconds();
-    checkPersistentCaching(context);
-    checkResultsFromVariousUrls(context);
-  }
-
-  private void checkResultsFromVariousUrls(TestContext context) {
-    runGETURLoop(context, urlsFromFile());
-  }
-
-  private void checkPersistentCaching(TestContext context) {
+  public void canUsePersistentCaching(TestContext context) {
     Async async = context.async();
 
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
@@ -174,6 +160,20 @@ public class RestVerticleTest {
           });
         }
       });
+  }
+
+  /**
+   * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
+   */
+  @Test
+  public void checkURLs(TestContext context) {
+    createSampleRecords(context);
+    waitForTwoSeconds();
+    checkResultsFromVariousUrls(context);
+  }
+
+  private void checkResultsFromVariousUrls(TestContext context) {
+    runGETURLoop(context, urlsFromFile());
   }
 
   private void waitForTwoSeconds() {
