@@ -3,12 +3,10 @@ package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -252,46 +250,40 @@ public class RestVerticleTest {
         String[] urlInfo = url.split(" , ");
         HttpClient client = vertx.createHttpClient();
         HttpClientRequest request = client.requestAbs(HttpMethod.GET,
-          urlInfo[1].trim().replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
-          @Override
-          public void handle(HttpClientResponse httpClientResponse) {
+          urlInfo[1].trim().replaceFirst("<port>", port + ""), httpClientResponse -> {
             int statusCode = httpClientResponse.statusCode();
             System.out.println("Status - " + statusCode + " " + urlInfo[1]);
             if (httpClientResponse.statusCode() != Integer.parseInt(urlInfo[3])) {
               context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
               async.complete();
             }
-            httpClientResponse.bodyHandler(new Handler<Buffer>() {
-              @Override
-              public void handle(Buffer buffer) {
-                if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
-                  //assume empty body / empty array of data
-                  async.complete();
-                }
-                else{
-                  try{
-                    System.out.println(buffer.toString());
-                    int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
-                    System.out.println("-------->"+records);
-                    if(httpClientResponse.statusCode() == 200){
-                      if(records != Integer.parseInt(urlInfo[4])){
-                        context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
-                        async.complete();
-                      }
-                      else{
-                        async.complete();
-                      }
+            httpClientResponse.bodyHandler(buffer -> {
+              if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
+                //assume empty body / empty array of data
+                async.complete();
+              }
+              else{
+                try{
+                  System.out.println(buffer.toString());
+                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
+                  System.out.println("-------->"+records);
+                  if(httpClientResponse.statusCode() == 200){
+                    if(records != Integer.parseInt(urlInfo[4])){
+                      context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
+                      async.complete();
+                    }
+                    else{
+                      async.complete();
                     }
                   }
-                  catch(Exception e){
-                    e.printStackTrace();
-                    context.fail(e.getMessage());
-                  }
+                }
+                catch(Exception e){
+                  e.printStackTrace();
+                  context.fail(e.getMessage());
                 }
               }
             });
-          }
-        });
+          });
         request.putHeader("X-Okapi-Request-Id", "999999999999");
         request.putHeader("x-okapi-tenant", "harvard");
         request.headers().add("Authorization", "harvard");
