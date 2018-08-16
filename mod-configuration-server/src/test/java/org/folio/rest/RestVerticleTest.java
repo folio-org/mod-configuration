@@ -23,12 +23,18 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -112,10 +118,21 @@ public class RestVerticleTest {
     Locale.setDefault(oldLocale);
   }
 
-  private static void setupPostgres() throws IOException {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+  @Before
+  public void beforeEach()
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
+
+    //Delete all configuration records
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
+
+    postgresClient.mutate(String.format("TRUNCATE TABLE %s_%s.config_data",
+      "harvard", "mod_configuration"), reply -> allDeleted.complete(null));
+
+    allDeleted.get(5, TimeUnit.SECONDS);
   }
 
   @Test
@@ -381,5 +398,11 @@ public class RestVerticleTest {
 
   private String getFile(String filename) throws IOException {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
+  }
+
+  private static void setupPostgres() throws IOException {
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 }
