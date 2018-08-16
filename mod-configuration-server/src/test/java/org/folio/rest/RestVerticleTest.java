@@ -124,15 +124,7 @@ public class RestVerticleTest {
     ExecutionException,
     TimeoutException {
 
-    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
-
-    //Delete all configuration records
-    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
-
-    postgresClient.mutate(String.format("TRUNCATE TABLE %s_%s.config_data",
-      "harvard", "mod_configuration"), reply -> allDeleted.complete(null));
-
-    allDeleted.get(5, TimeUnit.SECONDS);
+    deleteAllConfigurationRecordsExceptLocales().get(5, TimeUnit.SECONDS);
   }
 
   @Test
@@ -404,5 +396,25 @@ public class RestVerticleTest {
     PostgresClient.setIsEmbedded(true);
     PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+  }
+
+  private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
+    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
+
+    //Delete all configuration records
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
+
+    //Do not delete the sample records created from
+    postgresClient.mutate(String.format("DELETE FROM %s_%s.config_data WHERE jsonb->>'configName' != 'locale'",
+      "harvard", "mod_configuration"), reply -> {
+      if(reply.succeeded()) {
+        allDeleted.complete(null);
+      }
+      else {
+        allDeleted.completeExceptionally(reply.cause());
+      }
+    });
+
+    return allDeleted;
   }
 }
