@@ -37,8 +37,8 @@ import java.util.*;
 public class RestVerticleTest {
   private static Locale oldLocale;
   private static Vertx vertx;
-  private int port;
-  private TenantClient tClient = null;
+  private static int port;
+  private static TenantClient tClient = null;
 
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
@@ -46,18 +46,10 @@ public class RestVerticleTest {
   }
 
   @BeforeClass
-  public static void setUpClass() {
+  public static void beforeAll(TestContext context) {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.US);
-  }
 
-  @AfterClass
-  public static void tearDownClass() {
-    Locale.setDefault(oldLocale);
-  }
-
-  @Before
-  public void setUp(TestContext context) {
     vertx = Vertx.vertx();
 
     try {
@@ -102,17 +94,10 @@ public class RestVerticleTest {
         e.printStackTrace();
       }
     }));
-
   }
 
-  private static void setupPostgres() throws IOException {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
-
-  @After
-  public void tearDown(TestContext context) {
+  @AfterClass
+  public static void afterAll(TestContext context) {
     Async async = context.async();
     tClient.delete( reply -> {
       reply.bodyHandler( body2 -> {
@@ -123,6 +108,14 @@ public class RestVerticleTest {
         }));
       });
     });
+
+    Locale.setDefault(oldLocale);
+  }
+
+  private static void setupPostgres() throws IOException {
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
   /**
