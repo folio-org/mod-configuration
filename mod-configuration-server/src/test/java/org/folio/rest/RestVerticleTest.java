@@ -81,12 +81,11 @@ public class RestVerticleTest {
         tClient.post(ta, response -> {
           if(422 == response.statusCode()){
             try {
-              tClient.post(null, responseHandler -> {
-                responseHandler.bodyHandler( body -> {
-                  System.out.println(body.toString());
-                  async.complete();
-                });
-              });
+              tClient.post(null, responseHandler ->
+                responseHandler.bodyHandler(body -> {
+                System.out.println(body.toString());
+                async.complete();
+              }));
             } catch (Exception e) {
               context.fail(e.getMessage());
             }
@@ -105,15 +104,13 @@ public class RestVerticleTest {
   @AfterClass
   public static void afterAll(TestContext context) {
     Async async = context.async();
-    tClient.delete( reply -> {
-      reply.bodyHandler( body2 -> {
-        System.out.println(body2.toString());
-        vertx.close(context.asyncAssertSuccess( res-> {
-          PostgresClient.stopEmbeddedPostgres();
-          async.complete();
-        }));
-      });
-    });
+    tClient.delete(reply -> reply.bodyHandler(body -> {
+      System.out.println(body.toString());
+      vertx.close(context.asyncAssertSuccess(res-> {
+        PostgresClient.stopEmbeddedPostgres();
+        async.complete();
+      }));
+    }));
 
     Locale.setDefault(oldLocale);
   }
@@ -336,9 +333,9 @@ public class RestVerticleTest {
       async.complete();
       context.fail(error.getMessage());
     }).handler(response -> {
-      response.headers().forEach( header -> {
-        System.out.println(header.getKey() + " " + header.getValue());
-      });
+      response.headers().forEach( header ->
+        System.out.println(header.getKey() + " " + header.getValue()));
+
       int statusCode = response.statusCode();
       if(method == HttpMethod.POST && statusCode == 201){
         try {
