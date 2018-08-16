@@ -39,6 +39,9 @@ import java.util.concurrent.TimeoutException;
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
+  private static final String TENANT_ID = "harvard";
+
   private static Locale oldLocale;
   private static Vertx vertx;
   private static int port;
@@ -57,7 +60,7 @@ public class RestVerticleTest {
     vertx = Vertx.vertx();
 
     try {
-      AES.setSecretKey("b2+S+X4F/NFys/0jMaEG1A");
+      AES.setSecretKey(SECRET_KEY);
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
@@ -67,7 +70,7 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("localhost", port, "harvard", "harvard");
+    tClient = new TenantClient("localhost", port, TENANT_ID, TENANT_ID);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
       new JsonObject().put("http.port", port));
@@ -133,7 +136,7 @@ public class RestVerticleTest {
   public void canUsePersistentCaching(TestContext context) {
     Async async = context.async();
 
-    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     postgresClient.persistentlyCacheResult("mytablecache",
       "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
@@ -285,8 +288,8 @@ public class RestVerticleTest {
             });
           });
         request.putHeader("X-Okapi-Request-Id", "999999999999");
-        request.putHeader("x-okapi-tenant", "harvard");
-        request.headers().add("Authorization", "harvard");
+        request.putHeader("x-okapi-tenant", TENANT_ID);
+        request.headers().add("Authorization", TENANT_ID);
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -358,8 +361,8 @@ public class RestVerticleTest {
     });
     request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
-    request.putHeader("Authorization", "harvard");
-    request.putHeader("x-okapi-tenant", "harvard");
+    request.putHeader("Authorization", TENANT_ID);
+    request.putHeader("x-okapi-tenant", TENANT_ID);
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);
@@ -390,12 +393,11 @@ public class RestVerticleTest {
   private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
     CompletableFuture<Void> allDeleted = new CompletableFuture<>();
 
-    //Delete all configuration records
-    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, "harvard");
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     //Do not delete the sample records created from
     postgresClient.mutate(String.format("DELETE FROM %s_%s.config_data WHERE jsonb->>'configName' != 'locale'",
-      "harvard", "mod_configuration"), reply -> {
+      TENANT_ID, "mod_configuration"), reply -> {
       if(reply.succeeded()) {
         allDeleted.complete(null);
       }
