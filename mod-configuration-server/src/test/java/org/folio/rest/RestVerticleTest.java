@@ -8,6 +8,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
@@ -28,6 +29,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -187,6 +191,56 @@ public class RestVerticleTest {
     });
   }
 
+  @Test
+  public void canGetConfigurationRecords(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
+
+    JsonObject firstConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    allCreated.add(post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily()));
+
+    JsonObject secondConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "checkoutTimeoutDuration")
+      .put("value", 3);
+
+    allCreated.add(post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily()));
+
+    allOf(allCreated).thenComposeAsync(v ->
+      //Must filter to only check out module entries due to default locale records
+      get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
+    .thenAccept(response -> {
+      try {
+        testContext.assertEquals(200, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+        testContext.assertEquals(2, wrappedRecords.getInteger("totalRecords"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+  
   @Test
   public void canChangeLogLevel(TestContext context) {
     mutateURLs("http://localhost:" + port +
@@ -484,6 +538,30 @@ public class RestVerticleTest {
     return allDeleted;
   }
 
+  private CompletableFuture<Response> get(String url) {
+    HttpClient client = vertx.createHttpClient();
+
+    HttpClientRequest request = client.getAbs(url);
+
+    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
+
+    request.exceptionHandler(getCompleted::completeExceptionally);
+
+    request.handler(response ->
+      response.bodyHandler(buffer -> getCompleted.complete(
+        new Response(response.statusCode(),
+          buffer.getString(0, buffer.length())))));
+
+    request.putHeader("X-Okapi-Tenant", TENANT_ID);
+    request.putHeader("X-Okapi-Token", TOKEN);
+    request.putHeader("X-Okapi-User-Id", USER_ID);
+    request.putHeader("Accept", "application/json,text/plain");
+
+    request.end();
+
+    return getCompleted;
+  }
+
   private CompletableFuture<Response> post(String url, String jsonContent) {
     HttpClient client = vertx.createHttpClient();
 
@@ -528,5 +606,11 @@ public class RestVerticleTest {
     String getBody() {
       return body;
     }
+  }
+
+  public static <T> CompletableFuture<Void> allOf(
+    List<CompletableFuture<T>> allFutures) {
+
+    return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
   }
 }
