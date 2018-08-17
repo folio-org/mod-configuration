@@ -240,6 +240,74 @@ public class RestVerticleTest {
       }
     });
   }
+
+  @Test
+  public void canSortConfigurationRecordsByCreatedDate(TestContext testContext)
+    throws UnsupportedEncodingException,
+    InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    final CompletableFuture<Response> firstRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    //Make sure the first record is created before the second
+    firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "checkoutTimeoutDuration")
+      .put("value", 3);
+
+    final CompletableFuture<Response> secondRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    String encodedQuery = URLEncoder.encode("module==CHECKOUT sortBy metadata.createdDate/sort.descending",
+      StandardCharsets.UTF_8.name());
+
+    //Must filter to only check out module entries due to default locale records
+    get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(200, response.statusCode,
+            String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+              response.getBody()));
+
+          JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+          testContext.assertEquals(2, wrappedRecords.getInteger("totalRecords"));
+
+          final JsonArray records = wrappedRecords.getJsonArray("configs");
+
+          testContext.assertEquals("checkoutTimeoutDuration",
+            records.getJsonObject(0).getString("code"));
+
+          testContext.assertEquals("audioAlertsEnabled",
+            records.getJsonObject(1).getString("code"));
+        }
+        catch(Exception e) {
+          testContext.fail(e);
+        }
+        finally {
+          async.complete();
+        }
+      });
+  }
   
   @Test
   public void canChangeLogLevel(TestContext context) {
