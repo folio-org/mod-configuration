@@ -12,38 +12,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.folio</groupId>
-      <artifactId>domain-models-runtime</artifactId>
-      <version>19.0.0</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>commons-collections</artifactId>
-          <groupId>commons-collections</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jsr311-api</artifactId>
-          <groupId>javax.ws.rs</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xmlParserAPIs</artifactId>
-          <groupId>xerces</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xpp3_min</artifactId>
-          <groupId>xpp3</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-      <version>3.4.1</version>
-    </dependency>
-  </dependencies>
-
   <build>
     <resources>
       <resource>
