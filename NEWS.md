@@ -1,3 +1,6 @@
+## 4.0.4 unreleased
+* MODCONF-22 - use dereferenced kv_configuration.schema for metadata sorting
+
 ## 4.0.3 2018-04-24
 * MODCONF-17 - 500 and 422 errors while querying configurations/audit
 
