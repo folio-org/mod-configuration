@@ -113,8 +113,21 @@ public class ConfigAPI implements ConfigurationsResource {
                 }
                 else{
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
-                    .withPlainBadRequest(reply.cause().getMessage())));
+                  if(reply.cause() instanceof CQLQueryValidationException) {
+                    int start = reply.cause().getMessage().indexOf("'");
+                    int end = reply.cause().getMessage().lastIndexOf("'");
+                    String field = reply.cause().getMessage();
+                    if(start != -1 && end != -1){
+                      field = field.substring(start+1, end);
+                    }
+                    Errors e = ValidationHelper.createValidationErrorMessage(field, "", reply.cause().getMessage());
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
+                      .withJsonUnprocessableEntity(e)));
+                  }
+                  else {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
+                      .withPlainBadRequest(reply.cause().getMessage())));	  
+                  }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -123,18 +136,6 @@ public class ConfigAPI implements ConfigurationsResource {
                     lang, MessageConsts.InternalServerError))));
               }
             });
-      }
-      catch(CQLQueryValidationException e1){
-        int start = e1.getMessage().indexOf("'");
-        int end = e1.getMessage().lastIndexOf("'");
-        String field = e1.getMessage();
-        if(start != -1 && end != -1){
-          field = field.substring(start+1, end);
-        }
-        log.error(e1.getMessage());
-        Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetConfigurationsEntriesResponse
-          .withJsonUnprocessableEntity(e)));
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);

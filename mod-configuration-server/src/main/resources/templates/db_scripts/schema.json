@@ -24,29 +24,18 @@
       "likeIndex": [
         {
           "fieldName": "configName",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "whereClause": "WHERE ((jsonb->>'enabled'))::boolean = true",
-          "removeAccents": false
+          "tOps": "ADD"
         },
         {
           "fieldName": "code",
-          "tOps": "ADD",
-          "caseSensitive": false,
-          "removeAccents": false
+          "tOps": "ADD"
         }
       ],
       "index": [
         {
           "fieldName": "module",
-          "tOps": "ADD",
-          "removeAccents": false
-        },
-        {
-          "fieldName": "default",
-          "tOps": "ADD",
-          "stringType": false
-        }    
+          "tOps": "ADD"
+        }
       ]
     }
   ]
