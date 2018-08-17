@@ -51,7 +51,7 @@ public class ConfigAPI implements ConfigurationsResource {
   private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
-  private static final String       CONFIG_SCHEMA_NAME= "apidocs/raml/_schemas/kv_configuration.schema";
+  private static final String       CONFIG_SCHEMA_NAME= "ramls/_schemas/kv_configuration.schema";
   private static String             configSchema      =  null;
 
   private final Messages            messages          = Messages.getInstance();
