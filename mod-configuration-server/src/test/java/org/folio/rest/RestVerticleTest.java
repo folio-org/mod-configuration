@@ -41,6 +41,8 @@ import java.util.concurrent.TimeoutException;
 public class RestVerticleTest {
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
   private static final String TENANT_ID = "harvard";
+  private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
+  private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOiI3OWZmMmE4Yi1kOWMzLTViMzktYWQ0YS0wYTg0MDI1YWIwODUiLCJ0ZW5hbnQiOiJ0ZXN0X3RlbmFudCJ9BShwfHcNClt5ZXJ8ImQTMQtAM1sQEnhsfWNmXGsYVDpuaDN3RVQ9";
 
   private static Locale oldLocale;
   private static Vertx vertx;
@@ -70,7 +72,7 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("localhost", port, TENANT_ID, TENANT_ID);
+    tClient = new TenantClient("localhost", port, TENANT_ID, TOKEN);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
       new JsonObject().put("http.port", port));
@@ -146,7 +148,7 @@ public class RestVerticleTest {
             postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
               System.out.println(r4.succeeded());
 
-              /** this will probably cause a deadlock as the saveBatch runs within a transaction */
+              /* this will probably cause a deadlock as the saveBatch runs within a transaction */
 
              /*
              List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
@@ -288,8 +290,10 @@ public class RestVerticleTest {
             });
           });
         request.putHeader("X-Okapi-Request-Id", "999999999999");
-        request.putHeader("x-okapi-tenant", TENANT_ID);
         request.headers().add("Authorization", TENANT_ID);
+        request.putHeader("x-Okapi-Tenant", TENANT_ID);
+        request.putHeader("x-Okapi-Token", TOKEN);
+        request.putHeader("x-Okapi-User-Id", USER_ID);
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -362,7 +366,9 @@ public class RestVerticleTest {
     request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
     request.putHeader("Authorization", TENANT_ID);
-    request.putHeader("x-okapi-tenant", TENANT_ID);
+    request.putHeader("x-Okapi-Tenant", TENANT_ID);
+    request.putHeader("x-Okapi-Token", TOKEN);
+    request.putHeader("x-Okapi-User-Id", USER_ID);
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);
