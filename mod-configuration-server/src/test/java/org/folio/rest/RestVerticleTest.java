@@ -130,6 +130,64 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateConfigurationRecord(TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject configRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    final CompletableFuture<Response> postCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      configRecord.encodePrettily());
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertEquals("audioAlertsEnabled", createdRecord.getString("code"));
+        //TODO: Investigate why boolean value gets converted into a string
+        testContext.assertEquals("true", createdRecord.getString("value"));
+
+        testContext.assertTrue(createdRecord.containsKey("metadata"),
+          String.format("Should contain change metadata property: '%s'",
+            createdRecord.encodePrettily()));
+
+        final JsonObject changeMetadata = createdRecord.getJsonObject("metadata");
+
+        testContext.assertTrue(changeMetadata.containsKey("createdDate"),
+          String.format("Should contain created date property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
+          String.format("Should contain created by property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
+          String.format("Should contain updated date property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
+          String.format("Should contain updated by property: '%s'", changeMetadata));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
   public void canChangeLogLevel(TestContext context) {
     mutateURLs("http://localhost:" + port +
         "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist",
@@ -424,5 +482,51 @@ public class RestVerticleTest {
     });
 
     return allDeleted;
+  }
+
+  private CompletableFuture<Response> post(String url, String jsonContent) {
+    HttpClient client = vertx.createHttpClient();
+
+    HttpClientRequest request = client.postAbs(url);
+    Buffer requestBuffer = Buffer.buffer(jsonContent);
+
+    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
+
+    request.exceptionHandler(getCompleted::completeExceptionally);
+
+    request.handler(response ->
+      response.bodyHandler(responseBuffer -> {
+        getCompleted.complete(new Response(
+          response.statusCode(),
+          responseBuffer.getString(0, responseBuffer.length())));
+      }));
+
+    request.putHeader("X-Okapi-Tenant", TENANT_ID);
+    request.putHeader("X-Okapi-Token", TOKEN);
+    request.putHeader("X-Okapi-User-Id", USER_ID);
+    request.putHeader("Content-type", "application/json");
+    request.putHeader("Accept", "application/json,text/plain");
+
+    request.end(requestBuffer);
+
+    return getCompleted;
+  }
+
+  private class Response {
+    private final Integer statusCode;
+    private final String body;
+
+    private Response(Integer statusCode, String body) {
+      this.statusCode = statusCode;
+      this.body = body;
+    }
+
+    Integer getStatusCode() {
+      return statusCode;
+    }
+
+    String getBody() {
+      return body;
+    }
   }
 }
