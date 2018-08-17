@@ -124,7 +124,9 @@ public class RestVerticleTest {
     ExecutionException,
     TimeoutException {
 
-    deleteAllConfigurationRecordsExceptLocales().get(5, TimeUnit.SECONDS);
+    deleteAllConfigurationRecordsExceptLocales()
+      .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
+      .get(5, TimeUnit.SECONDS);
   }
 
   @Test
@@ -403,6 +405,25 @@ public class RestVerticleTest {
 
     //Do not delete the sample records created from
     postgresClient.mutate(String.format("DELETE FROM %s_%s.config_data WHERE jsonb->>'configName' != 'locale'",
+      TENANT_ID, "mod_configuration"), reply -> {
+      if(reply.succeeded()) {
+        allDeleted.complete(null);
+      }
+      else {
+        allDeleted.completeExceptionally(reply.cause());
+      }
+    });
+
+    return allDeleted;
+  }
+
+  private CompletableFuture<Void> deleteAllConfigurationAuditRecordsExceptLocales() {
+    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
+
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
+
+    //Do not delete the sample records created from
+    postgresClient.mutate(String.format("DELETE FROM %s_%s.audit_config_data WHERE jsonb->>'configName' != 'locale'",
       TENANT_ID, "mod_configuration"), reply -> {
       if(reply.succeeded()) {
         allDeleted.complete(null);
