@@ -138,10 +138,11 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = new ConfigurationRecordBuilder(
-      "audioAlertsEnabled",
-      true,
-      "Whether audio alerts should be made during check out").create();
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withCode("audioAlertsEnabled")
+      .withValue(true)
+      .withDescription("Whether audio alerts should be made during check out")
+      .create();
 
     final CompletableFuture<Response> postCompleted = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -233,19 +234,21 @@ public class RestVerticleTest {
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder(
-      "audioAlertsEnabled",
-      true,
-      "Whether audio alerts should be made during check out").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withCode("audioAlertsEnabled")
+      .withValue(true)
+      .withDescription("Whether audio alerts should be made during check out")
+      .create();
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder(
-      "checkoutTimeoutDuration",
-      3,
-      "How long the timeout for a check out session should be").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withCode("checkoutTimeoutDuration")
+      .withValue(3)
+      .withDescription("How long the timeout for a check out session should be")
+      .create();
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
@@ -282,10 +285,11 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder(
-      "audioAlertsEnabled",
-      true,
-      "Whether audio alerts should be made during check out").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withCode("audioAlertsEnabled")
+      .withValue(true)
+      .withDescription("Whether audio alerts should be made during check out")
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -294,10 +298,11 @@ public class RestVerticleTest {
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder(
-      "checkoutTimeoutDuration",
-      3,
-      "How long the timeout for a check out session should be").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withCode("checkoutTimeoutDuration")
+      .withValue(3)
+      .withDescription("How long the timeout for a check out session should be")
+      .create();
 
     final CompletableFuture<Response> secondRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",

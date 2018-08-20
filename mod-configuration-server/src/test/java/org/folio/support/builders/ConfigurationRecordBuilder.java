@@ -8,7 +8,11 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   private Object value;
   private String description;
 
-  public ConfigurationRecordBuilder(
+  public ConfigurationRecordBuilder() {
+    this(null, null, null);
+  }
+
+  private ConfigurationRecordBuilder(
     String code,
     Object value,
     String description) {
@@ -28,5 +32,26 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     put(configurationRecord, "value", this.value);
 
     return configurationRecord;
+  }
+
+  public ConfigurationRecordBuilder withCode(String code) {
+    return new ConfigurationRecordBuilder(
+      code,
+      this.value,
+      this.description);
+  }
+
+  public ConfigurationRecordBuilder withValue(Object value) {
+    return new ConfigurationRecordBuilder(
+      this.code,
+      value,
+      this.description);
+  }
+
+  public ConfigurationRecordBuilder withDescription(String description) {
+    return new ConfigurationRecordBuilder(
+      this.code,
+      this.value,
+      description);
   }
 }
