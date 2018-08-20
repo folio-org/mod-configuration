@@ -137,12 +137,10 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject configRecord = configurationRecord(
+      "audioAlertsEnabled",
+      true,
+      "Whether audio alerts should be made during check out");
 
     final CompletableFuture<Response> postCompleted = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -234,23 +232,19 @@ public class RestVerticleTest {
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject firstConfigRecord = configurationRecord(
+      "audioAlertsEnabled",
+      true,
+      "Whether audio alerts should be made during check out");
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
-    JsonObject secondConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "checkoutTimeoutDuration")
-      .put("value", 3);
+    JsonObject secondConfigRecord = configurationRecord(
+      "checkoutTimeoutDuration",
+      3,
+      "How long the timeout for a check out session should be");
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
@@ -287,12 +281,10 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject firstConfigRecord = configurationRecord(
+      "audioAlertsEnabled",
+      true,
+      "Whether audio alerts should be made during check out");
 
     final CompletableFuture<Response> firstRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -301,12 +293,10 @@ public class RestVerticleTest {
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "checkoutTimeoutDuration")
-      .put("value", 3);
+    JsonObject secondConfigRecord = configurationRecord(
+      "checkoutTimeoutDuration",
+      3,
+      "How long the timeout for a check out session should be");
 
     final CompletableFuture<Response> secondRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -717,5 +707,18 @@ public class RestVerticleTest {
     List<CompletableFuture<T>> allFutures) {
 
     return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
+  }
+
+  private JsonObject configurationRecord(
+    String code,
+    Object value,
+    String description) {
+
+    return new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", description)
+      .put("code", code)
+      .put("value", value);
   }
 }
