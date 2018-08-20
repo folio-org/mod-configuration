@@ -259,6 +259,41 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateMultipleConfigurationRecordsWithSameConfigNameAndDifferentModuleWithoutCode(
+    TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("RENEWAL")
+      .withConfigName("main_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
 
