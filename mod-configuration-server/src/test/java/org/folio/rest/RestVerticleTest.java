@@ -22,6 +22,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -137,7 +138,7 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = configurationRecord(
+    JsonObject configRecord = ConfigurationRecordBuilder.configurationRecord(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -232,7 +233,7 @@ public class RestVerticleTest {
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = configurationRecord(
+    JsonObject firstConfigRecord = ConfigurationRecordBuilder.configurationRecord(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -241,7 +242,7 @@ public class RestVerticleTest {
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
-    JsonObject secondConfigRecord = configurationRecord(
+    JsonObject secondConfigRecord = ConfigurationRecordBuilder.configurationRecord(
       "checkoutTimeoutDuration",
       3,
       "How long the timeout for a check out session should be");
@@ -281,7 +282,7 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = configurationRecord(
+    JsonObject firstConfigRecord = ConfigurationRecordBuilder.configurationRecord(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -293,7 +294,7 @@ public class RestVerticleTest {
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = configurationRecord(
+    JsonObject secondConfigRecord = ConfigurationRecordBuilder.configurationRecord(
       "checkoutTimeoutDuration",
       3,
       "How long the timeout for a check out session should be");
@@ -707,18 +708,5 @@ public class RestVerticleTest {
     List<CompletableFuture<T>> allFutures) {
 
     return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
-  }
-
-  private JsonObject configurationRecord(
-    String code,
-    Object value,
-    String description) {
-
-    return new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", description)
-      .put("code", code)
-      .put("value", value);
   }
 }
