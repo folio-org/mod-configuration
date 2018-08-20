@@ -264,13 +264,6 @@ public class RestVerticleTest {
     });
   }
 
-  private ConfigurationRecordBuilder audioAlertsExample() {
-    return new ConfigurationRecordBuilder()
-      .withCode("audioAlertsEnabled")
-      .withValue(true)
-      .withDescription("Whether audio alerts should be made during check out");
-  }
-
   @Test
   public void canSortConfigurationRecordsByCreatedDate(TestContext testContext)
     throws UnsupportedEncodingException,
@@ -327,13 +320,6 @@ public class RestVerticleTest {
           async.complete();
         }
       });
-  }
-
-  private ConfigurationRecordBuilder timeOutDurationExample() {
-    return new ConfigurationRecordBuilder()
-      .withCode("checkoutTimeoutDuration")
-      .withValue(3)
-      .withDescription("How long the timeout for a check out session should be");
   }
 
   @Test
@@ -707,5 +693,21 @@ public class RestVerticleTest {
     List<CompletableFuture<T>> allFutures) {
 
     return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
+  }
+
+  private static ConfigurationRecordBuilder timeOutDurationExample() {
+    return new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withCode("checkoutTimeoutDuration")
+      .withValue(3)
+      .withDescription("How long the timeout for a check out session should be");
+  }
+
+  private static ConfigurationRecordBuilder audioAlertsExample() {
+    return new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withCode("audioAlertsEnabled")
+      .withValue(true)
+      .withDescription("Whether audio alerts should be made during check out");
   }
 }
