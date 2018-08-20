@@ -3,7 +3,7 @@ package org.folio.support.builders;
 import io.vertx.core.json.JsonObject;
 
 public class ConfigurationRecordBuilder {
-  public static JsonObject configurationRecord(
+  public JsonObject configurationRecord(
     String code,
     Object value,
     String description) {
