@@ -192,6 +192,43 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateConfigurationRecordWithoutCode(TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject configRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "other checkout settings")
+      .put("value", "{ \"audioAlertsEnabled\": \"true\" }");
+
+    final CompletableFuture<Response> postCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      configRecord.encodePrettily());
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertFalse(createdRecord.containsKey("code"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
 
@@ -308,7 +345,7 @@ public class RestVerticleTest {
         }
       });
   }
-  
+
   @Test
   public void canChangeLogLevel(TestContext context) {
     mutateURLs("http://localhost:" + port +
