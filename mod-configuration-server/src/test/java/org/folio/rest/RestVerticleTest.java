@@ -225,7 +225,9 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canCreateMultipleConfigurationRecordsWithoutCode(TestContext testContext) {
+  public void canCreateMultipleConfigurationRecordsWithDifferentConfigNameWithoutCode(
+    TestContext testContext) {
+
     final Async async = testContext.async();
 
     JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
@@ -259,7 +261,7 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canCreateMultipleConfigurationRecordsWithSameConfigNameAndDifferentModuleWithoutCode(
+  public void canCreateMultipleConfigurationRecordsWithDifferentModuleWithoutCode(
     TestContext testContext) {
     final Async async = testContext.async();
 
@@ -276,6 +278,43 @@ public class RestVerticleTest {
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
       .withModuleName("RENEWAL")
       .withConfigName("main_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithDifferentConfigName(
+    TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("second_setting")
       .withValue("some other value")
       .create();
 
