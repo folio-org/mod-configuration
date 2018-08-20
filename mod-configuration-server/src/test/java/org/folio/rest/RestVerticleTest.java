@@ -1,18 +1,20 @@
 package org.folio.rest;
 
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Locale;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.IOUtils;
-import org.folio.rest.client.AdminClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -20,69 +22,51 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.ByteStreams;
-
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
+  private static final String TENANT_ID = "harvard";
+  private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
+  private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOiI3OWZmMmE4Yi1kOWMzLTViMzktYWQ0YS0wYTg0MDI1YWIwODUiLCJ0ZW5hbnQiOiJ0ZXN0X3RlbmFudCJ9BShwfHcNClt5ZXJ8ImQTMQtAM1sQEnhsfWNmXGsYVDpuaDN3RVQ9";
 
-  private static Locale     oldLocale;
-  private static Vertx      vertx;
-  private ArrayList<String> urls;
-  int                       port;
-  TenantClient tClient = null;
-  AdminClient aClient  = null;
+  private static Locale oldLocale;
+  private static Vertx vertx;
+  private static int port;
+  private static TenantClient tClient = null;
 
   static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
+    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
+      "io.vertx.core.logging.Log4jLogDelegateFactory");
   }
 
   @BeforeClass
-  public static void setUpClass() {
+  public static void beforeAll(TestContext context) {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.US);
-  }
 
-  @AfterClass
-  public static void tearDownClass() {
-    Locale.setDefault(oldLocale);
-  }
-
-  /**
-   *
-   * @param context
-   *          the test context.
-   */
-  @Before
-  public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
 
     try {
-      AES.setSecretKey("b2+S+X4F/NFys/0jMaEG1A");
+      AES.setSecretKey(SECRET_KEY);
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
@@ -92,36 +76,23 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    aClient = new AdminClient("localhost", port, "harvard", "harvard");
-    tClient = new TenantClient("localhost", port, "harvard", "harvard");
+    tClient = new TenantClient("localhost", port, TENANT_ID, TOKEN);
 
-/*    port = 8888;//NetworkUtils.nextFreePort();
+    DeploymentOptions options = new DeploymentOptions().setConfig(
+      new JsonObject().put("http.port", port));
 
-    AdminClient aClient = new AdminClient("localhost", port, "myuniversity");
-    try {
-      aClient.postImportSQL(
-        RestVerticleTest.class.getClassLoader().getResourceAsStream("create_config.sql"), reply -> {
-          async.complete();
-        });
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-      port));
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleFrom("v1");
-        //ta.setModuleTo("v2");
         tClient.post(ta, response -> {
           if(422 == response.statusCode()){
             try {
-              tClient.post(null, responseHandler -> {
-                responseHandler.bodyHandler( body -> {
-                  System.out.println(body.toString());
-                  async.complete();
-                });
-              });
+              tClient.post(null, responseHandler ->
+                responseHandler.bodyHandler(body -> {
+                System.out.println(body.toString());
+                async.complete();
+              }));
             } catch (Exception e) {
               context.fail(e.getMessage());
             }
@@ -135,46 +106,278 @@ public class RestVerticleTest {
         e.printStackTrace();
       }
     }));
-
   }
 
-  private static void setupPostgres() throws Exception {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
-
-  /**
-   * This method, called after our test, just cleanup everything by closing the vert.x instance
-   *
-   * @param context
-   *          the test context
-   */
-  @After
-  public void tearDown(TestContext context) {
+  @AfterClass
+  public static void afterAll(TestContext context) {
     Async async = context.async();
-    tClient.delete( reply -> {
-      reply.bodyHandler( body2 -> {
-        System.out.println(body2.toString());
-        vertx.close(context.asyncAssertSuccess( res-> {
-          PostgresClient.stopEmbeddedPostgres();
-          async.complete();
-        }));
-      });
-    });
+    tClient.delete(reply -> reply.bodyHandler(body -> {
+      System.out.println(body.toString());
+      vertx.close(context.asyncAssertSuccess(res-> {
+        PostgresClient.stopEmbeddedPostgres();
+        async.complete();
+      }));
+    }));
 
+    Locale.setDefault(oldLocale);
+  }
+
+  @Before
+  public void beforeEach()
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    deleteAllConfigurationRecordsExceptLocales()
+      .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
+      .get(5, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void canCreateConfigurationRecord(TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject configRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    final CompletableFuture<Response> postCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      configRecord.encodePrettily());
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertEquals("audioAlertsEnabled", createdRecord.getString("code"));
+        //TODO: Investigate why boolean value gets converted into a string
+        testContext.assertEquals("true", createdRecord.getString("value"));
+
+        testContext.assertTrue(createdRecord.containsKey("metadata"),
+          String.format("Should contain change metadata property: '%s'",
+            createdRecord.encodePrettily()));
+
+        final JsonObject changeMetadata = createdRecord.getJsonObject("metadata");
+
+        testContext.assertTrue(changeMetadata.containsKey("createdDate"),
+          String.format("Should contain created date property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
+          String.format("Should contain created by property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
+          String.format("Should contain updated date property: '%s'", changeMetadata));
+
+        testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
+          String.format("Should contain updated by property: '%s'", changeMetadata));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canGetConfigurationRecords(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
+
+    JsonObject firstConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    allCreated.add(post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily()));
+
+    JsonObject secondConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "checkoutTimeoutDuration")
+      .put("value", 3);
+
+    allCreated.add(post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily()));
+
+    allOf(allCreated).thenComposeAsync(v ->
+      //Must filter to only check out module entries due to default locale records
+      get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
+    .thenAccept(response -> {
+      try {
+        testContext.assertEquals(200, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+        testContext.assertEquals(2, wrappedRecords.getInteger("totalRecords"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canSortConfigurationRecordsByCreatedDate(TestContext testContext)
+    throws UnsupportedEncodingException,
+    InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "audioAlertsEnabled")
+      .put("value", true);
+
+    final CompletableFuture<Response> firstRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    //Make sure the first record is created before the second
+    firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new JsonObject()
+      .put("module", "CHECKOUT")
+      .put("configName", "other_settings")
+      .put("description", "Whether audio alerts should be made during ckeckout")
+      .put("code", "checkoutTimeoutDuration")
+      .put("value", 3);
+
+    final CompletableFuture<Response> secondRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    String encodedQuery = URLEncoder.encode("module==CHECKOUT sortBy metadata.createdDate/sort.descending",
+      StandardCharsets.UTF_8.name());
+
+    //Must filter to only check out module entries due to default locale records
+    get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(200, response.statusCode,
+            String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+              response.getBody()));
+
+          JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+          testContext.assertEquals(2, wrappedRecords.getInteger("totalRecords"));
+
+          final JsonArray records = wrappedRecords.getJsonArray("configs");
+
+          testContext.assertEquals("checkoutTimeoutDuration",
+            records.getJsonObject(0).getString("code"));
+
+          testContext.assertEquals("audioAlertsEnabled",
+            records.getJsonObject(1).getString("code"));
+        }
+        catch(Exception e) {
+          testContext.fail(e);
+        }
+        finally {
+          async.complete();
+        }
+      });
+  }
+  
+  @Test
+  public void canChangeLogLevel(TestContext context) {
+    mutateURLs("http://localhost:" + port +
+        "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist",
+      context, HttpMethod.PUT,"",  "application/json", 200);
+  }
+
+  @Test
+  public void canUsePersistentCaching(TestContext context) {
+    Async async = context.async();
+
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
+
+    postgresClient.persistentlyCacheResult("mytablecache",
+      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
+        if(reply.succeeded()){
+          postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
+            System.out.println(r3.result().getResults().size());
+            postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
+              System.out.println(r4.succeeded());
+
+              /* this will probably cause a deadlock as the saveBatch runs within a transaction */
+
+             /*
+             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
+                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
+              try {
+                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
+                  if(reply1.succeeded()){
+                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
+                  }
+                  async.complete();
+                  });
+              } catch (Exception e1) {
+                e1.printStackTrace();
+              }*/
+              async.complete();
+
+            });
+          });
+        }
+      });
   }
 
   /**
    * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
-   *
-   * @param context the test context
    */
   @Test
   public void checkURLs(TestContext context) {
+    createSampleRecords(context);
+    waitForTwoSeconds();
+    checkResultsFromVariousUrls(context);
+  }
 
+  private void checkResultsFromVariousUrls(TestContext context) {
+    runGETURLoop(context, urlsFromFile());
+  }
+
+  private void waitForTwoSeconds() {
     try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+  }
 
+  private void createSampleRecords(TestContext context) {
+    try {
       //save config entry
       String content = getFile("kv_configuration.sample");
       Config conf =  new ObjectMapper().readValue(content, Config.class);
@@ -221,140 +424,58 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         updatedConf, "application/json", 201);
 
-      mutateURLs("http://localhost:" + port + "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist", context,
-        HttpMethod.PUT,"",  "application/json", 200);
-
-/*      conf2.setMetadata(null);
-      conf2.setModule("BATCH");
-      conf2.setValue("what1");
-      Config conf3 = (Config)BeanUtils.cloneBean(conf2);
-      conf3.setValue("what2");
-      Configs c = new Configs();
-      List<Config> configArray = new ArrayList<>();
-      configArray.add(conf2);
-      configArray.add(conf3);
-      c.setConfigs(configArray);
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.PUT,
-        new ObjectMapper().writeValueAsString(c), "application/json", 204);*/
-
     } catch (Exception e) {
       e.printStackTrace();
       context.assertTrue(false, e.getMessage());
     }
-
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-
-    Async async = context.async();
-    PostgresClient.getInstance(vertx, "harvard").persistentlyCacheResult("mytablecache",
-      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
-        if(reply.succeeded()){
-          PostgresClient.getInstance(vertx, "harvard").select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            System.out.println(r3.result().getResults().size());
-            PostgresClient.getInstance(vertx, "harvard").removePersistentCacheResult("mytablecache",  r4 -> {
-              System.out.println(r4.succeeded());
-
-              /** this will probably cause a deadlock as the saveBatch runs within a transaction */
-
-             /*
-             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
-                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
-              try {
-                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
-                  if(reply1.succeeded()){
-                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
-                  }
-                  async.complete();
-                  });
-              } catch (Exception e1) {
-                e1.printStackTrace();
-              }*/
-              async.complete();
-
-            });
-          });
-        }
-      });
-
-    try {
-      urls = urlsFromFile();
-      Thread.sleep(2000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    //run get queries from the csv file
-    runGETURLoop(context);
-
   }
 
-
-  private void runGETURLoop(TestContext context){
+  private void runGETURLoop(TestContext context, ArrayList<String> urlsToCheck){
     try {
-      int[] urlCount = { urls.size() };
-      urls.forEach(url -> {
+      urlsToCheck.forEach(url -> {
         Async async = context.async();
         String[] urlInfo = url.split(" , ");
         HttpClient client = vertx.createHttpClient();
         HttpClientRequest request = client.requestAbs(HttpMethod.GET,
-          urlInfo[1].trim().replaceFirst("<port>", port + ""), new Handler<HttpClientResponse>() {
-          @Override
-          public void handle(HttpClientResponse httpClientResponse) {
+          urlInfo[1].trim().replaceFirst("<port>", port + ""), httpClientResponse -> {
             int statusCode = httpClientResponse.statusCode();
             System.out.println("Status - " + statusCode + " " + urlInfo[1]);
             if (httpClientResponse.statusCode() != Integer.parseInt(urlInfo[3])) {
               context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
               async.complete();
             }
-            httpClientResponse.bodyHandler(new Handler<Buffer>() {
-              @Override
-              public void handle(Buffer buffer) {
-                if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
-                  //assume empty body / empty array of data
-                  async.complete();
-                }
-                else{
-                  try{
-                    System.out.println(buffer.toString());
-                    int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
-                    System.out.println("-------->"+records);
-                    if(httpClientResponse.statusCode() == 200){
-                      if(records != Integer.parseInt(urlInfo[4])){
-                        context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
-                        async.complete();
-                      }
-                      else{
-                        async.complete();
-                      }
+            httpClientResponse.bodyHandler(buffer -> {
+              if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
+                //assume empty body / empty array of data
+                async.complete();
+              }
+              else{
+                try{
+                  System.out.println(buffer.toString());
+                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
+                  System.out.println("-------->"+records);
+                  if(httpClientResponse.statusCode() == 200){
+                    if(records != Integer.parseInt(urlInfo[4])){
+                      context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
+                      async.complete();
                     }
-/*                    aClient.getModuleStats( res -> {
-                      res.bodyHandler( b -> {
-                        System.out.println(urlInfo[1] + "  "+b.toString());
-                        aClient.getHealth( r -> {
-                          r.bodyHandler( bh -> {
-                            System.out.println(urlInfo[1] + "  "+bh.toString());
-                            async.complete();
-                          });
-                        });
-                      });
-                    });*/
+                    else{
+                      async.complete();
+                    }
                   }
-                  catch(Exception e){
-                    e.printStackTrace();
-                    context.fail(e.getMessage());
-                  }
+                }
+                catch(Exception e){
+                  e.printStackTrace();
+                  context.fail(e.getMessage());
                 }
               }
             });
-          }
-        });
+          });
         request.putHeader("X-Okapi-Request-Id", "999999999999");
-        request.putHeader("x-okapi-tenant", "harvard");
-        request.headers().add("Authorization", "harvard");
+        request.headers().add("Authorization", TENANT_ID);
+        request.putHeader("x-Okapi-Tenant", TENANT_ID);
+        request.putHeader("x-Okapi-Token", TOKEN);
+        request.putHeader("x-Okapi-User-Id", USER_ID);
         request.headers().add("Accept", "application/json");
         request.setChunked(true);
         request.end();
@@ -364,45 +485,42 @@ public class RestVerticleTest {
     }
   }
 
-  /**
-   * for POST / PUT / DELETE
-   * @param api
-   * @param context
-   * @param method
-   * @param content
-   * @param id
-   */
-  private void mutateURLs(String api, TestContext context, HttpMethod method, String content,
-      String contentType, int errorCode) {
+  private void mutateURLs(
+    String url,
+    TestContext context,
+    HttpMethod method,
+    String content,
+    String contentType,
+    int expectedStatusCode) {
+
     Async async = context.async();
     HttpClient client = vertx.createHttpClient();
     HttpClientRequest request;
     Buffer buffer = Buffer.buffer(content);
 
     if (method == HttpMethod.POST) {
-      request = client.postAbs(api);
+      request = client.postAbs(url);
     }
     else if (method == HttpMethod.DELETE) {
-      request = client.deleteAbs(api);
+      request = client.deleteAbs(url);
     }
     else if (method == HttpMethod.GET) {
-      request = client.getAbs(api);
+      request = client.getAbs(url);
     }
     else {
-      request = client.putAbs(api);
+      request = client.putAbs(url);
     }
     request.exceptionHandler(error -> {
       async.complete();
       context.fail(error.getMessage());
     }).handler(response -> {
-      response.headers().forEach( header -> {
-        System.out.println(header.getKey() + " " + header.getValue());
-      });
+      response.headers().forEach( header ->
+        System.out.println(header.getKey() + " " + header.getValue()));
+
       int statusCode = response.statusCode();
       if(method == HttpMethod.POST && statusCode == 201){
         try {
           System.out.println("Location - " + response.getHeader("Location"));
-          //String content2 = getFile("kv_configuration.sample");
           Config conf =  new ObjectMapper().readValue(content, Config.class);
           conf.setDescription(conf.getDescription());
           mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
@@ -411,16 +529,16 @@ public class RestVerticleTest {
           e.printStackTrace();
         }
       }
-      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + api);
-      if(errorCode == statusCode){
+      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
+      if(expectedStatusCode == statusCode){
         context.assertTrue(true);
       }
-      else if(errorCode == 0){
-        //currently dont care about return value
+      else if(expectedStatusCode == 0){
+        //currently don't care about return value
         context.assertTrue(true);
       }
       else {
-        context.fail("expected " + errorCode +" code, but got " + statusCode);
+        context.fail("expected " + expectedStatusCode +" code, but got " + statusCode);
       }
       if(!async.isCompleted()){
         async.complete();
@@ -429,35 +547,24 @@ public class RestVerticleTest {
     });
     request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
-    request.putHeader("Authorization", "harvard");
-    request.putHeader("x-okapi-tenant", "harvard");
+    request.putHeader("Authorization", TENANT_ID);
+    request.putHeader("x-Okapi-Tenant", TENANT_ID);
+    request.putHeader("x-Okapi-Token", TOKEN);
+    request.putHeader("x-Okapi-User-Id", USER_ID);
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
     request.end(buffer);
   }
 
-  private ArrayList<String> urlsFromFile() throws IOException {
+  private ArrayList<String> urlsFromFile() {
     ArrayList<String> ret = new ArrayList<>();
-    byte[] content = ByteStreams.toByteArray(getClass().getResourceAsStream("/urls.csv"));
-    InputStream is = null;
-    BufferedReader bfReader = null;
-    try {
-      is = new ByteArrayInputStream(content);
-      bfReader = new BufferedReader(new InputStreamReader(is));
-      String temp = null;
-      while ((temp = bfReader.readLine()) != null) {
-        ret.add(temp);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (is != null)
-          is.close();
-      } catch (Exception ex) {
 
+    try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/urls.csv"))) {
+    while(scanner.hasNext()) {
+        ret.add(scanner.nextLine());
       }
     }
+
     return ret;
   }
 
@@ -465,4 +572,113 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
+  private static void setupPostgres() throws IOException {
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+  }
+
+  private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
+    return deleteAllConfigurationRecordsFromTableExceptLocales("config_data");
+  }
+
+  private CompletableFuture<Void> deleteAllConfigurationAuditRecordsExceptLocales() {
+    return deleteAllConfigurationRecordsFromTableExceptLocales("audit_config_data");
+  }
+
+  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTableExceptLocales(
+    String audit_config_data) {
+
+    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
+
+    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
+
+    //Do not delete the sample records created from
+    postgresClient.mutate(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
+      TENANT_ID, "mod_configuration", audit_config_data), reply -> {
+      if (reply.succeeded()) {
+        allDeleted.complete(null);
+      } else {
+        allDeleted.completeExceptionally(reply.cause());
+      }
+    });
+
+    return allDeleted;
+  }
+
+  private CompletableFuture<Response> get(String url) {
+    HttpClient client = vertx.createHttpClient();
+
+    HttpClientRequest request = client.getAbs(url);
+
+    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
+
+    request.exceptionHandler(getCompleted::completeExceptionally);
+
+    request.handler(response ->
+      response.bodyHandler(buffer -> getCompleted.complete(
+        new Response(response.statusCode(),
+          buffer.getString(0, buffer.length())))));
+
+    request.putHeader("X-Okapi-Tenant", TENANT_ID);
+    request.putHeader("X-Okapi-Token", TOKEN);
+    request.putHeader("X-Okapi-User-Id", USER_ID);
+    request.putHeader("Accept", "application/json,text/plain");
+
+    request.end();
+
+    return getCompleted;
+  }
+
+  private CompletableFuture<Response> post(String url, String jsonContent) {
+    HttpClient client = vertx.createHttpClient();
+
+    HttpClientRequest request = client.postAbs(url);
+    Buffer requestBuffer = Buffer.buffer(jsonContent);
+
+    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
+
+    request.exceptionHandler(getCompleted::completeExceptionally);
+
+    request.handler(response ->
+      response.bodyHandler(responseBuffer -> {
+        getCompleted.complete(new Response(
+          response.statusCode(),
+          responseBuffer.getString(0, responseBuffer.length())));
+      }));
+
+    request.putHeader("X-Okapi-Tenant", TENANT_ID);
+    request.putHeader("X-Okapi-Token", TOKEN);
+    request.putHeader("X-Okapi-User-Id", USER_ID);
+    request.putHeader("Content-type", "application/json");
+    request.putHeader("Accept", "application/json,text/plain");
+
+    request.end(requestBuffer);
+
+    return getCompleted;
+  }
+
+  private class Response {
+    private final Integer statusCode;
+    private final String body;
+
+    private Response(Integer statusCode, String body) {
+      this.statusCode = statusCode;
+      this.body = body;
+    }
+
+    Integer getStatusCode() {
+      return statusCode;
+    }
+
+    String getBody() {
+      return body;
+    }
+  }
+
+  public static <T> CompletableFuture<Void> allOf(
+    List<CompletableFuture<T>> allFutures) {
+
+    return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
+  }
 }
