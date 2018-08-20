@@ -166,7 +166,8 @@ public class ConfigAPI implements ConfigurationsResource {
                 entity.setId((String) ret);
                 OutStream stream = new OutStream();
                 stream.setData(entity);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsEntriesResponse.withJsonCreated(
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                  PostConfigurationsEntriesResponse.withJsonCreated(
                   LOCATION_PREFIX + ret, stream)));
               }
               else {
@@ -304,8 +305,8 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void putConfigurationsEntriesByEntryId(String entryId, String lang, Config entity,
-                                                Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
-                                                Context vertxContext) throws Exception {
+      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
+      Context vertxContext) throws Exception {
 
     vertxContext.runOnContext(v -> {
       System.out.println("sending... putConfigurationsTablesByTableId");
@@ -432,9 +433,12 @@ public class ConfigAPI implements ConfigurationsResource {
   }
 
   private boolean isNotUniqueModuleConfigAndCode(AsyncResult<String> reply) {
+    //TODO: discriminate better the different unique constraints
     final String message = PgExceptionUtil.badRequestMessage(reply.cause());
 
-    return message.contains("config_data_module_configname_code_idx_unique");
+    //TODO: discriminate better the different unique constraints
+    return message.contains("config_data_module_configname_code_idx_unique")
+      || message.contains("config_data_module_configname_idx_unique");
   }
 
   private Errors uniqueModuleConfigAndCodeError(Config entity) {
