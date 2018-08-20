@@ -191,11 +191,11 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecordWithoutCode(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "other checkout settings")
-      .put("value", "{ \"audioAlertsEnabled\": \"true\" }");
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("{ \"audioAlertsEnabled\": \"true\" }")
+      .create();
 
     final CompletableFuture<Response> postCompleted = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -222,6 +222,40 @@ public class RestVerticleTest {
         async.complete();
       }
     });
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithoutCode(TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -693,6 +727,24 @@ public class RestVerticleTest {
     List<CompletableFuture<T>> allFutures) {
 
     return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
+  }
+
+  private void checkAllRecordsCreated(Iterable<CompletableFuture<Response>> allRecordsFutures, TestContext testContext, Async async) {
+    try {
+      for (CompletableFuture<Response> future : allRecordsFutures) {
+        Response response = future.get();
+
+        testContext.assertEquals(201, response.statusCode,
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+      }
+    }
+    catch(Exception e) {
+      testContext.fail(e);
+    }
+    finally {
+      async.complete();
+    }
   }
 
   private static ConfigurationRecordBuilder timeOutDurationExample() {
