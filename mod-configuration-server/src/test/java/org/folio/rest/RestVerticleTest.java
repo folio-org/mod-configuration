@@ -138,7 +138,7 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = new ConfigurationRecordBuilder().configurationRecord(
+    JsonObject configRecord = new ConfigurationRecordBuilder().create(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -233,7 +233,7 @@ public class RestVerticleTest {
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().configurationRecord(
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().create(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -242,7 +242,7 @@ public class RestVerticleTest {
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().configurationRecord(
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().create(
       "checkoutTimeoutDuration",
       3,
       "How long the timeout for a check out session should be");
@@ -282,7 +282,7 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().configurationRecord(
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().create(
       "audioAlertsEnabled",
       true,
       "Whether audio alerts should be made during check out");
@@ -294,7 +294,7 @@ public class RestVerticleTest {
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().configurationRecord(
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().create(
       "checkoutTimeoutDuration",
       3,
       "How long the timeout for a check out session should be");
