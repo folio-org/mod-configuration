@@ -36,6 +36,12 @@
           "removeAccents": false
         }
       ],
+      "uniqueIndex": [
+        {
+          "fieldName": "module, configName, code",
+          "tOps": "ADD"
+        }
+      ],
       "index": [
         {
           "fieldName": "module",

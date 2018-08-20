@@ -1,25 +1,23 @@
 package org.folio.rest.impl;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.Audit;
-import org.folio.rest.jaxrs.model.Audits;
-import org.folio.rest.jaxrs.model.Config;
-import org.folio.rest.jaxrs.model.Configs;
-import org.folio.rest.jaxrs.model.Errors;
+import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.resource.ConfigurationsResource;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
+import org.folio.rest.persist.PgExceptionUtil;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.facets.FacetField;
@@ -31,12 +29,13 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static io.vertx.core.Future.succeededFuture;
 
 @Path("configurations")
 public class ConfigAPI implements ConfigurationsResource {
@@ -170,10 +169,19 @@ public class ConfigAPI implements ConfigurationsResource {
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsEntriesResponse.withJsonCreated(
                   LOCATION_PREFIX + ret, stream)));
               }
-              else{
+              else {
                 log.error(reply.cause().getMessage(), reply.cause());
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PostConfigurationsEntriesResponse
-                  .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+
+                if(isNotUniqueModuleConfigAndCode(reply)) {
+                  asyncResultHandler.handle(succeededFuture(
+                    PostConfigurationsEntriesResponse
+                      .withJsonUnprocessableEntity(uniqueModuleConfigAndCodeError(entity))));
+                }
+                else {
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(
+                    PostConfigurationsEntriesResponse.withPlainInternalServerError(
+                      messages.getMessage(lang, MessageConsts.InternalServerError))));
+                }
               }
             } catch (Exception e) {
               log.error(e.getMessage(), e);
@@ -296,8 +304,8 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void putConfigurationsEntriesByEntryId(String entryId, String lang, Config entity,
-      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
-      Context vertxContext) throws Exception {
+                                                Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
+                                                Context vertxContext) throws Exception {
 
     vertxContext.runOnContext(v -> {
       System.out.println("sending... putConfigurationsTablesByTableId");
@@ -423,4 +431,26 @@ public class ConfigAPI implements ConfigurationsResource {
     }
   }
 
+  private boolean isNotUniqueModuleConfigAndCode(AsyncResult<String> reply) {
+    final String message = PgExceptionUtil.badRequestMessage(reply.cause());
+
+    return message.contains("config_data_module_configname_code_idx_unique");
+  }
+
+  private Errors uniqueModuleConfigAndCodeError(Config entity) {
+    Error error = new Error();
+
+    error.withMessage("Cannot have more than one record with the same module, config name and code")
+      .withAdditionalProperty("module", entity.getModule())
+      .withAdditionalProperty("configName", entity.getConfigName())
+      .withAdditionalProperty("code", entity.getCode());
+
+    List<Error> errorList = new ArrayList<>();
+    errorList.add(error);
+
+    Errors errors = new Errors();
+    errors.setErrors(errorList);
+
+    return errors;
+  }
 }

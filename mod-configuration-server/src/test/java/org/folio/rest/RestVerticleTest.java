@@ -371,6 +371,48 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void cannotCreateMultipleRecordsWithSameModuleConfigAndCode(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      firstConfigRecord.encodePrettily());
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCreated = post(
+      "http://localhost:" + port + "/configurations/entries",
+      secondConfigRecord.encodePrettily());
+
+    final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, firstRecordResponse.statusCode,
+      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+        firstRecordResponse.getBody()));
+
+    testContext.assertEquals(422, secondRecordResponse.statusCode,
+      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+        secondRecordResponse.getBody()));
+  }
+
+  @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
 
