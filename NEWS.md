@@ -2,6 +2,8 @@
 
 * MODCONF-21 - Configuration records are unique for each module, config name and code
 * MODCONF-22 - use dereferenced kv_configuration.schema for metadata sorting
+* Upgrades to RAML Module Builder 19.3.1
+* CQL queries for an unrecognised index report a 400 instead of 422
 
 ## 4.0.3 2018-04-24
 * MODCONF-17 - 500 and 422 errors while querying configurations/audit
