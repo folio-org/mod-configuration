@@ -538,26 +538,34 @@ public class RestVerticleTest {
   private void createSampleRecords(TestContext context) {
     try {
       //save config entry
-      String content = getFile("kv_configuration.sample");
-      Config conf =  new ObjectMapper().readValue(content, Config.class);
+      String sample = getFile("kv_configuration.sample");
+
+      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(sample);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        content, "application/json", 201);
+        baselineFromSample.create().encodePrettily(), "application/json", 201);
 
       //save config entry with value being a base64 encoded file
-      String attachment = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
-      conf.setValue(attachment);
+      String bytes = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
+
+      ConfigurationRecordBuilder encodedValueExample = baselineFromSample
+        .withCode("encoded_example")
+        .withValue(bytes);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+        encodedValueExample.create().encodePrettily(), "application/json", 201);
 
-      conf.setEnabled(false);
+      ConfigurationRecordBuilder disabledExample = baselineFromSample
+        .withCode("enabled_example")
+        .withValue(bytes)
+        .disabled();
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+        disabledExample.create().encodePrettily(), "application/json", 201);
 
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+      //This looks to be exactly the same use case
+//      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+//        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
 
       //attempt to delete invalud id (not uuid)
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
@@ -567,18 +575,23 @@ public class RestVerticleTest {
         "", "application/json", 404);
 
       //check read only
-      Config conf2 =  new ObjectMapper().readValue(content, Config.class);
+      Config conf2 =  new ObjectMapper().readValue(sample, Config.class);
+
+      conf2.setCode("change_metadata_example");
+
       Metadata md = new Metadata();
       md.setCreatedByUserId("123456");
       conf2.setMetadata(md);
+
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
       md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
       md.setCreatedDate(new Date());
       md.setUpdatedDate(new Date());
-      conf2.setModule("NOTHING");
+
       String updatedConf = new ObjectMapper().writeValueAsString(conf2);
+
       System.out.println(updatedConf);
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         updatedConf, "application/json", 201);

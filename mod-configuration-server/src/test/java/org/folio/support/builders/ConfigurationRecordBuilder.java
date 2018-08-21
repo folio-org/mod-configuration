@@ -9,9 +9,10 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   private final String code;
   private final Object value;
   private final String description;
+  private final Boolean enabled;
 
   public ConfigurationRecordBuilder() {
-    this(null, "other_settings", null, null, null);
+    this(null, "other_settings", null, null, null, true);
   }
 
   private ConfigurationRecordBuilder(
@@ -19,13 +20,30 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     String configName,
     String code,
     Object value,
-    String description) {
+    String description,
+    Boolean enabled) {
 
     this.moduleName = moduleName;
     this.code = code;
     this.value = value;
     this.description = description;
     this.configName = configName;
+    this.enabled = enabled;
+  }
+
+  public static ConfigurationRecordBuilder from(String example) {
+    return from(new JsonObject(example));
+  }
+
+  public static ConfigurationRecordBuilder from(JsonObject example) {
+    //TODO: Extract constants for properties
+    return new ConfigurationRecordBuilder(
+      example.getString("module"),
+      example.getString("configName"),
+      example.getString("code"),
+      example.getValue("value"),
+      example.getString("description"),
+      example.getBoolean("enabled"));
   }
 
   public JsonObject create() {
@@ -36,6 +54,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     put(configurationRecord, "description", this.description);
     put(configurationRecord, "code", this.code);
     put(configurationRecord, "value", this.value);
+    put(configurationRecord, "enabled", this.enabled);
 
     return configurationRecord;
   }
@@ -46,8 +65,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.configName,
       this.code,
       this.value,
-      this.description
-    );
+      this.description,
+      this.enabled);
   }
 
   public ConfigurationRecordBuilder withConfigName(String configName) {
@@ -56,8 +75,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       configName,
       this.code,
       this.value,
-      this.description
-    );
+      this.description,
+      this.enabled);
   }
 
   public ConfigurationRecordBuilder withCode(String code) {
@@ -66,8 +85,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.configName,
       code,
       this.value,
-      this.description
-    );
+      this.description,
+      this.enabled);
   }
 
   public ConfigurationRecordBuilder withValue(Object value) {
@@ -76,8 +95,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.configName,
       this.code,
       value,
-      this.description
-    );
+      this.description,
+      this.enabled);
   }
 
   public ConfigurationRecordBuilder withDescription(String description) {
@@ -86,7 +105,17 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.configName,
       this.code,
       this.value,
-      description
-    );
+      description,
+      this.enabled);
+  }
+
+  public ConfigurationRecordBuilder disabled() {
+    return new ConfigurationRecordBuilder(
+      this.moduleName,
+      this.configName,
+      this.code,
+      this.value,
+      this.description,
+      false);
   }
 }
