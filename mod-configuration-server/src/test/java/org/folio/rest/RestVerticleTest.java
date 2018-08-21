@@ -8,6 +8,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -590,56 +591,47 @@ public class RestVerticleTest {
 
   private void runGETURLoop(TestContext context, ArrayList<String> urlsToCheck){
     try {
-      urlsToCheck.forEach(url -> {
+      urlsToCheck.forEach(line -> {
         Async async = context.async();
-        String[] urlInfo = url.split(" , ");
-        HttpClient client = vertx.createHttpClient();
-        HttpClientRequest request = client.requestAbs(HttpMethod.GET,
-          urlInfo[1].trim().replaceFirst("<port>", port + ""), httpClientResponse -> {
-            int statusCode = httpClientResponse.statusCode();
-            System.out.println("Status - " + statusCode + " " + urlInfo[1]);
-            if (httpClientResponse.statusCode() != Integer.parseInt(urlInfo[3])) {
-              context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
-              async.complete();
+
+        String[] urlInfo = line.split(" , ");
+        final String url = urlInfo[1].trim().replaceFirst("<port>", port + "");
+        final Integer expectedStatusCode = Integer.parseInt(urlInfo[3]);
+
+        final Integer expectedRecordCount = urlInfo.length == 5
+          ? Integer.parseInt(urlInfo[4])
+          : null;
+
+        final CompletableFuture<Response> responded = get(url);
+
+        try {
+          Response response = responded.get(5, TimeUnit.SECONDS);
+
+          context.assertEquals(expectedStatusCode, response.getStatusCode(),
+            String.format("Unexpected status code from '%s': '%s'", url, response.getBody()));
+
+          if(expectedRecordCount != null && expectedRecordCount > 0) {
+            try {
+              JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+              context.assertEquals(expectedRecordCount, wrappedRecords.getInteger("totalRecords"),
+                String.format("Unexpected record count for '%s': '%s'", url, response.getBody()));
             }
-            httpClientResponse.bodyHandler(buffer -> {
-              if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
-                //assume empty body / empty array of data
-                async.complete();
-              }
-              else{
-                try{
-                  System.out.println(buffer.toString());
-                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
-                  System.out.println("-------->"+records);
-                  if(httpClientResponse.statusCode() == 200){
-                    if(records != Integer.parseInt(urlInfo[4])){
-                      context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
-                      async.complete();
-                    }
-                    else{
-                      async.complete();
-                    }
-                  }
-                }
-                catch(Exception e){
-                  e.printStackTrace();
-                  context.fail(e.getMessage());
-                }
-              }
-            });
-          });
-        request.putHeader("X-Okapi-Request-Id", "999999999999");
-        request.headers().add("Authorization", TENANT_ID);
-        request.putHeader("x-Okapi-Tenant", TENANT_ID);
-        request.putHeader("x-Okapi-Token", TOKEN);
-        request.putHeader("x-Okapi-User-Id", USER_ID);
-        request.headers().add("Accept", "application/json");
-        request.setChunked(true);
-        request.end();
-      });
+            catch(DecodeException e) {
+              context.fail(String.format("Could not decide '%s' - %s", response.getBody(), e.getMessage()));
+            }
+          }
+        }
+        catch(Exception e) {
+          context.fail(e);
+        }
+        finally {
+          async.complete();
+        }
+        });
     } catch (Throwable e) {
       e.printStackTrace();
+      context.fail(e);
     }
   }
 
