@@ -1,4 +1,6 @@
-## 4.0.4 unreleased
+## 5.0.0 unreleased
+
+* MODCONF-21 - Configuration records are unique for each module, config name and code
 * MODCONF-22 - use dereferenced kv_configuration.schema for metadata sorting
 
 ## 4.0.3 2018-04-24
