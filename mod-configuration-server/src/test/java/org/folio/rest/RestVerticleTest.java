@@ -349,6 +349,50 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateTenantAndGroupConfigurationRecordsForSameModuleConfigNameAndNoCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withNoCode()
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting
+      .forNoUser()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    final UUID firstUserId = UUID.randomUUID();
+
+    JsonObject firstUserConfigRecord = baselineSetting
+      .forUser(firstUserId)
+      .withValue("another value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstUserConfigRecord));
+
+    final UUID secondUserId = UUID.randomUUID();
+
+    JsonObject secondUserConfigRecord = baselineSetting
+      .forUser(secondUserId)
+      .withValue("a different value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondUserConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
   public void canCreateMultipleConfigurationRecordsWithDifferentConfigNameWithoutCode(
     TestContext testContext) {
 
