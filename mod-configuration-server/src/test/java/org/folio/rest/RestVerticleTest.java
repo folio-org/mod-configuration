@@ -25,6 +25,7 @@ import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.CompletableFutureExtensions;
 import org.folio.support.ConfigurationRecordExamples;
+import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
 import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
@@ -54,9 +55,11 @@ public class RestVerticleTest {
   private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOiI3OWZmMmE4Yi1kOWMzLTViMzktYWQ0YS0wYTg0MDI1YWIwODUiLCJ0ZW5hbnQiOiJ0ZXN0X3RlbmFudCJ9BShwfHcNClt5ZXJ8ImQTMQtAM1sQEnhsfWNmXGsYVDpuaDN3RVQ9";
 
   private static Locale oldLocale;
-  private static Vertx vertx;
+  private static final Vertx vertx = Vertx.vertx();
   private static int port;
   private static TenantClient tClient = null;
+  private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
+    vertx, TENANT_ID, USER_ID, TOKEN);
 
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
@@ -67,8 +70,6 @@ public class RestVerticleTest {
   public static void beforeAll(TestContext context) {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.US);
-
-    vertx = Vertx.vertx();
 
     try {
       AES.setSecretKey(SECRET_KEY);
@@ -144,7 +145,7 @@ public class RestVerticleTest {
 
     JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> postCompleted = post(
+    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       configRecord.encodePrettily());
 
@@ -201,7 +202,7 @@ public class RestVerticleTest {
       .withValue("{ \"audioAlertsEnabled\": \"true\" }")
       .create();
 
-    final CompletableFuture<Response> postCompleted = post(
+    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       configRecord.encodePrettily());
 
@@ -240,7 +241,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = post(
+    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -250,7 +251,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = post(
+    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -275,7 +276,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = post(
+    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -285,7 +286,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = post(
+    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -311,7 +312,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = post(
+    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -322,7 +323,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = post(
+    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -348,7 +349,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = post(
+    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -359,7 +360,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = post(
+    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -386,7 +387,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCreated = post(
+    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -400,7 +401,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCreated = post(
+    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -427,7 +428,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCreated = post(
+    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -440,7 +441,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCreated = post(
+    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -463,19 +464,19 @@ public class RestVerticleTest {
 
     JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    allCreated.add(post(
+    allCreated.add(okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
     JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    allCreated.add(post(
+    allCreated.add(okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily()));
 
     CompletableFutureExtensions.allOf(allCreated).thenComposeAsync(v ->
       //Must filter to only check out module entries due to default locale records
-      get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
+      okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
     .thenAccept(response -> {
       try {
         testContext.assertEquals(200, response.getStatusCode(),
@@ -506,7 +507,7 @@ public class RestVerticleTest {
 
     JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> firstRecordCreated = post(
+    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily());
 
@@ -515,7 +516,7 @@ public class RestVerticleTest {
 
     JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    final CompletableFuture<Response> secondRecordCreated = post(
+    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily());
 
@@ -525,7 +526,7 @@ public class RestVerticleTest {
       StandardCharsets.UTF_8.name());
 
     //Must filter to only check out module entries due to default locale records
-    get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
       .thenAccept(response -> {
         try {
           testContext.assertEquals(200, response.getStatusCode(),
@@ -700,7 +701,7 @@ public class RestVerticleTest {
           ? Integer.parseInt(urlInfo[4])
           : null;
 
-        final CompletableFuture<Response> responded = get(url);
+        final CompletableFuture<Response> responded = okapiHttpClient.get(url);
 
         try {
           Response response = responded.get(5, TimeUnit.SECONDS);
@@ -852,63 +853,6 @@ public class RestVerticleTest {
     });
 
     return allDeleted;
-  }
-
-  private CompletableFuture<Response> get(String url) {
-    HttpClient client = vertx.createHttpClient();
-
-    HttpClientRequest request = client.getAbs(url);
-
-    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(getCompleted::completeExceptionally);
-
-    request.handler(response ->
-      response.bodyHandler(buffer -> getCompleted.complete(
-        new Response(response.statusCode(),
-          buffer.getString(0, buffer.length())))));
-
-    request.putHeader("X-Okapi-Tenant", TENANT_ID);
-    request.putHeader("X-Okapi-Token", TOKEN);
-    request.putHeader("X-Okapi-User-Id", USER_ID);
-    request.putHeader("Accept", "application/json,text/plain");
-
-    request.end();
-
-    return getCompleted;
-  }
-
-  private CompletableFuture<Response> post(String url, String jsonContent) {
-    HttpClient client = vertx.createHttpClient();
-
-    HttpClientRequest request = client.postAbs(url);
-    Buffer requestBuffer = Buffer.buffer(jsonContent);
-
-    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(getCompleted::completeExceptionally);
-
-    request.handler(response ->
-      response.bodyHandler(responseBuffer -> {
-        final Response convertedResponse = new Response(
-          response.statusCode(),
-          responseBuffer.getString(0, responseBuffer.length()));
-
-        System.out.println(String.format("Received response: '%s':'%s'",
-          convertedResponse.getStatusCode(), convertedResponse.getBody()));
-
-        getCompleted.complete(convertedResponse);
-      }));
-
-    request.putHeader("X-Okapi-Tenant", TENANT_ID);
-    request.putHeader("X-Okapi-Token", TOKEN);
-    request.putHeader("X-Okapi-User-Id", USER_ID);
-    request.putHeader("Content-type", "application/json");
-    request.putHeader("Accept", "application/json,text/plain");
-
-    request.end(requestBuffer);
-
-    return getCompleted;
   }
 
   private void checkAllRecordsCreated(
