@@ -39,22 +39,22 @@
       "uniqueIndex": [
         {
           "fieldName": "module, configName, code",
-          "whereClause": "WHERE ((jsonb->'code')) is not null AND ((jsonb->'userId')) is null",
+          "whereClause": "WHERE (jsonb->'code') is not null AND (jsonb->'userId') is null AND (jsonb->>'enabled')::boolean is true",
           "tOps": "ADD"
         },
         {
           "fieldName": "module, configName",
-          "whereClause": "WHERE ((jsonb->'code')) is null AND ((jsonb->'userId')) is null",
+          "whereClause": "WHERE (jsonb->'code') is null AND (jsonb->'userId') is null",
           "tOps": "ADD"
         },
         {
           "fieldName": "module, configName, code, userId",
-          "whereClause": "WHERE ((jsonb->'code')) is not null AND ((jsonb->'userId')) is not null",
+          "whereClause": "WHERE (jsonb->'code') is not null AND (jsonb->'userId') is not null",
           "tOps": "ADD"
         },
         {
           "fieldName": "module, configName, userId",
-          "whereClause": "WHERE ((jsonb->'code')) is null AND ((jsonb->'userId')) is not null",
+          "whereClause": "WHERE (jsonb->'code') is null AND (jsonb->'userId') is not null",
           "tOps": "ADD"
         }
       ],
