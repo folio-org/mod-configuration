@@ -28,9 +28,12 @@ import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
+import org.z3950.zing.cql.cql2pgjson.FieldException;
+import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,14 +54,14 @@ public class ConfigAPI implements ConfigurationsResource {
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
   private static final String       CONFIG_SCHEMA_NAME= "ramls/_schemas/kv_configuration.schema";
-  private static String             configSchema      =  null;
+  private String                    configSchema      =  null;
 
   private final Messages            messages          = Messages.getInstance();
 
   private String idFieldName                          = "id";
 
   public ConfigAPI(Vertx vertx, String tenantId) {
-    if(configSchema == null){
+    if(configSchema == null) {
       initCQLValidation();
     }
 
@@ -90,7 +93,7 @@ public class ConfigAPI implements ConfigurationsResource {
     */
     context.runOnContext(v -> {
       try {
-        System.out.println("sending... getConfigurationsTables");
+        log.debug("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         CQLWrapper cql = getCQL(CONFIG_TABLE, query,limit, offset, configSchema);
 
@@ -124,8 +127,8 @@ public class ConfigAPI implements ConfigurationsResource {
             });
       }
       catch(CQLQueryValidationException e1){
-        int start = e1.getMessage().indexOf("'");
-        int end = e1.getMessage().lastIndexOf("'");
+        int start = e1.getMessage().indexOf('\'');
+        int end = e1.getMessage().lastIndexOf('\'');
         String field = e1.getMessage();
         if(start != -1 && end != -1){
           field = field.substring(start+1, end);
@@ -154,7 +157,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
     context.runOnContext(v -> {
       try {
-        System.out.println("sending... postConfigurationsTables");
+        log.debug("sending... postConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         PostgresClient.getInstance(context.owner(), tenantId).save(
           CONFIG_TABLE,
@@ -206,7 +209,7 @@ public class ConfigAPI implements ConfigurationsResource {
 
     context.runOnContext(v -> {
       try {
-        System.out.println("sending... getConfigurationsEntriesByEntryId");
+        log.debug("sending... getConfigurationsEntriesByEntryId");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         Criterion c = new Criterion(
@@ -260,7 +263,7 @@ public class ConfigAPI implements ConfigurationsResource {
           throws Exception {
 
       context.runOnContext(v -> {
-        System.out.println("sending... deleteConfigurationsTablesByTableId");
+        log.debug("sending... deleteConfigurationsTablesByTableId");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         try {
           PostgresClient.getInstance(context.owner(), tenantId).delete(CONFIG_TABLE, entryId,
@@ -309,7 +312,7 @@ public class ConfigAPI implements ConfigurationsResource {
       Context vertxContext) throws Exception {
 
     vertxContext.runOnContext(v -> {
-      System.out.println("sending... putConfigurationsTablesByTableId");
+      log.debug("sending... putConfigurationsTablesByTableId");
       String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
       try {
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
@@ -353,14 +356,21 @@ public class ConfigAPI implements ConfigurationsResource {
     });
   }
 
-  private CQLWrapper getCQL(String table, String query, int limit, int offset, String schema) throws Exception {
-    CQL2PgJSON cql2pgJson = null;
+  private CQLWrapper getCQL(String table, String query, int limit, int offset, String schema)
+    throws FieldException,
+    IOException,
+    SchemaException {
+
+    final CQL2PgJSON cql2pgJson;
+
     if(schema != null){
       cql2pgJson = new CQL2PgJSON(table+".jsonb", schema);
     } else {
       cql2pgJson = new CQL2PgJSON(table+".jsonb");
     }
-    return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
+
+    return new CQLWrapper(cql2pgJson, query)
+      .setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
 
   @Validate
@@ -374,7 +384,7 @@ public class ConfigAPI implements ConfigurationsResource {
     */
     vertxContext.runOnContext(v -> {
       try {
-        System.out.println("sending... getConfigurationsTables");
+        log.debug("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         CQLWrapper cql = getCQL(AUDIT_TABLE, query,limit, offset, null);
 
@@ -406,8 +416,8 @@ public class ConfigAPI implements ConfigurationsResource {
             });
       }
       catch(CQLQueryValidationException e1){
-        int start = e1.getMessage().indexOf("'");
-        int end = e1.getMessage().lastIndexOf("'");
+        int start = e1.getMessage().indexOf('\'');
+        int end = e1.getMessage().lastIndexOf('\'');
         String field = e1.getMessage();
         if(start != -1 && end != -1){
           field = field.substring(start+1, end);
@@ -430,14 +440,10 @@ public class ConfigAPI implements ConfigurationsResource {
   }
 
   private boolean isInvalidUUID(String errorMessage){
-    if(errorMessage != null &&
-        (errorMessage.contains("invalid input syntax for type uuid") /*postgres v10*/ ||
-            errorMessage.contains("invalid input syntax for uuid") /*postgres v9.6*/)){
-      return true;
-    }
-    else{
-      return false;
-    }
+    /*postgres v10*//*postgres v9.6*/
+    return errorMessage != null &&
+      (errorMessage.contains("invalid input syntax for type uuid") /*postgres v10*/ ||
+        errorMessage.contains("invalid input syntax for uuid") /*postgres v9.6*/);
   }
 
   private <T> boolean isNotUniqueModuleConfigAndCode(AsyncResult<T> reply) {
