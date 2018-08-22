@@ -23,6 +23,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -139,7 +140,7 @@ public class RestVerticleTest {
   public void canCreateConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = audioAlertsExample().create();
+    JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
     final CompletableFuture<Response> postCompleted = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -458,13 +459,13 @@ public class RestVerticleTest {
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = audioAlertsExample().create();
+    JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
       firstConfigRecord.encodePrettily()));
 
-    JsonObject secondConfigRecord = timeOutDurationExample().create();
+    JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
     allCreated.add(post(
       "http://localhost:" + port + "/configurations/entries",
@@ -501,7 +502,7 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = audioAlertsExample().create();
+    JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
     final CompletableFuture<Response> firstRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -510,7 +511,7 @@ public class RestVerticleTest {
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = timeOutDurationExample().create();
+    JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
     final CompletableFuture<Response> secondRecordCreated = post(
       "http://localhost:" + port + "/configurations/entries",
@@ -948,23 +949,5 @@ public class RestVerticleTest {
     finally {
       async.complete();
     }
-  }
-
-  private static ConfigurationRecordBuilder timeOutDurationExample() {
-    return new ConfigurationRecordBuilder()
-      .withModuleName("CHECKOUT")
-      .withConfigName("other_settings")
-      .withCode("checkoutTimeoutDuration")
-      .withValue(3)
-      .withDescription("How long the timeout for a check out session should be");
-  }
-
-  private static ConfigurationRecordBuilder audioAlertsExample() {
-    return new ConfigurationRecordBuilder()
-      .withModuleName("CHECKOUT")
-      .withConfigName("other_settings")
-      .withCode("audioAlertsEnabled")
-      .withValue(true)
-      .withDescription("Whether audio alerts should be made during check out");
   }
 }
