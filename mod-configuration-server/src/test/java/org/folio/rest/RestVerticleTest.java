@@ -145,9 +145,7 @@ public class RestVerticleTest {
 
     JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      configRecord.encodePrettily());
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
@@ -202,9 +200,7 @@ public class RestVerticleTest {
       .withValue("{ \"audioAlertsEnabled\": \"true\" }")
       .create();
 
-    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      configRecord.encodePrettily());
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
@@ -239,9 +235,7 @@ public class RestVerticleTest {
       .forUser(userId)
       .create();
 
-    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      configRecord.encodePrettily());
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
@@ -282,9 +276,7 @@ public class RestVerticleTest {
       .forUser(userId)
       .create();
 
-    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      configRecord.encodePrettily());
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
@@ -323,9 +315,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
       .withModuleName("CHECKOUT")
@@ -333,9 +323,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
     allRecordsFutures.add(firstRecordCompleted);
@@ -358,9 +346,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
       .withModuleName("RENEWAL")
@@ -368,9 +354,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
     allRecordsFutures.add(firstRecordCompleted);
@@ -394,9 +378,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
       .withModuleName("CHECKOUT")
@@ -405,9 +387,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
     allRecordsFutures.add(firstRecordCompleted);
@@ -431,9 +411,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
       .withModuleName("RENEWAL")
@@ -442,9 +420,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCompleted = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
     allRecordsFutures.add(firstRecordCompleted);
@@ -469,9 +445,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     //Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
@@ -483,9 +457,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
@@ -510,9 +482,7 @@ public class RestVerticleTest {
       .withValue("some value")
       .create();
 
-    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     //Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
@@ -523,9 +493,7 @@ public class RestVerticleTest {
       .withValue("some other value")
       .create();
 
-    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
@@ -546,15 +514,11 @@ public class RestVerticleTest {
 
     JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    allCreated.add(okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily()));
+    allCreated.add(createConfigRecord(firstConfigRecord));
 
     JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    allCreated.add(okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily()));
+    allCreated.add(createConfigRecord(secondConfigRecord));
 
     CompletableFutureExtensions.allOf(allCreated).thenComposeAsync(v ->
       //Must filter to only check out module entries due to default locale records
@@ -589,18 +553,14 @@ public class RestVerticleTest {
 
     JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> firstRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
     JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    final CompletableFuture<Response> secondRecordCreated = okapiHttpClient.post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     secondRecordCreated.get(5, TimeUnit.SECONDS);
 
@@ -957,5 +917,11 @@ public class RestVerticleTest {
     finally {
       async.complete();
     }
+  }
+
+  private CompletableFuture<Response> createConfigRecord(JsonObject record) {
+    return okapiHttpClient.post(
+      "http://localhost:" + port + "/configurations/entries",
+      record.encodePrettily());
   }
 }
