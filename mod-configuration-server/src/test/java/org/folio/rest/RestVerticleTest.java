@@ -23,6 +23,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.support.CompletableFutureExtensions;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
@@ -256,7 +257,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -291,7 +292,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -328,7 +329,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -365,7 +366,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -471,7 +472,7 @@ public class RestVerticleTest {
       "http://localhost:" + port + "/configurations/entries",
       secondConfigRecord.encodePrettily()));
 
-    allOf(allCreated).thenComposeAsync(v ->
+    CompletableFutureExtensions.allOf(allCreated).thenComposeAsync(v ->
       //Must filter to only check out module entries due to default locale records
       get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
     .thenAccept(response -> {
@@ -927,13 +928,11 @@ public class RestVerticleTest {
     }
   }
 
-  public static <T> CompletableFuture<Void> allOf(
-    List<CompletableFuture<T>> allFutures) {
+  private void checkAllRecordsCreated(
+    Iterable<CompletableFuture<Response>> allRecordsFutures,
+    TestContext testContext,
+    Async async) {
 
-    return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
-  }
-
-  private void checkAllRecordsCreated(Iterable<CompletableFuture<Response>> allRecordsFutures, TestContext testContext, Async async) {
     try {
       for (CompletableFuture<Response> future : allRecordsFutures) {
         Response response = future.get();
