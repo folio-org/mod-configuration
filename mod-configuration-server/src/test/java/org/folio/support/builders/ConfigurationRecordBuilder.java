@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public class ConfigurationRecordBuilder extends JsonBuilder {
 
+  private final UUID id;
   private final String moduleName;
   private final String configName;
   private final String code;
@@ -15,17 +16,20 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   private final UUID userId;
 
   public ConfigurationRecordBuilder() {
-    this(null, null, null, null, null, true, null);
+    this(null, null, null, null, null, null, true, null);
   }
 
   private ConfigurationRecordBuilder(
+    UUID id,
     String moduleName,
     String configName,
     String code,
     Object value,
     String description,
-    Boolean enabled, UUID userId) {
+    Boolean enabled,
+    UUID userId) {
 
+    this.id = id;
     this.moduleName = moduleName;
     this.code = code;
     this.value = value;
@@ -39,14 +43,19 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     return from(new JsonObject(example));
   }
 
-  private static ConfigurationRecordBuilder from(JsonObject example) {
+  public static ConfigurationRecordBuilder from(JsonObject example) {
     //TODO: Extract constants for properties
+
+    final UUID id = example.containsKey("id")
+      ? UUID.fromString(example.getString("id"))
+      : null;
 
     final UUID userId = example.containsKey("userId")
       ? UUID.fromString(example.getString("userId"))
       : null;
 
     return new ConfigurationRecordBuilder(
+      id,
       example.getString("module"),
       example.getString("configName"),
       example.getString("code"),
@@ -70,8 +79,21 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     return configurationRecord;
   }
 
+  public ConfigurationRecordBuilder withId(UUID id) {
+    return new ConfigurationRecordBuilder(
+      id,
+      this.moduleName,
+      this.configName,
+      this.code,
+      this.value,
+      this.description,
+      this.enabled,
+      this.userId);
+  }
+
   public ConfigurationRecordBuilder withModuleName(String moduleName) {
     return new ConfigurationRecordBuilder(
+      this.id,
       moduleName,
       this.configName,
       this.code,
@@ -83,6 +105,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder withConfigName(String configName) {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       configName,
       this.code,
@@ -94,6 +117,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder withCode(String code) {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       this.configName,
       code,
@@ -109,6 +133,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder withValue(Object value) {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       this.configName,
       this.code,
@@ -120,6 +145,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder withDescription(String description) {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       this.configName,
       this.code,
@@ -131,6 +157,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder disabled() {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       this.configName,
       this.code,
@@ -142,6 +169,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
 
   public ConfigurationRecordBuilder forUser(UUID userId) {
     return new ConfigurationRecordBuilder(
+      this.id,
       this.moduleName,
       this.configName,
       this.code,

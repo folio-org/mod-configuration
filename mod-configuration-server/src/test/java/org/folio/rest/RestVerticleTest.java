@@ -27,9 +27,7 @@ import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
 import org.folio.support.builders.ConfigurationRecordBuilder;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -304,6 +302,76 @@ public class RestVerticleTest {
     });
   }
 
+  //Only a single example, rather than replicating all of the examples used for POST
+  @Test
+  public void canReplaceTenantConfigurationRecordUsingPut(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withModuleName("a_new_module")
+      .withConfigName("a_new_config_name")
+      .withCode("a_new_code")
+      .withValue("a_new_value")
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    try {
+      testContext.assertEquals(204, putResponse.getStatusCode(),
+        String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+          putResponse.getBody()));
+
+      final Response getResponse = okapiHttpClient.get(
+        "http://localhost:" + port + "/configurations/entries/" + id)
+        .get(5, TimeUnit.SECONDS);
+
+      JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+      testContext.assertEquals("a_new_module", updatedRecord.getString("module"));
+      testContext.assertEquals("a_new_config_name", updatedRecord.getString("configName"));
+      testContext.assertEquals("a_new_code", updatedRecord.getString("code"));
+      testContext.assertEquals("a_new_value", updatedRecord.getString("value"));
+
+      testContext.assertTrue(updatedRecord.containsKey("metadata"),
+        String.format("Should contain change metadata property: '%s'",
+          updatedRecord.encodePrettily()));
+
+      final JsonObject changeMetadata = updatedRecord.getJsonObject("metadata");
+
+      testContext.assertTrue(changeMetadata.containsKey("createdDate"),
+        String.format("Should contain created date property: '%s'", changeMetadata));
+
+      testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
+        String.format("Should contain created by property: '%s'", changeMetadata));
+
+      testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
+        String.format("Should contain updated date property: '%s'", changeMetadata));
+
+      testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
+        String.format("Should contain updated by property: '%s'", changeMetadata));
+    }
+    catch(Exception e) {
+      testContext.fail(e);
+    }
+  }
+
   @Test
   public void canCreateTenantAndGroupConfigurationRecordsForSameModuleConfigNameAndCode(
     TestContext testContext) {
@@ -521,6 +589,37 @@ public class RestVerticleTest {
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
+  @Test
+  public void cannotCreateConfigurationRecordUsingPut(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID id = UUID.randomUUID();
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .withId(id)
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id.toString(),
+      configRecord.encodePrettily());
+
+    putCompleted.thenAccept(response -> {
+      try {
+        //TODO: Should this be 400/422 instead?
+        testContext.assertEquals(500, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+  
   @Test
   public void cannotCreateMultipleTenantRecordsWithSameModuleConfigAndCode(
     TestContext testContext)
