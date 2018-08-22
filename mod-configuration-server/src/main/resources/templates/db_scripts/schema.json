@@ -49,7 +49,7 @@
         },
         {
           "fieldName": "module, configName, code, userId",
-          "whereClause": "WHERE (jsonb->'code') is not null AND (jsonb->'userId') is not null",
+          "whereClause": "WHERE (jsonb->'code') is not null AND (jsonb->'userId') is not null AND (jsonb->>'enabled')::boolean is true",
           "tOps": "ADD"
         },
         {

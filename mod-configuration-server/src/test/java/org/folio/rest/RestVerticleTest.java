@@ -1057,6 +1057,48 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateMultipleDisabledUserConfigurationRecordsWithCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final UUID userId = UUID.randomUUID();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value")
+      .forUser(userId);
+
+    JsonObject tenantConfigRecord = baselineSetting
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    JsonObject firstDisabledConfigRecord = baselineSetting
+      .withValue("another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstDisabledConfigRecord));
+
+    JsonObject secondDisabledConfigRecord = baselineSetting
+      .withValue("yet another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondDisabledConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
 
