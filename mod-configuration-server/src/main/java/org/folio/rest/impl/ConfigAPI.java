@@ -433,12 +433,21 @@ public class ConfigAPI implements ConfigurationsResource {
   }
 
   private boolean isNotUniqueModuleConfigAndCode(AsyncResult<String> reply) {
+    if(reply == null) {
+      return false;
+    }
+
     //TODO: discriminate better the different unique constraints
     final String message = PgExceptionUtil.badRequestMessage(reply.cause());
 
-    return message.contains("config_data_module_configname_code_idx_unique")
-      || message.contains("config_data_module_configname_idx_unique")
-      || message.contains("config_data_module_configname_code_userid_idx_unique");
+    if(message == null) {
+      return false;
+    }
+    else {
+      return message.contains("config_data_module_configname_code_idx_unique")
+        || message.contains("config_data_module_configname_idx_unique")
+        || message.contains("config_data_module_configname_code_userid_idx_unique");
+    }
   }
 
   private Errors uniqueModuleConfigAndCodeError(Config entity) {
