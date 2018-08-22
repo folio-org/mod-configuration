@@ -25,6 +25,7 @@ import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.CompletableFutureExtensions;
 import org.folio.support.ConfigurationRecordExamples;
+import org.folio.support.Response;
 import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -149,7 +150,7 @@ public class RestVerticleTest {
 
     postCompleted.thenAccept(response -> {
       try {
-        testContext.assertEquals(201, response.statusCode,
+        testContext.assertEquals(201, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
@@ -206,7 +207,7 @@ public class RestVerticleTest {
 
     postCompleted.thenAccept(response -> {
       try {
-        testContext.assertEquals(201, response.statusCode,
+        testContext.assertEquals(201, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
@@ -405,11 +406,11 @@ public class RestVerticleTest {
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
-    testContext.assertEquals(201, firstRecordResponse.statusCode,
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
       String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
-    testContext.assertEquals(422, secondRecordResponse.statusCode,
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
       String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
@@ -445,11 +446,11 @@ public class RestVerticleTest {
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
-    testContext.assertEquals(201, firstRecordResponse.statusCode,
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
       String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
-    testContext.assertEquals(422, secondRecordResponse.statusCode,
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
       String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
@@ -477,7 +478,7 @@ public class RestVerticleTest {
       get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
     .thenAccept(response -> {
       try {
-        testContext.assertEquals(200, response.statusCode,
+        testContext.assertEquals(200, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
@@ -527,7 +528,7 @@ public class RestVerticleTest {
     get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
       .thenAccept(response -> {
         try {
-          testContext.assertEquals(200, response.statusCode,
+          testContext.assertEquals(200, response.getStatusCode(),
             String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
               response.getBody()));
 
@@ -910,24 +911,6 @@ public class RestVerticleTest {
     return getCompleted;
   }
 
-  private class Response {
-    private final Integer statusCode;
-    private final String body;
-
-    private Response(Integer statusCode, String body) {
-      this.statusCode = statusCode;
-      this.body = body;
-    }
-
-    Integer getStatusCode() {
-      return statusCode;
-    }
-
-    String getBody() {
-      return body;
-    }
-  }
-
   private void checkAllRecordsCreated(
     Iterable<CompletableFuture<Response>> allRecordsFutures,
     TestContext testContext,
@@ -937,7 +920,7 @@ public class RestVerticleTest {
       for (CompletableFuture<Response> future : allRecordsFutures) {
         Response response = future.get();
 
-        testContext.assertEquals(201, response.statusCode,
+        testContext.assertEquals(201, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
       }
