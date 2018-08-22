@@ -51,6 +51,11 @@
           "fieldName": "module, configName, code, userId",
           "whereClause": "WHERE ((jsonb->'code')) is not null AND ((jsonb->'userId')) is not null",
           "tOps": "ADD"
+        },
+        {
+          "fieldName": "module, configName, userId",
+          "whereClause": "WHERE ((jsonb->'code')) is null AND ((jsonb->'userId')) is not null",
+          "tOps": "ADD"
         }
       ],
       "index": [

@@ -446,7 +446,8 @@ public class ConfigAPI implements ConfigurationsResource {
     else {
       return message.contains("config_data_module_configname_code_idx_unique")
         || message.contains("config_data_module_configname_idx_unique")
-        || message.contains("config_data_module_configname_code_userid_idx_unique");
+        || message.contains("config_data_module_configname_code_userid_idx_unique")
+        || message.contains("config_data_module_configname_userid_idx_unique");
     }
   }
 
