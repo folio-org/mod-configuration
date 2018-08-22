@@ -1,6 +1,7 @@
-## 5.0.0 unreleased
+## 5.0.0 Unreleased
 
 * MODCONF-21 - Configuration records are unique for each module, config name and code
+* MODCONF-21 - Configuration records are enabled by default
 * MODCONF-22 - use dereferenced kv_configuration.schema for metadata sorting
 * Upgrades to RAML Module Builder 19.3.1
 * CQL queries for an unrecognised index report a 400 instead of 422

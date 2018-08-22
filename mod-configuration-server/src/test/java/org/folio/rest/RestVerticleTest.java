@@ -304,7 +304,7 @@ public class RestVerticleTest {
 
   //Only a single example, rather than replicating all of the examples used for POST
   @Test
-  public void canReplaceTenantConfigurationRecordUsingPut(TestContext testContext)
+  public void canReplaceConfigurationRecordUsingPut(TestContext testContext)
     throws InterruptedException,
     ExecutionException,
     TimeoutException {
@@ -333,43 +333,126 @@ public class RestVerticleTest {
 
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
-    try {
-      testContext.assertEquals(204, putResponse.getStatusCode(),
-        String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
-          putResponse.getBody()));
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
 
-      final Response getResponse = okapiHttpClient.get(
-        "http://localhost:" + port + "/configurations/entries/" + id)
-        .get(5, TimeUnit.SECONDS);
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
 
-      JsonObject updatedRecord = getResponse.getBodyAsJson();
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
 
-      testContext.assertEquals("a_new_module", updatedRecord.getString("module"));
-      testContext.assertEquals("a_new_config_name", updatedRecord.getString("configName"));
-      testContext.assertEquals("a_new_code", updatedRecord.getString("code"));
-      testContext.assertEquals("a_new_value", updatedRecord.getString("value"));
+    testContext.assertEquals("a_new_module", updatedRecord.getString("module"));
+    testContext.assertEquals("a_new_config_name", updatedRecord.getString("configName"));
+    testContext.assertEquals("a_new_code", updatedRecord.getString("code"));
+    testContext.assertEquals("a_new_value", updatedRecord.getString("value"));
 
-      testContext.assertTrue(updatedRecord.containsKey("metadata"),
-        String.format("Should contain change metadata property: '%s'",
-          updatedRecord.encodePrettily()));
+    testContext.assertTrue(updatedRecord.containsKey("metadata"),
+      String.format("Should contain change metadata property: '%s'",
+        updatedRecord.encodePrettily()));
 
-      final JsonObject changeMetadata = updatedRecord.getJsonObject("metadata");
+    final JsonObject changeMetadata = updatedRecord.getJsonObject("metadata");
 
-      testContext.assertTrue(changeMetadata.containsKey("createdDate"),
-        String.format("Should contain created date property: '%s'", changeMetadata));
+    testContext.assertTrue(changeMetadata.containsKey("createdDate"),
+      String.format("Should contain created date property: '%s'", changeMetadata));
 
-      testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
-        String.format("Should contain created by property: '%s'", changeMetadata));
+    testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
+      String.format("Should contain created by property: '%s'", changeMetadata));
 
-      testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
-        String.format("Should contain updated date property: '%s'", changeMetadata));
+    testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
+      String.format("Should contain updated date property: '%s'", changeMetadata));
 
-      testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
-        String.format("Should contain updated by property: '%s'", changeMetadata));
-    }
-    catch(Exception e) {
-      testContext.fail(e);
-    }
+    testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
+      String.format("Should contain updated by property: '%s'", changeMetadata));
+  }
+
+  @Test
+  public void canDisableConfigurationRecord(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .disabled()
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
+
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+    testContext.assertTrue(updatedRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertFalse(updatedRecord.getBoolean("enabled"),
+      "Should be disabled");
+  }
+
+  @Test
+  public void configurationRecordIsEnabledByDefaultWhenReplaced(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withNoEnabled()
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
+
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+    testContext.assertTrue(updatedRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertTrue(updatedRecord.getBoolean("enabled"),
+      "Should be enabled");
   }
 
   @Test
@@ -587,6 +670,71 @@ public class RestVerticleTest {
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void createdConfigurationRecordIsEnabledByDefault(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("some_module")
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .withNoEnabled()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, response.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+        response.getBody()));
+
+    System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+    JsonObject createdRecord = new JsonObject(response.getBody());
+
+    testContext.assertTrue(createdRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertEquals(true, createdRecord.getBoolean("enabled"),
+      "Should be enabled");
+  }
+
+  @Test
+  public void canCreatedDisabledConfigurationRecord(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("some_module")
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .disabled()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, response.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+        response.getBody()));
+
+    System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+    JsonObject createdRecord = new JsonObject(response.getBody());
+
+    testContext.assertTrue(createdRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertEquals(false, createdRecord.getBoolean("enabled"));
   }
 
   @Test

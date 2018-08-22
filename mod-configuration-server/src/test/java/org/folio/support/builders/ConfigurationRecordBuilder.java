@@ -182,4 +182,16 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   public ConfigurationRecordBuilder forNoUser() {
     return forUser(null);
   }
+
+  public ConfigurationRecordBuilder withNoEnabled() {
+    return new ConfigurationRecordBuilder(
+      this.id,
+      this.moduleName,
+      this.configName,
+      this.code,
+      this.value,
+      this.description,
+      null,
+      this.userId);
+  }
 }

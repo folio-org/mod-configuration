@@ -153,7 +153,9 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void postConfigurationsEntries(String lang, Config entity, java.util.Map<String, String>okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context context) {
+
+    defaultToEnabled(entity);
 
     context.runOnContext(v -> {
       try {
@@ -309,7 +311,9 @@ public class ConfigAPI implements ConfigurationsResource {
   @Override
   public void putConfigurationsEntriesByEntryId(String entryId, String lang, Config entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
-      Context vertxContext) throws Exception {
+      Context vertxContext) {
+
+    defaultToEnabled(entity);
 
     vertxContext.runOnContext(v -> {
       log.debug("sending... putConfigurationsTablesByTableId");
@@ -480,5 +484,11 @@ public class ConfigAPI implements ConfigurationsResource {
     errors.setErrors(errorList);
 
     return errors;
+  }
+
+  private void defaultToEnabled(Config entity) {
+    if(entity.getEnabled() == null) {
+      entity.setEnabled(true);
+    }
   }
 }
