@@ -23,7 +23,6 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.folio.support.CompletableFutureExtensions;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
@@ -43,6 +42,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static org.folio.support.CompletableFutureExtensions.allOf;
 
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
@@ -304,6 +305,50 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateTenantAndGroupConfigurationRecordsForSameModuleConfigNameAndCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting
+      .forNoUser()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    final UUID firstUserId = UUID.randomUUID();
+
+    JsonObject firstUserConfigRecord = baselineSetting
+      .forUser(firstUserId)
+      .withValue("another value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstUserConfigRecord));
+
+    final UUID secondUserId = UUID.randomUUID();
+
+    JsonObject secondUserConfigRecord = baselineSetting
+      .forUser(secondUserId)
+      .withValue("a different value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondUserConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
   public void canCreateMultipleConfigurationRecordsWithDifferentConfigNameWithoutCode(
     TestContext testContext) {
 
@@ -329,7 +374,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -360,7 +405,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -393,7 +438,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -426,7 +471,7 @@ public class RestVerticleTest {
     allRecordsFutures.add(firstRecordCompleted);
     allRecordsFutures.add(secondRecordCompleted);
 
-    CompletableFuture<Void> allRecordsCompleted = CompletableFutureExtensions.allOf(allRecordsFutures);
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
     allRecordsCompleted.thenAccept(v ->
       checkAllRecordsCreated(allRecordsFutures, testContext, async));
@@ -520,7 +565,7 @@ public class RestVerticleTest {
 
     allCreated.add(createConfigRecord(secondConfigRecord));
 
-    CompletableFutureExtensions.allOf(allCreated).thenComposeAsync(v ->
+    allOf(allCreated).thenComposeAsync(v ->
       //Must filter to only check out module entries due to default locale records
       okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
     .thenAccept(response -> {

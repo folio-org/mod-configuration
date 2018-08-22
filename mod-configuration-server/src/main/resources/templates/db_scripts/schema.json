@@ -39,7 +39,7 @@
       "uniqueIndex": [
         {
           "fieldName": "module, configName, code",
-          "whereClause": "WHERE ((jsonb->'code')) is not null",
+          "whereClause": "WHERE ((jsonb->'code')) is not null AND ((jsonb->'userId')) is null",
           "tOps": "ADD"
         },
         {

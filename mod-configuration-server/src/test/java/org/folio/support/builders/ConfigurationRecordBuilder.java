@@ -150,4 +150,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.enabled,
       userId);
   }
+
+  public ConfigurationRecordBuilder forNoUser() {
+    return forUser(null);
+  }
 }
