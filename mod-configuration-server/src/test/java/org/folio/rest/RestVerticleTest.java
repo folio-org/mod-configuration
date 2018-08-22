@@ -140,7 +140,7 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canCreateConfigurationRecord(TestContext testContext) {
+  public void canCreateTenantConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
     JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
@@ -193,7 +193,7 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canCreateConfigurationRecordWithoutCode(TestContext testContext) {
+  public void canCreateTenantConfigurationRecordWithoutCode(TestContext testContext) {
     final Async async = testContext.async();
 
     JsonObject configRecord = new ConfigurationRecordBuilder()
@@ -219,6 +219,88 @@ public class RestVerticleTest {
         testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
         testContext.assertEquals("other_settings", createdRecord.getString("configName"));
         testContext.assertFalse(createdRecord.containsKey("code"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canCreateUserConfigurationRecord(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample()
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
+      "http://localhost:" + port + "/configurations/entries",
+      configRecord.encodePrettily());
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertEquals("audioAlertsEnabled", createdRecord.getString("code"));
+        testContext.assertEquals("true", createdRecord.getString("value"));
+        testContext.assertEquals(userId.toString(), createdRecord.getString("userId"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canCreateUserConfigurationRecordWithoutCode(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> postCompleted = okapiHttpClient.post(
+      "http://localhost:" + port + "/configurations/entries",
+      configRecord.encodePrettily());
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertFalse(createdRecord.containsKey("code"), "Should not have a code");
+        testContext.assertEquals("some value", createdRecord.getString("value"));
+        testContext.assertEquals(userId.toString(), createdRecord.getString("userId"));
       }
       catch(Exception e) {
         testContext.fail(e);

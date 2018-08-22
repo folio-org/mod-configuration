@@ -2,6 +2,8 @@ package org.folio.support.builders;
 
 import io.vertx.core.json.JsonObject;
 
+import java.util.UUID;
+
 public class ConfigurationRecordBuilder extends JsonBuilder {
 
   private final String moduleName;
@@ -10,9 +12,10 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   private final Object value;
   private final String description;
   private final Boolean enabled;
+  private final UUID userId;
 
   public ConfigurationRecordBuilder() {
-    this(null, "other_settings", null, null, null, true);
+    this(null, null, null, null, null, true, null);
   }
 
   private ConfigurationRecordBuilder(
@@ -21,7 +24,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     String code,
     Object value,
     String description,
-    Boolean enabled) {
+    Boolean enabled, UUID userId) {
 
     this.moduleName = moduleName;
     this.code = code;
@@ -29,21 +32,28 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     this.description = description;
     this.configName = configName;
     this.enabled = enabled;
+    this.userId = userId;
   }
 
   public static ConfigurationRecordBuilder from(String example) {
     return from(new JsonObject(example));
   }
 
-  public static ConfigurationRecordBuilder from(JsonObject example) {
+  private static ConfigurationRecordBuilder from(JsonObject example) {
     //TODO: Extract constants for properties
+
+    final UUID userId = example.containsKey("userId")
+      ? UUID.fromString(example.getString("userId"))
+      : null;
+
     return new ConfigurationRecordBuilder(
       example.getString("module"),
       example.getString("configName"),
       example.getString("code"),
       example.getValue("value"),
       example.getString("description"),
-      example.getBoolean("enabled"));
+      example.getBoolean("enabled"),
+      userId);
   }
 
   public JsonObject create() {
@@ -55,6 +65,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     put(configurationRecord, "code", this.code);
     put(configurationRecord, "value", this.value);
     put(configurationRecord, "enabled", this.enabled);
+    put(configurationRecord, "userId", this.userId);
 
     return configurationRecord;
   }
@@ -66,7 +77,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.code,
       this.value,
       this.description,
-      this.enabled);
+      this.enabled,
+      this.userId);
   }
 
   public ConfigurationRecordBuilder withConfigName(String configName) {
@@ -76,7 +88,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.code,
       this.value,
       this.description,
-      this.enabled);
+      this.enabled,
+      this.userId);
   }
 
   public ConfigurationRecordBuilder withCode(String code) {
@@ -86,7 +99,12 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       code,
       this.value,
       this.description,
-      this.enabled);
+      this.enabled,
+      this.userId);
+  }
+
+  public ConfigurationRecordBuilder withNoCode() {
+    return withCode(null);
   }
 
   public ConfigurationRecordBuilder withValue(Object value) {
@@ -96,7 +114,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.code,
       value,
       this.description,
-      this.enabled);
+      this.enabled,
+      this.userId);
   }
 
   public ConfigurationRecordBuilder withDescription(String description) {
@@ -106,7 +125,8 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.code,
       this.value,
       description,
-      this.enabled);
+      this.enabled,
+      this.userId);
   }
 
   public ConfigurationRecordBuilder disabled() {
@@ -116,6 +136,18 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.code,
       this.value,
       this.description,
-      false);
+      false,
+      this.userId);
+  }
+
+  public ConfigurationRecordBuilder forUser(UUID userId) {
+    return new ConfigurationRecordBuilder(
+      this.moduleName,
+      this.configName,
+      this.code,
+      this.value,
+      this.description,
+      this.enabled,
+      userId);
   }
 }
