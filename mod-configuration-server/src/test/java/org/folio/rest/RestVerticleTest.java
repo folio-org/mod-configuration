@@ -781,6 +781,55 @@ public class RestVerticleTest {
         secondRecordResponse.getBody()));
   }
 
+  //Only a single example, rather than replicating all of the examples used for POST
+  @Test
+  public void cannotReplaceTenantConfigurationRecordToHaveDuplicateModuleConfigNameAndCode(
+    TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("some_setting")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject recordToBeUpdated = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(recordToBeUpdated);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("some_setting")
+      .withValue("a new value")
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(422, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+  }
+
   @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
