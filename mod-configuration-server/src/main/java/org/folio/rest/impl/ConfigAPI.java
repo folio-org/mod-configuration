@@ -436,23 +436,23 @@ public class ConfigAPI implements ConfigurationsResource {
     //TODO: discriminate better the different unique constraints
     final String message = PgExceptionUtil.badRequestMessage(reply.cause());
 
-    //TODO: discriminate better the different unique constraints
     return message.contains("config_data_module_configname_code_idx_unique")
-      || message.contains("config_data_module_configname_idx_unique");
+      || message.contains("config_data_module_configname_idx_unique")
+      || message.contains("config_data_module_configname_code_userid_idx_unique");
   }
 
   private Errors uniqueModuleConfigAndCodeError(Config entity) {
-    Error error = new Error();
-
-    error.withMessage("Cannot have more than one record with the same module, config name and code")
+    final Error error = new Error()
+      .withMessage("Cannot have more than one tenant or user record with the same module, config name and code")
       .withAdditionalProperty("module", entity.getModule())
       .withAdditionalProperty("configName", entity.getConfigName())
-      .withAdditionalProperty("code", entity.getCode());
+      .withAdditionalProperty("code", entity.getCode())
+      .withAdditionalProperty("userId", entity.getUserId());
 
-    List<Error> errorList = new ArrayList<>();
+    final List<Error> errorList = new ArrayList<>();
     errorList.add(error);
 
-    Errors errors = new Errors();
+    final Errors errors = new Errors();
     errors.setErrors(errorList);
 
     return errors;
