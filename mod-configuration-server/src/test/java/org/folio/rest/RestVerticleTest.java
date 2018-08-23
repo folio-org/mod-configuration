@@ -8,8 +8,10 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -22,6 +24,10 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.support.ConfigurationRecordExamples;
+import org.folio.support.OkapiHttpClient;
+import org.folio.support.Response;
+import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -30,6 +36,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -38,20 +45,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.folio.support.CompletableFutureExtensions.allOf;
+
 /**
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
   private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOiI3OWZmMmE4Yi1kOWMzLTViMzktYWQ0YS0wYTg0MDI1YWIwODUiLCJ0ZW5hbnQiOiJ0ZXN0X3RlbmFudCJ9BShwfHcNClt5ZXJ8ImQTMQtAM1sQEnhsfWNmXGsYVDpuaDN3RVQ9";
 
   private static Locale oldLocale;
-  private static Vertx vertx;
+  private static final Vertx vertx = Vertx.vertx();
   private static int port;
   private static TenantClient tClient = null;
+  private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
+    vertx, TENANT_ID, USER_ID, TOKEN);
 
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
@@ -62,8 +75,6 @@ public class RestVerticleTest {
   public static void beforeAll(TestContext context) {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.US);
-
-    vertx = Vertx.vertx();
 
     try {
       AES.setSecretKey(SECRET_KEY);
@@ -90,7 +101,7 @@ public class RestVerticleTest {
             try {
               tClient.post(null, responseHandler ->
                 responseHandler.bodyHandler(body -> {
-                System.out.println(body.toString());
+                log.debug(body.toString());
                 async.complete();
               }));
             } catch (Exception e) {
@@ -112,7 +123,7 @@ public class RestVerticleTest {
   public static void afterAll(TestContext context) {
     Async async = context.async();
     tClient.delete(reply -> reply.bodyHandler(body -> {
-      System.out.println(body.toString());
+      log.debug(body.toString());
       vertx.close(context.asyncAssertSuccess(res-> {
         PostgresClient.stopEmbeddedPostgres();
         async.complete();
@@ -134,27 +145,20 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canCreateConfigurationRecord(TestContext testContext) {
+  public void canCreateTenantConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject configRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> postCompleted = post(
-      "http://localhost:" + port + "/configurations/entries",
-      configRecord.encodePrettily());
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
-        testContext.assertEquals(201, response.statusCode,
+        testContext.assertEquals(201, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
-        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
 
         JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -192,39 +196,972 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void canCreateTenantConfigurationRecordWithoutCode(TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("{ \"audioAlertsEnabled\": \"true\" }")
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertFalse(createdRecord.containsKey("code"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canCreateUserConfigurationRecord(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample()
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertEquals("audioAlertsEnabled", createdRecord.getString("code"));
+        testContext.assertEquals("true", createdRecord.getString("value"));
+        testContext.assertEquals(userId.toString(), createdRecord.getString("userId"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void canCreateUserConfigurationRecordWithoutCode(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    postCompleted.thenAccept(response -> {
+      try {
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
+
+        JsonObject createdRecord = new JsonObject(response.getBody());
+
+        testContext.assertEquals("CHECKOUT", createdRecord.getString("module"));
+        testContext.assertEquals("other_settings", createdRecord.getString("configName"));
+        testContext.assertFalse(createdRecord.containsKey("code"), "Should not have a code");
+        testContext.assertEquals("some value", createdRecord.getString("value"));
+        testContext.assertEquals(userId.toString(), createdRecord.getString("userId"));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+
+  //Only a single example, rather than replicating all of the examples used for POST
+  @Test
+  public void canReplaceConfigurationRecordUsingPut(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withModuleName("a_new_module")
+      .withConfigName("a_new_config_name")
+      .withCode("a_new_code")
+      .withValue("a_new_value")
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
+
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+    testContext.assertEquals("a_new_module", updatedRecord.getString("module"));
+    testContext.assertEquals("a_new_config_name", updatedRecord.getString("configName"));
+    testContext.assertEquals("a_new_code", updatedRecord.getString("code"));
+    testContext.assertEquals("a_new_value", updatedRecord.getString("value"));
+
+    testContext.assertTrue(updatedRecord.containsKey("metadata"),
+      String.format("Should contain change metadata property: '%s'",
+        updatedRecord.encodePrettily()));
+
+    final JsonObject changeMetadata = updatedRecord.getJsonObject("metadata");
+
+    testContext.assertTrue(changeMetadata.containsKey("createdDate"),
+      String.format("Should contain created date property: '%s'", changeMetadata));
+
+    testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
+      String.format("Should contain created by property: '%s'", changeMetadata));
+
+    testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
+      String.format("Should contain updated date property: '%s'", changeMetadata));
+
+    testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
+      String.format("Should contain updated by property: '%s'", changeMetadata));
+  }
+
+  @Test
+  public void canDisableConfigurationRecord(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .disabled()
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
+
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+    testContext.assertTrue(updatedRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertFalse(updatedRecord.getBoolean("enabled"),
+      "Should be disabled");
+  }
+
+  @Test
+  public void configurationRecordIsEnabledByDefaultWhenReplaced(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withNoEnabled()
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(204, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+
+    final Response getResponse = okapiHttpClient.get(
+      "http://localhost:" + port + "/configurations/entries/" + id)
+      .get(5, TimeUnit.SECONDS);
+
+    JsonObject updatedRecord = getResponse.getBodyAsJson();
+
+    testContext.assertTrue(updatedRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertTrue(updatedRecord.getBoolean("enabled"),
+      "Should be enabled");
+  }
+
+  @Test
+  public void canCreateTenantAndGroupConfigurationRecordsForSameModuleConfigNameAndCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting
+      .forNoUser()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    final UUID firstUserId = UUID.randomUUID();
+
+    JsonObject firstUserConfigRecord = baselineSetting
+      .forUser(firstUserId)
+      .withValue("another value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstUserConfigRecord));
+
+    final UUID secondUserId = UUID.randomUUID();
+
+    JsonObject secondUserConfigRecord = baselineSetting
+      .forUser(secondUserId)
+      .withValue("a different value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondUserConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateTenantAndGroupConfigurationRecordsForSameModuleConfigNameAndNoCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withNoCode()
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting
+      .forNoUser()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    final UUID firstUserId = UUID.randomUUID();
+
+    JsonObject firstUserConfigRecord = baselineSetting
+      .forUser(firstUserId)
+      .withValue("another value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstUserConfigRecord));
+
+    final UUID secondUserId = UUID.randomUUID();
+
+    JsonObject secondUserConfigRecord = baselineSetting
+      .forUser(secondUserId)
+      .withValue("a different value")
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondUserConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithDifferentConfigNameWithoutCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithDifferentModuleWithoutCode(
+    TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("RENEWAL")
+      .withConfigName("main_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithDifferentConfigName(
+    TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("second_setting")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleConfigurationRecordsWithDifferentModuleName(
+    TestContext testContext) {
+    final Async async = testContext.async();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("RENEWAL")
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+    allRecordsFutures.add(firstRecordCompleted);
+    allRecordsFutures.add(secondRecordCompleted);
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void createdConfigurationRecordIsEnabledByDefault(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("some_module")
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .withNoEnabled()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, response.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+        response.getBody()));
+
+    log.debug(String.format("Create Response: '%s'", response.getBody()));
+
+    JsonObject createdRecord = new JsonObject(response.getBody());
+
+    testContext.assertTrue(createdRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertEquals(true, createdRecord.getBoolean("enabled"),
+      "Should be enabled");
+  }
+
+  @Test
+  public void canCreatedDisabledConfigurationRecord(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+      .withModuleName("some_module")
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .disabled()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, response.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+        response.getBody()));
+
+    log.debug(String.format("Create Response: '%s'", response.getBody()));
+
+    JsonObject createdRecord = new JsonObject(response.getBody());
+
+    testContext.assertTrue(createdRecord.containsKey("enabled"),
+      "Should have enabled property");
+
+    testContext.assertEquals(false, createdRecord.getBoolean("enabled"));
+  }
+
+  @Test
+  public void cannotCreateConfigurationRecordUsingPut(TestContext testContext) {
+    final Async async = testContext.async();
+
+    final UUID id = UUID.randomUUID();
+
+    JsonObject configRecord = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .withId(id)
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id.toString(),
+      configRecord.encodePrettily());
+
+    putCompleted.thenAccept(response -> {
+      try {
+        //TODO: Should this be 400/422 instead?
+        testContext.assertEquals(500, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+      }
+      catch(Exception e) {
+        testContext.fail(e);
+      }
+      finally {
+        async.complete();
+      }
+    });
+  }
+  
+  @Test
+  public void cannotCreateMultipleTenantRecordsWithSameModuleConfigAndCode(
+    TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
+
+    final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+        firstRecordResponse.getBody()));
+
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+        secondRecordResponse.getBody()));
+  }
+
+  @Test
+  public void cannotCreateMultipleTenantRecordsWithSameModuleConfigWithoutCode(TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withValue("some other value")
+      .create();
+
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
+
+    final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+        firstRecordResponse.getBody()));
+
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+        secondRecordResponse.getBody()));
+  }
+
+  @Test
+  public void cannotCreateMultipleUserRecordsWithSameModuleConfigAndCode(
+    TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some other value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
+
+    final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+        firstRecordResponse.getBody()));
+
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+        secondRecordResponse.getBody()));
+  }
+
+  @Test
+  public void cannotCreateMultipleUserRecordsWithSameModuleConfigWithoutCode(
+    TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    final UUID userId = UUID.randomUUID();
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some other value")
+      .forUser(userId)
+      .create();
+
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
+
+    final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+        firstRecordResponse.getBody()));
+
+    testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+        secondRecordResponse.getBody()));
+  }
+
+  //Only a single example, rather than replicating all of the examples used for POST
+  @Test
+  public void cannotReplaceTenantConfigurationRecordToHaveDuplicateModuleConfigNameAndCode(
+    TestContext testContext)
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException {
+
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("some_setting")
+      .withValue("some value")
+      .create();
+
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
+
+    //Make sure the first record is created before the second
+    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+
+    JsonObject recordToBeUpdated = ConfigurationRecordExamples
+      .audioAlertsExample()
+      .create();
+
+    final CompletableFuture<Response> postCompleted = createConfigRecord(recordToBeUpdated);
+
+    final Response response = postCompleted.get(5, TimeUnit.SECONDS);
+
+    final JsonObject createdRecord = response.getBodyAsJson();
+    String id = createdRecord.getString("id");
+
+    JsonObject putRequest = ConfigurationRecordBuilder.from(createdRecord)
+      .withModuleName("CHECKOUT")
+      .withConfigName("other_settings")
+      .withCode("some_setting")
+      .withValue("a new value")
+      .create();
+
+    final CompletableFuture<Response> putCompleted = okapiHttpClient.put(
+      "http://localhost:" + port + "/configurations/entries/" + id,
+      putRequest.encodePrettily());
+
+    final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    testContext.assertEquals(422, putResponse.getStatusCode(),
+      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+        putResponse.getBody()));
+  }
+
+  @Test
+  public void canCreateMultipleDisabledTenantConfigurationRecordsWithCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting.create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    JsonObject firstDisabledConfigRecord = baselineSetting
+      .withValue("another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstDisabledConfigRecord));
+
+    JsonObject secondDisabledConfigRecord = baselineSetting
+      .withValue("yet another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondDisabledConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleDisabledTenantConfigurationRecordsWithoutCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withNoCode()
+      .withValue("some value");
+
+    JsonObject tenantConfigRecord = baselineSetting.create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    JsonObject firstDisabledConfigRecord = baselineSetting
+      .withValue("another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstDisabledConfigRecord));
+
+    JsonObject secondDisabledConfigRecord = baselineSetting
+      .withValue("yet another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondDisabledConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleDisabledUserConfigurationRecordsWithCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final UUID userId = UUID.randomUUID();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value")
+      .forUser(userId);
+
+    JsonObject tenantConfigRecord = baselineSetting.create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    JsonObject firstDisabledConfigRecord = baselineSetting
+      .withValue("another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstDisabledConfigRecord));
+
+    JsonObject secondDisabledConfigRecord = baselineSetting
+      .withValue("yet another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondDisabledConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
+  public void canCreateMultipleDisabledUserConfigurationRecordsWithoutCode(
+    TestContext testContext) {
+
+    final Async async = testContext.async();
+
+    List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
+
+    final UUID userId = UUID.randomUUID();
+
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+      .withModuleName("CHECKOUT")
+      .withConfigName("main_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId);
+
+    JsonObject tenantConfigRecord = baselineSetting.create();
+
+    allRecordsFutures.add(createConfigRecord(tenantConfigRecord));
+
+    JsonObject firstDisabledConfigRecord = baselineSetting
+      .withValue("another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(firstDisabledConfigRecord));
+
+    JsonObject secondDisabledConfigRecord = baselineSetting
+      .withValue("yet another value")
+      .disabled()
+      .create();
+
+    allRecordsFutures.add(createConfigRecord(secondDisabledConfigRecord));
+
+    CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
+
+    allRecordsCompleted.thenAccept(v ->
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
+  }
+
+  @Test
   public void canGetConfigurationRecords(TestContext testContext) {
     final Async async = testContext.async();
 
     final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
 
-    JsonObject firstConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    allCreated.add(post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily()));
+    allCreated.add(createConfigRecord(firstConfigRecord));
 
-    JsonObject secondConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "checkoutTimeoutDuration")
-      .put("value", 3);
+    JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    allCreated.add(post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily()));
+    allCreated.add(createConfigRecord(secondConfigRecord));
 
     allOf(allCreated).thenComposeAsync(v ->
       //Must filter to only check out module entries due to default locale records
-      get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
+      okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
     .thenAccept(response -> {
       try {
-        testContext.assertEquals(200, response.statusCode,
+        testContext.assertEquals(200, response.getStatusCode(),
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
@@ -250,30 +1187,16 @@ public class RestVerticleTest {
 
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "audioAlertsEnabled")
-      .put("value", true);
+    JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
-    final CompletableFuture<Response> firstRecordCreated = post(
-      "http://localhost:" + port + "/configurations/entries",
-      firstConfigRecord.encodePrettily());
+    final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     //Make sure the first record is created before the second
     firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new JsonObject()
-      .put("module", "CHECKOUT")
-      .put("configName", "other_settings")
-      .put("description", "Whether audio alerts should be made during ckeckout")
-      .put("code", "checkoutTimeoutDuration")
-      .put("value", 3);
+    JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
 
-    final CompletableFuture<Response> secondRecordCreated = post(
-      "http://localhost:" + port + "/configurations/entries",
-      secondConfigRecord.encodePrettily());
+    final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     secondRecordCreated.get(5, TimeUnit.SECONDS);
 
@@ -281,10 +1204,10 @@ public class RestVerticleTest {
       StandardCharsets.UTF_8.name());
 
     //Must filter to only check out module entries due to default locale records
-    get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedQuery)
       .thenAccept(response -> {
         try {
-          testContext.assertEquals(200, response.statusCode,
+          testContext.assertEquals(200, response.getStatusCode(),
             String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
               response.getBody()));
 
@@ -308,7 +1231,7 @@ public class RestVerticleTest {
         }
       });
   }
-  
+
   @Test
   public void canChangeLogLevel(TestContext context) {
     mutateURLs("http://localhost:" + port +
@@ -326,9 +1249,9 @@ public class RestVerticleTest {
       "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
         if(reply.succeeded()){
           postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            System.out.println(r3.result().getResults().size());
+            log.debug(r3.result().getResults().size());
             postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
-              System.out.println(r4.succeeded());
+              log.debug(r4.succeeded());
 
               /* this will probably cause a deadlock as the saveBatch runs within a transaction */
 
@@ -338,7 +1261,7 @@ public class RestVerticleTest {
               try {
                 PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
                   if(reply1.succeeded()){
-                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
+                    log.debug(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
                   }
                   async.complete();
                   });
@@ -379,26 +1302,34 @@ public class RestVerticleTest {
   private void createSampleRecords(TestContext context) {
     try {
       //save config entry
-      String content = getFile("kv_configuration.sample");
-      Config conf =  new ObjectMapper().readValue(content, Config.class);
+      String sample = getFile("kv_configuration.sample");
+
+      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(sample);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        content, "application/json", 201);
+        baselineFromSample.create().encodePrettily(), "application/json", 201);
 
       //save config entry with value being a base64 encoded file
-      String attachment = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
-      conf.setValue(attachment);
+      String bytes = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
+
+      ConfigurationRecordBuilder encodedValueExample = baselineFromSample
+        .withCode("encoded_example")
+        .withValue(bytes);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+        encodedValueExample.create().encodePrettily(), "application/json", 201);
 
-      conf.setEnabled(false);
+      ConfigurationRecordBuilder disabledExample = baselineFromSample
+        .withCode("enabled_example")
+        .withValue(bytes)
+        .disabled();
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+        disabledExample.create().encodePrettily(), "application/json", 201);
 
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+      //This looks to be exactly the same use case
+//      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+//        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
 
       //attempt to delete invalud id (not uuid)
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
@@ -408,19 +1339,24 @@ public class RestVerticleTest {
         "", "application/json", 404);
 
       //check read only
-      Config conf2 =  new ObjectMapper().readValue(content, Config.class);
+      Config conf2 =  new ObjectMapper().readValue(sample, Config.class);
+
+      conf2.setCode("change_metadata_example");
+
       Metadata md = new Metadata();
       md.setCreatedByUserId("123456");
       conf2.setMetadata(md);
+
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
       md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
       md.setCreatedDate(new Date());
       md.setUpdatedDate(new Date());
-      conf2.setModule("NOTHING");
+
       String updatedConf = new ObjectMapper().writeValueAsString(conf2);
-      System.out.println(updatedConf);
+
+      log.debug(updatedConf);
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         updatedConf, "application/json", 201);
 
@@ -432,56 +1368,47 @@ public class RestVerticleTest {
 
   private void runGETURLoop(TestContext context, ArrayList<String> urlsToCheck){
     try {
-      urlsToCheck.forEach(url -> {
+      urlsToCheck.forEach(line -> {
         Async async = context.async();
-        String[] urlInfo = url.split(" , ");
-        HttpClient client = vertx.createHttpClient();
-        HttpClientRequest request = client.requestAbs(HttpMethod.GET,
-          urlInfo[1].trim().replaceFirst("<port>", port + ""), httpClientResponse -> {
-            int statusCode = httpClientResponse.statusCode();
-            System.out.println("Status - " + statusCode + " " + urlInfo[1]);
-            if (httpClientResponse.statusCode() != Integer.parseInt(urlInfo[3])) {
-              context.fail("expected " + Integer.parseInt(urlInfo[3]) + " , got " + httpClientResponse.statusCode());
-              async.complete();
+
+        String[] urlInfo = line.split(" , ");
+        final String url = urlInfo[1].trim().replaceFirst("<port>", port + "");
+        final Integer expectedStatusCode = Integer.parseInt(urlInfo[3]);
+
+        final Integer expectedRecordCount = urlInfo.length == 5
+          ? Integer.parseInt(urlInfo[4])
+          : null;
+
+        final CompletableFuture<Response> responded = okapiHttpClient.get(url);
+
+        try {
+          Response response = responded.get(5, TimeUnit.SECONDS);
+
+          context.assertEquals(expectedStatusCode, response.getStatusCode(),
+            String.format("Unexpected status code from '%s': '%s'", url, response.getBody()));
+
+          if(expectedRecordCount != null && expectedRecordCount > 0) {
+            try {
+              JsonObject wrappedRecords = new JsonObject(response.getBody());
+
+              context.assertEquals(expectedRecordCount, wrappedRecords.getInteger("totalRecords"),
+                String.format("Unexpected record count for '%s': '%s'", url, response.getBody()));
             }
-            httpClientResponse.bodyHandler(buffer -> {
-              if(buffer.length() < 5 || httpClientResponse.statusCode() != 200){
-                //assume empty body / empty array of data
-                async.complete();
-              }
-              else{
-                try{
-                  System.out.println(buffer.toString());
-                  int records = new JsonObject(buffer.getString(0, buffer.length())).getInteger("totalRecords");
-                  System.out.println("-------->"+records);
-                  if(httpClientResponse.statusCode() == 200){
-                    if(records != Integer.parseInt(urlInfo[4])){
-                      context.fail(urlInfo[1] + " expected record count: " + urlInfo[4] + ", returned record count: " + records);
-                      async.complete();
-                    }
-                    else{
-                      async.complete();
-                    }
-                  }
-                }
-                catch(Exception e){
-                  e.printStackTrace();
-                  context.fail(e.getMessage());
-                }
-              }
-            });
-          });
-        request.putHeader("X-Okapi-Request-Id", "999999999999");
-        request.headers().add("Authorization", TENANT_ID);
-        request.putHeader("x-Okapi-Tenant", TENANT_ID);
-        request.putHeader("x-Okapi-Token", TOKEN);
-        request.putHeader("x-Okapi-User-Id", USER_ID);
-        request.headers().add("Accept", "application/json");
-        request.setChunked(true);
-        request.end();
-      });
+            catch(DecodeException e) {
+              context.fail(String.format("Could not decide '%s' - %s", response.getBody(), e.getMessage()));
+            }
+          }
+        }
+        catch(Exception e) {
+          context.fail(e);
+        }
+        finally {
+          async.complete();
+        }
+        });
     } catch (Throwable e) {
       e.printStackTrace();
+      context.fail(e);
     }
   }
 
@@ -515,12 +1442,12 @@ public class RestVerticleTest {
       context.fail(error.getMessage());
     }).handler(response -> {
       response.headers().forEach( header ->
-        System.out.println(header.getKey() + " " + header.getValue()));
+        log.debug(header.getKey() + " " + header.getValue()));
 
       int statusCode = response.statusCode();
       if(method == HttpMethod.POST && statusCode == 201){
         try {
-          System.out.println("Location - " + response.getHeader("Location"));
+          log.debug("Location - " + response.getHeader("Location"));
           Config conf =  new ObjectMapper().readValue(content, Config.class);
           conf.setDescription(conf.getDescription());
           mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
@@ -529,7 +1456,7 @@ public class RestVerticleTest {
           e.printStackTrace();
         }
       }
-      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
+      log.debug("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
       if(expectedStatusCode == statusCode){
         context.assertTrue(true);
       }
@@ -543,7 +1470,7 @@ public class RestVerticleTest {
       if(!async.isCompleted()){
         async.complete();
       }
-      System.out.println("complete");
+      log.debug("complete");
     });
     request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
@@ -606,79 +1533,31 @@ public class RestVerticleTest {
     return allDeleted;
   }
 
-  private CompletableFuture<Response> get(String url) {
-    HttpClient client = vertx.createHttpClient();
+  private void checkAllRecordsCreated(
+    Iterable<CompletableFuture<Response>> allRecordsFutures,
+    TestContext testContext,
+    Async async) {
 
-    HttpClientRequest request = client.getAbs(url);
+    try {
+      for (CompletableFuture<Response> future : allRecordsFutures) {
+        Response response = future.get();
 
-    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(getCompleted::completeExceptionally);
-
-    request.handler(response ->
-      response.bodyHandler(buffer -> getCompleted.complete(
-        new Response(response.statusCode(),
-          buffer.getString(0, buffer.length())))));
-
-    request.putHeader("X-Okapi-Tenant", TENANT_ID);
-    request.putHeader("X-Okapi-Token", TOKEN);
-    request.putHeader("X-Okapi-User-Id", USER_ID);
-    request.putHeader("Accept", "application/json,text/plain");
-
-    request.end();
-
-    return getCompleted;
-  }
-
-  private CompletableFuture<Response> post(String url, String jsonContent) {
-    HttpClient client = vertx.createHttpClient();
-
-    HttpClientRequest request = client.postAbs(url);
-    Buffer requestBuffer = Buffer.buffer(jsonContent);
-
-    final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(getCompleted::completeExceptionally);
-
-    request.handler(response ->
-      response.bodyHandler(responseBuffer -> {
-        getCompleted.complete(new Response(
-          response.statusCode(),
-          responseBuffer.getString(0, responseBuffer.length())));
-      }));
-
-    request.putHeader("X-Okapi-Tenant", TENANT_ID);
-    request.putHeader("X-Okapi-Token", TOKEN);
-    request.putHeader("X-Okapi-User-Id", USER_ID);
-    request.putHeader("Content-type", "application/json");
-    request.putHeader("Accept", "application/json,text/plain");
-
-    request.end(requestBuffer);
-
-    return getCompleted;
-  }
-
-  private class Response {
-    private final Integer statusCode;
-    private final String body;
-
-    private Response(Integer statusCode, String body) {
-      this.statusCode = statusCode;
-      this.body = body;
+        testContext.assertEquals(201, response.getStatusCode(),
+          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            response.getBody()));
+      }
     }
-
-    Integer getStatusCode() {
-      return statusCode;
+    catch(Exception e) {
+      testContext.fail(e);
     }
-
-    String getBody() {
-      return body;
+    finally {
+      async.complete();
     }
   }
 
-  public static <T> CompletableFuture<Void> allOf(
-    List<CompletableFuture<T>> allFutures) {
-
-    return CompletableFuture.allOf(allFutures.toArray(new CompletableFuture<?>[] { }));
+  private CompletableFuture<Response> createConfigRecord(JsonObject record) {
+    return okapiHttpClient.post(
+      "http://localhost:" + port + "/configurations/entries",
+      record.encodePrettily());
   }
 }
