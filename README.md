@@ -5,8 +5,11 @@ Copyright (C) 2016-2018 The Open Library Foundation
 
 This software is distributed under the terms of the Apache License, Version 2.0. See the file ["LICENSE"](https://github.com/folio-org/mod-configuration/blob/master/LICENSE) for more information.
 
+## Purpose
 
-#### Configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
+Configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
+
+## Introduction
 
 This project is built using the raml-module-builder, using the PostgreSQL async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are many features that the mod-configuration module inherits from the raml-module-builder framework.
 
@@ -105,6 +108,8 @@ To see an audit list:
 
 `http://<host>:<port>/configurations/audit`
 
+#### Querying audit records
+
 CQL syntax is also supported by the audit API
 
 ### <a id="local-apidocs"></a>Documentation of the Service's APIs
@@ -117,7 +122,6 @@ http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
 ### Examples
 
 Make sure to include appropriate headers as the runtime framework validates them.
-
 
 `Accept: application/json`
 
@@ -155,6 +159,37 @@ Deleting / Updating specific entries is possible as well - See circulation.raml 
 ```
 
 ## Additional information
+
+### Types of Configuration Records
+#### Tenant
+These are records which are not associated with a user (no `userId` property). 
+
+They represent a configuration setting for a tenant, and is the default if no user setting is in place (see validation section for what how records are intended to be matched). 
+
+#### User
+These are records which are associated user (a `userId` property is present).
+
+They represent a configuration setting for a specific user, which is considered to take precedence over a matching tenant setting (if present).
+
+### Defaults
+
+#### Enabled
+Configuration records are defaulted to be enabled (`enabled` is true) if the client does not provide a value for the `enabled` property.
+
+This applies to both newly created records, and records being replaced using PUT.
+
+### Validation
+As of version 5.0.0, configuration records are validated to be unique for combinations of certain properties.
+
+Disabled properties (`enabled` is false) are ignored during these checks.
+
+These checks are applied separately for tenant and user level records, in order for it to be possible to have user level record precedence for the same setting.
+
+#### Module and Config Name
+If no code is present, a setting is considered to be unique for the `module` and `configName` properties.
+
+#### Module, Config Name and Code
+If a code is present, a setting is considered to be unique for the `module`,  `configName` and `code` properties.
 
 ### Other documentation
 
