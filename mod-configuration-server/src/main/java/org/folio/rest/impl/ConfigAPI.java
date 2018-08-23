@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static io.vertx.core.Future.succeededFuture;
 
@@ -85,7 +86,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Override
   public void getConfigurationsEntries(String query, int offset, int limit, List<String> facets,
       String lang,java.util.Map<String, String>okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context context) {
 
 
     /**
@@ -126,26 +127,15 @@ public class ConfigAPI implements ConfigurationsResource {
               }
             });
       }
-      catch(CQLQueryValidationException e1){
-        int start = e1.getMessage().indexOf('\'');
-        int end = e1.getMessage().lastIndexOf('\'');
-        String field = e1.getMessage();
-        if(start != -1 && end != -1){
-          field = field.substring(start+1, end);
-        }
-        log.error(e1.getMessage());
-        Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
-        asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-          .withJsonUnprocessableEntity(e)));
+      catch(CQLQueryValidationException e) {
+        handleCqlException(asyncResultHandler, e,
+          GetConfigurationsEntriesResponse::withJsonUnprocessableEntity);
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
-        String message = messages.getMessage(lang, MessageConsts.InternalServerError);
-        if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
-          message = " CQL parse error " + e.getLocalizedMessage();
-        }
         asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-          .withPlainInternalServerError(message)));
+          .withPlainInternalServerError(messages.getMessage(
+            lang, MessageConsts.InternalServerError))));
       }
     });
   }
@@ -207,7 +197,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void getConfigurationsEntriesByEntryId(String entryId, String lang, java.util.Map<String, String>okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context context) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context context) {
 
     context.runOnContext(v -> {
       try {
@@ -261,8 +251,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Validate
   @Override
   public void deleteConfigurationsEntriesByEntryId(String entryId, String lang,
-      java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context)
-          throws Exception {
+      java.util.Map<String, String>okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context context) {
 
       context.runOnContext(v -> {
         log.debug("sending... deleteConfigurationsTablesByTableId");
@@ -381,7 +370,7 @@ public class ConfigAPI implements ConfigurationsResource {
   @Override
   public void getConfigurationsAudit(String query, int offset,
       int limit, String lang, Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     /**
     * http://host:port/configurations/tables
@@ -405,7 +394,7 @@ public class ConfigAPI implements ConfigurationsResource {
                   asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
                     auditRecords)));
                 }
-                else{
+                 else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse
                     .withPlainInternalServerError(messages.getMessage(
@@ -419,16 +408,9 @@ public class ConfigAPI implements ConfigurationsResource {
               }
             });
       }
-      catch(CQLQueryValidationException e1){
-        int start = e1.getMessage().indexOf('\'');
-        int end = e1.getMessage().lastIndexOf('\'');
-        String field = e1.getMessage();
-        if(start != -1 && end != -1){
-          field = field.substring(start+1, end);
-        }
-        Errors e = ValidationHelper.createValidationErrorMessage(field, "", e1.getMessage());
-        asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-          .withJsonUnprocessableEntity(e)));
+      catch(CQLQueryValidationException e) {
+        handleCqlException(asyncResultHandler, e,
+          GetConfigurationsAuditResponse::withJsonUnprocessableEntity);
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
@@ -489,5 +471,26 @@ public class ConfigAPI implements ConfigurationsResource {
     if(entity.getEnabled() == null) {
       entity.setEnabled(true);
     }
+  }
+
+  private void handleCqlException(
+    Handler<AsyncResult<Response>> asyncResultHandler,
+    CQLQueryValidationException exception,
+    Function<Errors, Response> responseCreator) {
+
+    log.error(exception.getMessage(), exception);
+
+    int start = exception.getMessage().indexOf('\'');
+    int end = exception.getMessage().lastIndexOf('\'');
+
+    String field = exception.getMessage();
+    
+    if(start != -1 && end != -1){
+      field = field.substring(start+1, end);
+    }
+
+    Errors e = ValidationHelper.createValidationErrorMessage(field, "", exception.getMessage());
+
+    asyncResultHandler.handle(succeededFuture(responseCreator.apply(e)));
   }
 }
