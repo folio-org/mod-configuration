@@ -191,6 +191,14 @@ If no code is present, a setting is considered to be unique for the `module` and
 #### Module, Config Name and Code
 If a code is present, a setting is considered to be unique for the `module`,  `configName` and `code` properties.
 
+#### Implementation
+
+These checks are achieved by using four unique indexes. 
+
+Two of these are for the two variations above at the tenant level configurations and the other two at the user level. 
+
+See the [declarative schema](mod-configuration-server/src/main/resources/schema.json) for how these are defined.
+
 ### Other documentation
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
