@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -27,12 +28,15 @@ import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
 import org.folio.support.builders.ConfigurationRecordBuilder;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -48,6 +52,8 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
@@ -95,7 +101,7 @@ public class RestVerticleTest {
             try {
               tClient.post(null, responseHandler ->
                 responseHandler.bodyHandler(body -> {
-                System.out.println(body.toString());
+                log.debug(body.toString());
                 async.complete();
               }));
             } catch (Exception e) {
@@ -117,7 +123,7 @@ public class RestVerticleTest {
   public static void afterAll(TestContext context) {
     Async async = context.async();
     tClient.delete(reply -> reply.bodyHandler(body -> {
-      System.out.println(body.toString());
+      log.debug(body.toString());
       vertx.close(context.asyncAssertSuccess(res-> {
         PostgresClient.stopEmbeddedPostgres();
         async.complete();
@@ -152,7 +158,7 @@ public class RestVerticleTest {
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
-        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
 
         JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -207,7 +213,7 @@ public class RestVerticleTest {
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
-        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
 
         JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -242,7 +248,7 @@ public class RestVerticleTest {
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
-        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
 
         JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -283,7 +289,7 @@ public class RestVerticleTest {
           String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
             response.getBody()));
 
-        System.out.println(String.format("Create Response: '%s'", response.getBody()));
+        log.debug(String.format("Create Response: '%s'", response.getBody()));
 
         JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -694,7 +700,7 @@ public class RestVerticleTest {
       String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
         response.getBody()));
 
-    System.out.println(String.format("Create Response: '%s'", response.getBody()));
+    log.debug(String.format("Create Response: '%s'", response.getBody()));
 
     JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -727,7 +733,7 @@ public class RestVerticleTest {
       String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
         response.getBody()));
 
-    System.out.println(String.format("Create Response: '%s'", response.getBody()));
+    log.debug(String.format("Create Response: '%s'", response.getBody()));
 
     JsonObject createdRecord = new JsonObject(response.getBody());
 
@@ -1243,9 +1249,9 @@ public class RestVerticleTest {
       "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
         if(reply.succeeded()){
           postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            System.out.println(r3.result().getResults().size());
+            log.debug(r3.result().getResults().size());
             postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
-              System.out.println(r4.succeeded());
+              log.debug(r4.succeeded());
 
               /* this will probably cause a deadlock as the saveBatch runs within a transaction */
 
@@ -1255,7 +1261,7 @@ public class RestVerticleTest {
               try {
                 PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
                   if(reply1.succeeded()){
-                    System.out.println(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
+                    log.debug(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
                   }
                   async.complete();
                   });
@@ -1350,7 +1356,7 @@ public class RestVerticleTest {
 
       String updatedConf = new ObjectMapper().writeValueAsString(conf2);
 
-      System.out.println(updatedConf);
+      log.debug(updatedConf);
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         updatedConf, "application/json", 201);
 
@@ -1436,12 +1442,12 @@ public class RestVerticleTest {
       context.fail(error.getMessage());
     }).handler(response -> {
       response.headers().forEach( header ->
-        System.out.println(header.getKey() + " " + header.getValue()));
+        log.debug(header.getKey() + " " + header.getValue()));
 
       int statusCode = response.statusCode();
       if(method == HttpMethod.POST && statusCode == 201){
         try {
-          System.out.println("Location - " + response.getHeader("Location"));
+          log.debug("Location - " + response.getHeader("Location"));
           Config conf =  new ObjectMapper().readValue(content, Config.class);
           conf.setDescription(conf.getDescription());
           mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
@@ -1450,7 +1456,7 @@ public class RestVerticleTest {
           e.printStackTrace();
         }
       }
-      System.out.println("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
+      log.debug("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
       if(expectedStatusCode == statusCode){
         context.assertTrue(true);
       }
@@ -1464,7 +1470,7 @@ public class RestVerticleTest {
       if(!async.isCompleted()){
         async.complete();
       }
-      System.out.println("complete");
+      log.debug("complete");
     });
     request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
