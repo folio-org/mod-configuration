@@ -455,18 +455,17 @@ public class ConfigAPI implements ConfigurationsResource {
       return false;
     }
 
-    //TODO: discriminate better the different unique constraints
     final String message = PgExceptionUtil.badRequestMessage(reply.cause());
 
     if(message == null) {
       return false;
     }
-    else {
-      return message.contains("config_data_module_configname_code_idx_unique")
-        || message.contains("config_data_module_configname_idx_unique")
-        || message.contains("config_data_module_configname_code_userid_idx_unique")
-        || message.contains("config_data_module_configname_userid_idx_unique");
-    }
+
+    //TODO: discriminate better the different unique constraints
+    return message.contains("config_data_module_configname_code_idx_unique")
+      || message.contains("config_data_module_configname_idx_unique")
+      || message.contains("config_data_module_configname_code_userid_idx_unique")
+      || message.contains("config_data_module_configname_userid_idx_unique");
   }
 
   private Errors uniqueModuleConfigAndCodeError(Config entity) {
