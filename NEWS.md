@@ -1,4 +1,4 @@
-## 5.0.0 Unreleased
+## 5.0.0 2018-09-04
 
 * MODCONF-21 - Configuration records are unique for each module, config name and code
 * MODCONF-21 - Configuration records are enabled by default
