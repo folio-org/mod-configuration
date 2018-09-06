@@ -162,9 +162,9 @@ Deleting / Updating specific entries is possible as well - See circulation.raml 
 
 ### Types of Configuration Records
 #### Tenant
-These are records which are not associated with a user (no `userId` property). 
+These are records which are not associated with a user (no `userId` property).
 
-They represent a configuration setting for a tenant, and is the default if no user setting is in place (see validation section for what how records are intended to be matched). 
+They represent a configuration setting for a tenant, and is the default if no user setting is in place (see validation section for what how records are intended to be matched).
 
 #### User
 These are records which are associated user (a `userId` property is present).
@@ -193,9 +193,9 @@ If a code is present, a setting is considered to be unique for the `module`,  `c
 
 #### Implementation
 
-These checks are achieved by using four unique indexes. 
+These checks are achieved by using four unique indexes.
 
-Two of these are for the two variations above at the tenant level configurations and the other two at the user level. 
+Two of these are for the two variations above at the tenant level configurations and the other two at the user level.
 
 See the [declarative schema](mod-configuration-server/src/main/resources/schema.json) for how these are defined.
 

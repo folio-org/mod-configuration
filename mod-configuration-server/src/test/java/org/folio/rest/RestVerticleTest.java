@@ -773,7 +773,7 @@ public class RestVerticleTest {
       }
     });
   }
-  
+
   @Test
   public void cannotCreateMultipleTenantRecordsWithSameModuleConfigAndCode(
     TestContext testContext)
