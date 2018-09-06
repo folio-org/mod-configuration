@@ -484,7 +484,7 @@ public class ConfigAPI implements ConfigurationsResource {
     int end = exception.getMessage().lastIndexOf('\'');
 
     String field = exception.getMessage();
-    
+
     if(start != -1 && end != -1){
       field = field.substring(start+1, end);
     }

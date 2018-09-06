@@ -19,7 +19,7 @@
           "tOps": "ADD",
           "caseSensitive": false,
           "removeAccents": true
-        } 
+        }
       ],
       "likeIndex": [
         {
@@ -68,7 +68,7 @@
           "fieldName": "default",
           "tOps": "ADD",
           "stringType": false
-        }    
+        }
       ]
     }
   ]
