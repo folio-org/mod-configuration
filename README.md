@@ -167,7 +167,7 @@ These are records which are not associated with a user (no `userId` property).
 They represent a configuration setting for a tenant, and is the default if no user setting is in place (see validation section for what how records are intended to be matched).
 
 #### User
-These are records which are associated user (a `userId` property is present).
+These are records which are associated with a user (a `userId` property is present).
 
 They represent a configuration setting for a specific user, which is considered to take precedence over a matching tenant setting (if present).
 
@@ -197,7 +197,7 @@ These checks are achieved by using four unique indexes.
 
 Two of these are for the two variations above at the tenant level configurations and the other two at the user level.
 
-See the [declarative schema](mod-configuration-server/src/main/resources/schema.json) for how these are defined.
+See the [declarative schema](mod-configuration-server/src/main/resources/templates/db_scripts/schema.json) for how these are defined.
 
 ### Other documentation
 
