@@ -197,7 +197,7 @@ These checks are achieved by using four unique indexes.
 
 Two of these are for the two variations above at the tenant level configurations and the other two at the user level.
 
-See the [declarative schema](mod-configuration-server/src/main/resources/schema.json) for how these are defined.
+See the [declarative schema](mod-configuration-server/src/main/resources/templates/db_scripts/schema.json) for how these are defined.
 
 ### Other documentation
 
