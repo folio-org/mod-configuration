@@ -11,7 +11,7 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.*;
 import org.folio.rest.jaxrs.model.Error;
-import org.folio.rest.jaxrs.resource.ConfigurationsResource;
+import org.folio.rest.jaxrs.resource.Configurations;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
@@ -24,7 +24,6 @@ import org.folio.rest.persist.facets.FacetField;
 import org.folio.rest.persist.facets.FacetManager;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
@@ -42,7 +41,7 @@ import java.util.function.Function;
 import static io.vertx.core.Future.succeededFuture;
 
 @Path("configurations")
-public class ConfigAPI implements ConfigurationsResource {
+public class ConfigAPI implements Configurations {
 
   public static final String        CONFIG_TABLE      = "config_data";
   public static final String        AUDIT_TABLE       = "audit_config_data";
@@ -106,35 +105,34 @@ public class ConfigAPI implements ConfigurationsResource {
               try {
                 if(reply.succeeded()){
                   Configs configs = new Configs();
-                  @SuppressWarnings("unchecked")
-                  List<Config> config = (List<Config>) reply.result().getResults();
+                  List<Config> config = reply.result().getResults();
                   configs.setConfigs(config);
                   configs.setResultInfo(reply.result().getResultInfo());
                   configs.setTotalRecords(reply.result().getResultInfo().getTotalRecords());
-                  asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse.withJsonOK(
+                  asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse.respond200WithApplicationJson(
                     configs)));
                 }
                 else{
                   log.error(reply.cause().getMessage(), reply.cause());
                   asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-                    .withPlainBadRequest(reply.cause().getMessage())));
+                    .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-                  .withPlainInternalServerError(messages.getMessage(
+                  .respond500WithTextPlain(messages.getMessage(
                     lang, MessageConsts.InternalServerError))));
               }
             });
       }
       catch(CQLQueryValidationException e) {
         handleCqlException(asyncResultHandler, e,
-          GetConfigurationsEntriesResponse::withJsonUnprocessableEntity);
+          GetConfigurationsEntriesResponse::respond422WithApplicationJson);      
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
         asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesResponse
-          .withPlainInternalServerError(messages.getMessage(
+          .respond500WithTextPlain(messages.getMessage(
             lang, MessageConsts.InternalServerError))));
       }
     });
@@ -157,13 +155,11 @@ public class ConfigAPI implements ConfigurationsResource {
           reply -> {
             try {
               if(reply.succeeded()){
-                Object ret = reply.result();
-                entity.setId((String) ret);
-                OutStream stream = new OutStream();
-                stream.setData(entity);
+                String ret = reply.result();
+                entity.setId(ret);
                 asyncResultHandler.handle(succeededFuture(
-                  PostConfigurationsEntriesResponse.withJsonCreated(
-                  LOCATION_PREFIX + ret, stream)));
+                  PostConfigurationsEntriesResponse.respond201WithApplicationJson(entity, 
+                    PostConfigurationsEntriesResponse.headersFor201().withLocation(LOCATION_PREFIX + ret))));
               }
               else {
                 log.error(reply.cause().getMessage(), reply.cause());
@@ -171,24 +167,24 @@ public class ConfigAPI implements ConfigurationsResource {
                 if(isNotUniqueModuleConfigAndCode(reply)) {
                   asyncResultHandler.handle(succeededFuture(
                     PostConfigurationsEntriesResponse
-                      .withJsonUnprocessableEntity(uniqueModuleConfigAndCodeError(entity))));
+                      .respond422WithApplicationJson(uniqueModuleConfigAndCodeError(entity))));
                 }
                 else {
                   asyncResultHandler.handle(succeededFuture(
-                    PostConfigurationsEntriesResponse.withPlainInternalServerError(
+                    PostConfigurationsEntriesResponse.respond500WithTextPlain(
                       messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               }
             } catch (Exception e) {
               log.error(e.getMessage(), e);
               asyncResultHandler.handle(succeededFuture(PostConfigurationsEntriesResponse
-                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
         asyncResultHandler.handle(succeededFuture(PostConfigurationsEntriesResponse
-          .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
 
@@ -211,39 +207,38 @@ public class ConfigAPI implements ConfigurationsResource {
             reply -> {
               try {
                 if(reply.succeeded()){
-                  @SuppressWarnings("unchecked")
-                  List<Config> config = (List<Config>) reply.result().getResults();
+                  List<Config> config = reply.result().getResults();
                   if(config.isEmpty()){
                     asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                      .withPlainNotFound(entryId)));
+                      .respond404WithTextPlain(entryId)));
                   }
                   else{
                     asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                      .withJsonOK(config.get(0))));
+                      .respond200WithApplicationJson(config.get(0))));
                   }
                 }
                 else{
                   log.error(reply.cause().getMessage(), reply.cause());
                   if(isInvalidUUID(reply.cause().getMessage())){
                     asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                      .withPlainNotFound(entryId)));
+                      .respond404WithTextPlain(entryId)));
                   }
                   else{
                     asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                      .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError) + " " +
+                      .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError) + " " +
                           reply.cause().getMessage())));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-                  .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
         });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
         asyncResultHandler.handle(succeededFuture(GetConfigurationsEntriesByEntryIdResponse
-          .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
   }
@@ -263,35 +258,35 @@ public class ConfigAPI implements ConfigurationsResource {
                 if(reply.succeeded()){
                   if(reply.result().getUpdated() == 1){
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                      .withNoContent()));
+                      .respond204()));
                   }
                   else{
                     log.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                      .withPlainNotFound(messages.getMessage(lang, MessageConsts.DeletedCountError,1 , reply.result().getUpdated()))));
+                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.DeletedCountError,1 , reply.result().getUpdated()))));
                   }
                 }
                 else{
                   log.error(reply.cause());
                   if(isInvalidUUID(reply.cause().getMessage())){
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                      .withPlainNotFound(entryId)));
+                      .respond404WithTextPlain(entryId)));
                   }
                   else{
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                      .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                      .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                  .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
         } catch (Exception e) {
           log.error(e.getMessage(), e);
           asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-            .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
         }
       });
   }
@@ -315,11 +310,11 @@ public class ConfigAPI implements ConfigurationsResource {
               if(reply.succeeded()) {
                 if(reply.result().getUpdated() == 0) {
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-                    .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                 }
                 else{
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-                    .withNoContent()));
+                    .respond204()));
                 }
               }
               else {
@@ -328,23 +323,23 @@ public class ConfigAPI implements ConfigurationsResource {
                 if(isNotUniqueModuleConfigAndCode(reply)) {
                   asyncResultHandler.handle(succeededFuture(
                     PutConfigurationsEntriesByEntryIdResponse
-                      .withJsonUnprocessableEntity(uniqueModuleConfigAndCodeError(entity))));
+                      .respond422WithApplicationJson(uniqueModuleConfigAndCodeError(entity))));
                 }
                 else {
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-                    .withNoContent()));
+                    .respond204()));
                 }
               }
             } catch (Exception e) {
               log.error(e.getMessage(), e);
               asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
             }
           });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
         asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-          .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
+          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
   }
@@ -387,30 +382,29 @@ public class ConfigAPI implements ConfigurationsResource {
               try {
                 if(reply.succeeded()){
                   Audits auditRecords = new Audits();
-                  @SuppressWarnings("unchecked")
-                  List<Audit> auditList = (List<Audit>) reply.result().getResults();
+                  List<Audit> auditList = reply.result().getResults();
                   auditRecords.setAudits(auditList);
                   auditRecords.setTotalRecords(reply.result().getResultInfo().getTotalRecords());
-                  asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse.withJsonOK(
+                  asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse.respond200WithApplicationJson(
                     auditRecords)));
                 }
                  else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse
-                    .withPlainInternalServerError(messages.getMessage(
+                    .respond500WithTextPlain(messages.getMessage(
                       lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse
-                  .withPlainInternalServerError(messages.getMessage(
+                  .respond500WithTextPlain(messages.getMessage(
                     lang, MessageConsts.InternalServerError))));
               }
             });
       }
       catch(CQLQueryValidationException e) {
         handleCqlException(asyncResultHandler, e,
-          GetConfigurationsAuditResponse::withJsonUnprocessableEntity);
+          GetConfigurationsAuditResponse::respond422WithApplicationJson);
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
@@ -419,7 +413,7 @@ public class ConfigAPI implements ConfigurationsResource {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
         asyncResultHandler.handle(succeededFuture(GetConfigurationsAuditResponse
-          .withPlainInternalServerError(message)));
+          .respond500WithTextPlain(message)));
       }
     });
 

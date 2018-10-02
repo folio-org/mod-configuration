@@ -37,43 +37,43 @@ public class Test {
       reply.statusCode();
     });*/
 
-    aClient.getModuleStats( res -> {
+    aClient.getAdminModuleStats( res -> {
       res.bodyHandler( b -> {
         System.out.println(b.toString());
-        aClient.getHealth( r -> {
+        aClient.getAdminHealth( r -> {
           r.bodyHandler( bh -> {
             System.out.println(bh.toString());
           });
         });
       });
     });
-    tClient.post(new TenantAttributes(), reply -> {
+    tClient.postTenant(new TenantAttributes(), reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body);
       });
       reply.statusCode();
     });
-    aClient.getJstack( trace -> {
+    aClient.getAdminJstack( trace -> {
       trace.bodyHandler( content -> {
         System.out.println(content);
       });
     });
-    aClient.getPostgresActiveSessions("postgres", reply -> {
+    aClient.getAdminPostgresActiveSessions("postgres", reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });
     });
-    aClient.getPostgresLoad("postgres", reply -> {
+    aClient.getAdminPostgresLoad("postgres", reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });
     });
-    aClient.getPostgresTableAccessStats(reply -> {
+    aClient.getAdminPostgresTableAccessStats(reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });
     });
-    aClient.getPostgresTableSize("postgres", reply -> {
+    aClient.getAdminPostgresTableSize("postgres", reply -> {
       reply.bodyHandler( body -> {
         System.out.println(body.toString("UTF8"));
       });

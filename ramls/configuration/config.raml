@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: Configurations
 version: v1
 baseUri: http://github.com/org/folio/lsp-apis
@@ -8,30 +8,25 @@ documentation:
   - title: Configuration API updating system wide configurations
     content: <b>This documents the API calls that can be made to update configurations in the system</b>
 
+types:
+  configs: !include ../_schemas/kv_configurations.schema
+  config: !include ../_schemas/kv_configuration.schema
+  libraries: !include ../_schemas/library.schema
+  audits: !include ../_schemas/audits.schema
+  errors: !include ../raml-util/schemas/errors.schema
 
-schemas:
-  - configs: !include ../_schemas/kv_configurations.schema
-  - kv_configuration.schema: !include ../_schemas/kv_configuration.schema
-  - libraries: !include ../_schemas/library.schema
-  - audits: !include ../_schemas/audits.schema
-  - audit.schema: !include ../_schemas/audit.schema
-  - errors: !include ../raml-util/schemas/errors.schema
-  - error.schema: !include ../raml-util/schemas/error.schema
-  - parameters.schema: !include ../raml-util/schemas/parameters.schema
-  - ../raml-util/schemas/resultInfo.schema: !include ../raml-util/schemas/resultInfo.schema
-  - ../raml-util/schemas/metadata.schema: !include ../raml-util/schemas/metadata.schema
 traits:
-  - secured: !include ../raml-util/traits/auth.raml
-  - orderable: !include ../raml-util/traits/orderable.raml
-  - pageable:  !include ../raml-util/traits/pageable.raml
-  - searchable: !include ../raml-util/traits/searchable.raml
-  - language: !include ../raml-util/traits/language.raml
-  - validate: !include ../raml-util/traits/validation.raml
-  - facets: !include ../raml-util/traits/facets.raml
+  orderable: !include ../raml-util/traits/orderable.raml
+  pageable:  !include ../raml-util/traits/pageable.raml
+  searchable: !include ../raml-util/traits/searchable.raml
+  language: !include ../raml-util/traits/language.raml
+  validate: !include ../raml-util/traits/validation.raml
+  facets: !include ../raml-util/traits/facets.raml
+
 resourceTypes:
-  - collection: !include ../raml-util/rtypes/collection.raml
-  - collection-item: !include ../raml-util/rtypes/item-collection.raml
-  - get-only: !include ../raml-util/rtypes/get-only.raml
+  collection: !include ../raml-util/rtypes/collection.raml
+  collection-item: !include ../raml-util/rtypes/item-collection.raml
+  get-only: !include ../raml-util/rtypes/get-only.raml
 
 /configurations:
   /entries:
@@ -40,7 +35,7 @@ resourceTypes:
     type:
       collection:
         schemaCollection: configs
-        schemaItem: kv_configuration.schema
+        schemaItem: config
         exampleCollection: !include ../_examples/kv_configurations.sample
         exampleItem: !include ../_examples/kv_configuration.sample
     get:
@@ -57,7 +52,7 @@ resourceTypes:
       description: Get, Delete or Update a specific entry
       type:
         collection-item:
-          schema: kv_configuration.schema
+          schema: config
           exampleItem: !include ../_examples/kv_configuration.sample
       put:
         is: [validate]
