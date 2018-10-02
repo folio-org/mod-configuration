@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -39,10 +38,6 @@ public class TestClient {
   int                       port;
   ConfigurationsClient cc = null;
   TenantClient ac = null;
-
-  static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
-  }
 
   @Before
   public void setUp(TestContext context) throws IOException {
@@ -87,7 +82,7 @@ public class TestClient {
       ac = new TenantClient("localhost", port, "harvard", "harvard");
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
-      ac.post(ta,reply -> {
+      ac.postTenant(ta,reply -> {
           try {
             postConfigs(async, context);
           } catch (Exception e) {
@@ -102,7 +97,7 @@ public class TestClient {
 
   public void getConfigs(Async async, TestContext context) {
     try {
-      cc.getEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en", response -> {
+      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en", response -> {
         response.bodyHandler(body -> {
           System.out.println(body);
           if(response.statusCode() == 500){
@@ -111,7 +106,7 @@ public class TestClient {
           else{
             async.countDown();
           }
-          ac.delete( reply -> {
+          ac.deleteTenant(reply -> {
             reply.bodyHandler( body2 -> {
               System.out.println(body2);
               async.countDown();
@@ -127,7 +122,7 @@ public class TestClient {
   public void postConfigs(Async async, TestContext context) throws Exception {
     String content = getFile("kv_configuration.sample");
     Config conf =  new ObjectMapper().readValue(content, Config.class);
-    cc.postEntries(null, conf, reply -> {
+    cc.postConfigurationsEntries(null, conf, reply -> {
       reply.bodyHandler( handler -> {
         try {
           System.out.println(new String(handler.getBytes(), "UTF8"));

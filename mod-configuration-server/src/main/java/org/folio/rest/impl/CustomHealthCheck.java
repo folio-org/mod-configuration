@@ -21,7 +21,7 @@ public class CustomHealthCheck extends AdminAPI {
 
   @Override
   public void getAdminHealth(Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)  {
 
     super.getAdminHealth(okapiHeaders,  res -> {
 
@@ -29,13 +29,13 @@ public class CustomHealthCheck extends AdminAPI {
       stream.setData("OK");
 
       log.info(" --- this is an over ride of the health API by the config module "+res.result().getStatus());
-      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminHealthResponse.withAnyOK(stream)));
+      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminHealthResponse.respond200WithAnyAny(stream)));
     }, vertxContext);
   }
 
   @Override
   public void getAdminModuleStats(Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)  {
 
     super.getAdminModuleStats(okapiHeaders,  res -> {
 
@@ -43,7 +43,7 @@ public class CustomHealthCheck extends AdminAPI {
 
       log.info(" --- this is an over ride of the Module Stats API by the config module ");
       asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdminModuleStatsResponse.
-        withPlainOK( o.encodePrettily() )));
+        respond200WithTextPlain(o.encodePrettily())));
     }, vertxContext);
   }
 }

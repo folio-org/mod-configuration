@@ -96,10 +96,10 @@ public class RestVerticleTest {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleFrom("v1");
-        tClient.post(ta, response -> {
+        tClient.postTenant(ta, response -> {
           if(422 == response.statusCode()){
             try {
-              tClient.post(null, responseHandler ->
+              tClient.postTenant(null, responseHandler ->
                 responseHandler.bodyHandler(body -> {
                 log.debug(body.toString());
                 async.complete();
@@ -122,7 +122,7 @@ public class RestVerticleTest {
   @AfterClass
   public static void afterAll(TestContext context) {
     Async async = context.async();
-    tClient.delete(reply -> reply.bodyHandler(body -> {
+    tClient.deleteTenant(reply -> reply.bodyHandler(body -> {
       log.debug(body.toString());
       vertx.close(context.asyncAssertSuccess(res-> {
         PostgresClient.stopEmbeddedPostgres();
