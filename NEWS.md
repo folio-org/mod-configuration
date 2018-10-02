@@ -1,3 +1,6 @@
+## 5.0.1 2018-10-02
+* MODCONF-26 Update to RAML 1.0 / RMB 21
+
 ## 5.0.0 2018-09-04
 
 * MODCONF-21 - Configuration records are unique for each module, config name and code
