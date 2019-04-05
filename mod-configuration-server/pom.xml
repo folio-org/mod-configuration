@@ -84,27 +84,6 @@
               </systemProperties>
             </configuration>
           </execution>
-          <execution>
-            <id>generate_md</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.folio.rest.tools.MDGenerator</mainClass>
-              <cleanupDaemonThreads>false</cleanupDaemonThreads>
-              <systemProperties>
-                <systemProperty>
-                  <key>modDescrptor.generate</key>
-                  <value>true</value>
-                </systemProperty>
-                <systemProperty>
-                  <key>project.basedir</key>
-                  <value>${basedir}</value>
-                </systemProperty>
-              </systemProperties>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
