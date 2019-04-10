@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.*;
@@ -53,32 +52,17 @@ public class ConfigAPI implements Configurations {
   private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
-  private static final String       CONFIG_SCHEMA_NAME= "ramls/_schemas/kv_configuration.schema";
-  private String                    configSchema      =  null;
 
   private final Messages            messages          = Messages.getInstance();
 
   private String idFieldName                          = "id";
 
   public ConfigAPI(Vertx vertx, String tenantId) {
-    if(configSchema == null) {
-      initCQLValidation();
-    }
-
     //calculate facets on all results, this shouldnt be a performance issue as the amount of
     //records in a configuration result set shouldnt get too high
     //FacetManager.setCalculateOnFirst(0);
 
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-  }
-
-  private void initCQLValidation() {
-    String path = CONFIG_SCHEMA_NAME;
-    try {
-      configSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(path), "UTF-8");
-    } catch (Exception e) {
-      log.error("unable to load schema - " +path+ ", validation of query fields will not be active");
-    }
   }
 
   @Validate
@@ -95,7 +79,7 @@ public class ConfigAPI implements Configurations {
       try {
         log.debug("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(CONFIG_TABLE, query,limit, offset, configSchema);
+        CQLWrapper cql = getCQL(CONFIG_TABLE, query,limit, offset);
 
         List<FacetField> facetList = FacetManager.convertFacetStrings2FacetFields(facets, "jsonb");
 
@@ -344,18 +328,14 @@ public class ConfigAPI implements Configurations {
     });
   }
 
-  private CQLWrapper getCQL(String table, String query, int limit, int offset, String schema)
+  private CQLWrapper getCQL(String table, String query, int limit, int offset)
     throws FieldException,
     IOException,
     SchemaException {
 
     final CQL2PgJSON cql2pgJson;
 
-    if(schema != null){
-      cql2pgJson = new CQL2PgJSON(table+".jsonb", schema);
-    } else {
-      cql2pgJson = new CQL2PgJSON(table+".jsonb");
-    }
+    cql2pgJson = new CQL2PgJSON(table+".jsonb");
 
     return new CQLWrapper(cql2pgJson, query)
       .setLimit(new Limit(limit)).setOffset(new Offset(offset));
@@ -374,7 +354,7 @@ public class ConfigAPI implements Configurations {
       try {
         log.debug("sending... getConfigurationsTables");
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-        CQLWrapper cql = getCQL(AUDIT_TABLE, query,limit, offset, null);
+        CQLWrapper cql = getCQL(AUDIT_TABLE, query,limit, offset);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
           new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
