@@ -27,11 +27,9 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
-import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -329,9 +327,7 @@ public class ConfigAPI implements Configurations {
   }
 
   private CQLWrapper getCQL(String table, String query, int limit, int offset)
-    throws FieldException,
-    IOException,
-    SchemaException {
+    throws FieldException {
 
     final CQL2PgJSON cql2pgJson;
 
