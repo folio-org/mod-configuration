@@ -229,6 +229,11 @@ java -jar mod-configuration-server/target/mod-configuration-server-fat.jar \
 
 Additional command-line [options](#instructions) and information.
 
+### ModuleDescriptor
+
+See the built `target/ModuleDescriptor.json` for the interfaces that this module
+requires and provides, the permissions, and the additional module metadata.
+
 ### Code analysis
 
 [SonarQube analysis](https://sonarcloud.io/dashboard?id=org.folio%3Amod-configuration).
