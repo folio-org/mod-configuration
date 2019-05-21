@@ -58,7 +58,7 @@ clone / download mod-configuration then `mvn clean install`
 
 Run:
 
-`java -jar mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=8085 embed_postgres=true`
+`java -jar mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=8081 embed_postgres=true`
 
 
 Or run via Dockerfile
@@ -117,7 +117,7 @@ CQL syntax is also supported by the audit API
 Documentation is auto-generated from the RAML files into HTML.
 After the service is started, the documentation can be viewed at:
 
-http://localhost:8085/apidocs/index.html?raml=raml/configuration/config.raml
+http://localhost:8081/apidocs/index.html?raml=raml/configuration/config.raml
 
 ### Examples
 
@@ -132,7 +132,7 @@ Make sure to include appropriate headers as the runtime framework validates them
 
 Query for all tables:
 (GET)
-http://localhost:8085/configurations/entries
+http://localhost:8081/configurations/entries
 
 
 Query for a specific module / config / row:
@@ -143,7 +143,7 @@ http://localhost:<port>/configurations/entries?query=code=PATRON_RULE
 
 Add an entry:
 (POST)
-http://localhost:8085/configurations/entries
+http://localhost:8081/configurations/entries
 {
   "module": "CIRCULATION",
   "configName": "validation_rules",
@@ -224,7 +224,7 @@ Run the local stand-alone instance:
 
 ```
 java -jar mod-configuration-server/target/mod-configuration-server-fat.jar \
-  -Dhttp.port=8085 embed_postgres=true
+  -Dhttp.port=8081 embed_postgres=true
 ```
 
 Additional command-line [options](#instructions) and information.
