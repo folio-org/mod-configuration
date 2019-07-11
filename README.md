@@ -99,8 +99,7 @@ cc.postEntries(null, conf, reply -> {
 ```
 
 #### Query syntax
-The configuration module supports the CQL syntax - please see
-https://github.com/folio-org/cql2pgjson-java
+The configuration module supports the [CQL (Contextual Query Language)](https://github.com/folio-org/raml-module-builder#cql-contextual-query-language) syntax.
 
 ### Auditing
 Every change to entries is automatically audited by the service.
