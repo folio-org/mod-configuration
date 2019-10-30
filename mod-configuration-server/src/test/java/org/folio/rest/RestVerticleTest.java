@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
@@ -31,7 +32,9 @@ import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
@@ -81,40 +84,32 @@ public class RestVerticleTest {
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
+      context.fail(e);
+      return;
     }
 
     Async async = context.async();
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("localhost", port, TENANT_ID, TOKEN);
+    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, TOKEN);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
-      new JsonObject().put("http.port", port));
+      new JsonObject().put("http.port", port)).setWorker(true);
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
         TenantAttributes ta = new TenantAttributes();
-        ta.setModuleFrom("v1");
-        tClient.postTenant(ta, response -> {
-          if(422 == response.statusCode()){
-            try {
-              tClient.postTenant(null, responseHandler ->
-                responseHandler.bodyHandler(body -> {
-                log.debug(body.toString());
-                async.complete();
-              }));
-            } catch (Exception e) {
-              context.fail(e.getMessage());
-            }
-          }
-          else{
-            context.fail("expected code 422 for validation error but received " + response.statusCode());
-          }
+        ta.setModuleTo("mod-configuration-1.0.0");
+        List<Parameter> parameters = new LinkedList<>();
+        parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+        ta.setParameters(parameters);
+        tClient.postTenant(ta, res2 -> {
+          context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+          async.complete();
         });
-
       } catch (Exception e) {
-        e.printStackTrace();
+        context.fail(e);
       }
     }));
   }
@@ -1501,7 +1496,7 @@ public class RestVerticleTest {
 
   private static void setupPostgres() throws IOException {
     PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
+    //PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 

@@ -1,0 +1,10 @@
+{
+    "id": "dc34af02-65a6-4ff1-8b3e-07f4996f0035",
+	"module": "SETTINGS",
+	"configName": "locale",
+	"code": "system.timezone.dk",
+	"description": "timezone",
+	"default": false,
+	"enabled": true,
+	"value": "GMT-01:00"
+}

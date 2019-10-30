@@ -1,0 +1,10 @@
+{
+    "id": "84c11d70-3d17-42b2-9f43-8a46dd759e67",
+	"module": "SETTINGS",
+	"configName": "locale",
+	"code": "system.timezone_date.dk",
+	"description": "timezone date format",
+	"default": false,
+	"enabled": true,
+	"value": "MM/dd/yyyy"
+}
