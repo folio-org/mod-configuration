@@ -62,7 +62,7 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isLoadSample(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
-        //using withPostOnly until MODCONF-35 is fixed. TenantLoading API throws exits on 500 from PUT
+        //using withPostOnly until MODCONF-35 is fixed. TenantLoading API exits without loading data on 500 from PUT
         .withPostOnly()
         .add("locales", "configurations/entries");
       loadData = true;

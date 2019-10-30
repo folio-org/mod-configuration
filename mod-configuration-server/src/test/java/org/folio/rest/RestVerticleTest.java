@@ -24,6 +24,7 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
+import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
@@ -32,9 +33,7 @@ import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
@@ -137,6 +136,56 @@ public class RestVerticleTest {
     deleteAllConfigurationRecordsExceptLocales()
       .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
       .get(5, TimeUnit.SECONDS);
+  }
+
+
+  @Test
+  public void verifySampleDataLoaded(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS")
+  .thenAccept(response -> {
+    try {
+      testContext.assertEquals(200, response.getStatusCode(),
+        String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          response.getBody()));
+      JsonObject wrappedRecords = new JsonObject(response.getBody());
+      testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
+    }
+    catch(Exception e) {
+      testContext.fail(e);
+    }
+    finally {
+      async.complete();
+    }
+  });
+  }
+
+  /**
+   * Upgrading a module with sample data will FAIL because we are setting the parameter "withPostOnly"(which tries to POST the
+   * sample data again, which will fail with data already present) temporarily until MODCONF-35 is fixed
+   * -- Change this test once the bug is fixed
+   */
+  @Test
+  public void upgradeTenantWithSampleDataLoaded(TestContext testContext) {
+    final Async async = testContext.async();
+
+    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+
+    try {
+      TenantAttributes ta = new TenantAttributes();
+      ta.setModuleTo(moduleId);
+      ta.setModuleFrom("mod-configuration-1.0.0");
+      List<Parameter> parameters = new LinkedList<>();
+      parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+      ta.setParameters(parameters);
+      tClient.postTenant(ta, res2 -> {
+        testContext.assertEquals(500, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        async.complete();
+      });
+    } catch (Exception e) {
+      testContext.fail(e);
+    }
+
   }
 
   @Test
@@ -1496,7 +1545,7 @@ public class RestVerticleTest {
 
   private static void setupPostgres() throws IOException {
     PostgresClient.setIsEmbedded(true);
-    //PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
+    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
