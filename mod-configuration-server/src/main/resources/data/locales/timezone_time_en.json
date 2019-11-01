@@ -1,10 +1,10 @@
 {
     "id": "e97ade0c-069b-45dc-a2b5-de45f849c2e4",
-	"module": "SETTINGS",
-	"configName": "locale",
-	"code": "system.timezone_time.en",
-	"description": "timezone time format",
-	"default": true,
-	"enabled": true,
-	"value": "HH:mm:ss a z"
+    "module": "SETTINGS",
+    "configName": "locale",
+    "code": "system.timezone_time.en",
+    "description": "timezone time format",
+    "default": true,
+    "enabled": true,
+    "value": "HH:mm:ss a z"
 }

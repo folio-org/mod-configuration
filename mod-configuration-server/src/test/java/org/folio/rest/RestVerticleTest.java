@@ -54,6 +54,8 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
+
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
@@ -146,7 +148,7 @@ public class RestVerticleTest {
   .thenAccept(response -> {
     try {
       testContext.assertEquals(200, response.getStatusCode(),
-        String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
           response.getBody()));
       JsonObject wrappedRecords = new JsonObject(response.getBody());
       testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
@@ -199,7 +201,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -254,7 +256,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -289,7 +291,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -330,7 +332,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -384,7 +386,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -445,7 +447,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -489,7 +491,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -741,7 +743,7 @@ public class RestVerticleTest {
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
         response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -774,7 +776,7 @@ public class RestVerticleTest {
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
         response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -806,7 +808,7 @@ public class RestVerticleTest {
       try {
         //TODO: Should this be 400/422 instead?
         testContext.assertEquals(500, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
       catch(Exception e) {
@@ -849,11 +851,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -885,11 +887,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -928,11 +930,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -971,11 +973,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -1024,7 +1026,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(422, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
   }
 
@@ -1206,7 +1208,7 @@ public class RestVerticleTest {
     .thenAccept(response -> {
       try {
         testContext.assertEquals(200, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         JsonObject wrappedRecords = new JsonObject(response.getBody());
@@ -1252,7 +1254,7 @@ public class RestVerticleTest {
       .thenAccept(response -> {
         try {
           testContext.assertEquals(200, response.getStatusCode(),
-            String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
               response.getBody()));
 
           JsonObject wrappedRecords = new JsonObject(response.getBody());
@@ -1587,7 +1589,7 @@ public class RestVerticleTest {
         Response response = future.get();
 
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
     }

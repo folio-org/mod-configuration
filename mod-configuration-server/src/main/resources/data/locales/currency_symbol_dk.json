@@ -1,10 +1,10 @@
 {
     "id": "f77d1b4e-6928-4b49-9878-12c616aa1580",
-	"module": "SETTINGS",
-	"configName": "locale",
-	"code": "system.currency_symbol.dk",
-	"description": "currency code",
-	"default": false,
-	"enabled": true,
-	"value": "kr"
+    "module": "SETTINGS",
+    "configName": "locale",
+    "code": "system.currency_symbol.dk",
+    "description": "currency code",
+    "default": false,
+    "enabled": true,
+    "value": "kr"
 }
