@@ -20,9 +20,11 @@ import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.security.AES;
+import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
@@ -52,6 +54,8 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
  */
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
+  private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
+
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
@@ -81,40 +85,32 @@ public class RestVerticleTest {
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
+      context.fail(e);
+      return;
     }
 
     Async async = context.async();
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("localhost", port, TENANT_ID, TOKEN);
+    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, TOKEN);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
-      new JsonObject().put("http.port", port));
+      new JsonObject().put("http.port", port)).setWorker(true);
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
         TenantAttributes ta = new TenantAttributes();
-        ta.setModuleFrom("v1");
-        tClient.postTenant(ta, response -> {
-          if(422 == response.statusCode()){
-            try {
-              tClient.postTenant(null, responseHandler ->
-                responseHandler.bodyHandler(body -> {
-                log.debug(body.toString());
-                async.complete();
-              }));
-            } catch (Exception e) {
-              context.fail(e.getMessage());
-            }
-          }
-          else{
-            context.fail("expected code 422 for validation error but received " + response.statusCode());
-          }
+        ta.setModuleTo("mod-configuration-1.0.0");
+        List<Parameter> parameters = new LinkedList<>();
+        parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+        ta.setParameters(parameters);
+        tClient.postTenant(ta, res2 -> {
+          context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+          async.complete();
         });
-
       } catch (Exception e) {
-        e.printStackTrace();
+        context.fail(e);
       }
     }));
   }
@@ -144,6 +140,56 @@ public class RestVerticleTest {
       .get(5, TimeUnit.SECONDS);
   }
 
+
+  @Test
+  public void verifySampleDataLoaded(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS")
+  .thenAccept(response -> {
+    try {
+      testContext.assertEquals(200, response.getStatusCode(),
+        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+          response.getBody()));
+      JsonObject wrappedRecords = new JsonObject(response.getBody());
+      testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
+    }
+    catch(Exception e) {
+      testContext.fail(e);
+    }
+    finally {
+      async.complete();
+    }
+  });
+  }
+
+  /**
+   * Upgrading a module with sample data will FAIL because we are setting the parameter "withPostOnly"(which tries to POST the
+   * sample data again, which will fail with data already present) temporarily until MODCONF-35 is fixed
+   * -- Change this test once the bug is fixed
+   */
+  @Test
+  public void upgradeTenantWithSampleDataLoaded(TestContext testContext) {
+    final Async async = testContext.async();
+
+    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+
+    try {
+      TenantAttributes ta = new TenantAttributes();
+      ta.setModuleTo(moduleId);
+      ta.setModuleFrom("mod-configuration-1.0.0");
+      List<Parameter> parameters = new LinkedList<>();
+      parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+      ta.setParameters(parameters);
+      tClient.postTenant(ta, res2 -> {
+        testContext.assertEquals(500, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        async.complete();
+      });
+    } catch (Exception e) {
+      testContext.fail(e);
+    }
+
+  }
+
   @Test
   public void canCreateTenantConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
@@ -155,7 +201,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -210,7 +256,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -245,7 +291,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -286,7 +332,7 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -340,7 +386,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -401,7 +447,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -445,7 +491,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient.get(
@@ -697,7 +743,7 @@ public class RestVerticleTest {
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
         response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -730,7 +776,7 @@ public class RestVerticleTest {
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
         response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
@@ -762,7 +808,7 @@ public class RestVerticleTest {
       try {
         //TODO: Should this be 400/422 instead?
         testContext.assertEquals(500, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
       catch(Exception e) {
@@ -805,11 +851,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -841,11 +887,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -884,11 +930,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -927,11 +973,11 @@ public class RestVerticleTest {
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", firstRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(),
         firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", secondRecordResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(),
         secondRecordResponse.getBody()));
   }
 
@@ -980,7 +1026,7 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(422, putResponse.getStatusCode(),
-      String.format("Unexpected status code: '%s': '%s'", putResponse.getStatusCode(),
+      String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(),
         putResponse.getBody()));
   }
 
@@ -1162,7 +1208,7 @@ public class RestVerticleTest {
     .thenAccept(response -> {
       try {
         testContext.assertEquals(200, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
 
         JsonObject wrappedRecords = new JsonObject(response.getBody());
@@ -1208,7 +1254,7 @@ public class RestVerticleTest {
       .thenAccept(response -> {
         try {
           testContext.assertEquals(200, response.getStatusCode(),
-            String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
               response.getBody()));
 
           JsonObject wrappedRecords = new JsonObject(response.getBody());
@@ -1543,7 +1589,7 @@ public class RestVerticleTest {
         Response response = future.get();
 
         testContext.assertEquals(201, response.getStatusCode(),
-          String.format("Unexpected status code: '%s': '%s'", response.getStatusCode(),
+          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
     }
