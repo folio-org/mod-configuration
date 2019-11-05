@@ -25,8 +25,8 @@ import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
-import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
-import org.z3950.zing.cql.cql2pgjson.FieldException;
+import org.folio.cql2pgjson.CQL2PgJSON;
+import org.folio.cql2pgjson.exception.FieldException;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -53,14 +53,12 @@ public class ConfigAPI implements Configurations {
 
   private final Messages            messages          = Messages.getInstance();
 
-  private String idFieldName                          = "id";
-
   public ConfigAPI(Vertx vertx, String tenantId) {
     //calculate facets on all results, this shouldnt be a performance issue as the amount of
     //records in a configuration result set shouldnt get too high
     //FacetManager.setCalculateOnFirst(0);
 
-    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+    PostgresClient.getInstance(vertx, tenantId);
   }
 
   @Validate
@@ -183,7 +181,7 @@ public class ConfigAPI implements Configurations {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         Criterion c = new Criterion(
-          new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue("'"+entryId+"'"));
+          new Criteria().addField("id").setJSONB(false).setOperation("=").setVal(entryId));
 
         PostgresClient.getInstance(context.owner(), tenantId).get(CONFIG_TABLE, Config.class, c, false,
             reply -> {
@@ -353,7 +351,7 @@ public class ConfigAPI implements Configurations {
         CQLWrapper cql = getCQL(AUDIT_TABLE, query,limit, offset);
 
         PostgresClient.getInstance(vertxContext.owner(), tenantId).get(AUDIT_TABLE, Audit.class,
-          new String[]{"jsonb", "orig_id", "created_date", "operation"}, cql, true,
+          new String[]{"jsonb", "id"}, cql, true,
             reply -> {
               try {
                 if(reply.succeeded()){

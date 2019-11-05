@@ -1,11 +1,11 @@
-{"module":"SETTINGS","configName":"locale","code":"system.timezone.en","description":"timezone","default": true,"enabled": true,"value": "GMT-04:00" , "userId" : "joeshmoe"}
-{"module":"SETTINGS","configName":"locale","code":"system.timezone_date.en","description":"timezone date format","default": true,"enabled": true,"value": "dd/MM/yyyy"}
-{"module":"SETTINGS","configName":"locale","code":"system.timezone_time.en","description":"timezone time format","default": true,"enabled": true,"value": "HH:mm:ss a z"}
-{"module":"SETTINGS","configName":"locale","code":"system.currency_code.en","description":"currency","default": true,"enabled": true,"value": "USD"}
-{"module":"SETTINGS","configName":"locale","code":"system.currency_symbol.en","description":"currency code","default": true,"enabled": true,"value": "$"}
-{"module":"SETTINGS","configName":"locale","code":"system.timezone.dk","description":"timezone","default": false,"enabled": true,"value": "GMT-01:00"}
-{"module":"SETTINGS","configName":"locale","code":"system.timezone_date.dk","description":"timezone date format","default": false,"enabled": true,"value": "MM/dd/yyyy"}
-{"module":"SETTINGS","configName":"locale","code":"system.timezone_time.dk","description":"timezone time format","default": false,"enabled": true,"value": "HH:mm:ss a z"}
-{"module":"SETTINGS","configName":"locale","code":"system.currency_code.dk","description":"currency","default": false,"enabled": true,"value": "DKK"}
-{"module":"SETTINGS","configName":"locale","code":"system.currency_symbol.dk","description":"currency code","default": false,"enabled": true,"value": "kr"}
+6359ba66-4e84-480e-b104-1ec45359c8a6	{"module":"SETTINGS","configName":"locale","code":"system.timezone.en","description":"timezone","default": true,"enabled": true,"value": "GMT-04:00" , "userId" : "joeshmoe"}
+5cb56c21-441c-4735-931a-ee4367a90e39	{"module":"SETTINGS","configName":"locale","code":"system.timezone_date.en","description":"timezone date format","default": true,"enabled": true,"value": "dd/MM/yyyy"}
+dee10f94-673d-43c1-907b-5d9c9c0fef68	{"module":"SETTINGS","configName":"locale","code":"system.timezone_time.en","description":"timezone time format","default": true,"enabled": true,"value": "HH:mm:ss a z"}
+bb9d2ed0-dd28-40e5-8373-ae403cb13928	{"module":"SETTINGS","configName":"locale","code":"system.currency_code.en","description":"currency","default": true,"enabled": true,"value": "USD"}
+46e73ac3-3f83-484e-a049-7218b3a382af	{"module":"SETTINGS","configName":"locale","code":"system.currency_symbol.en","description":"currency code","default": true,"enabled": true,"value": "$"}
+f9f3a534-8aea-4849-b7d8-4b7b2c56513e	{"module":"SETTINGS","configName":"locale","code":"system.timezone.dk","description":"timezone","default": false,"enabled": true,"value": "GMT-01:00"}
+f6d3399a-0bcd-441e-b6fb-6f308ecde00e	{"module":"SETTINGS","configName":"locale","code":"system.timezone_date.dk","description":"timezone date format","default": false,"enabled": true,"value": "MM/dd/yyyy"}
+fca5f9ee-89ee-4971-9fe0-62f614414e76	{"module":"SETTINGS","configName":"locale","code":"system.timezone_time.dk","description":"timezone time format","default": false,"enabled": true,"value": "HH:mm:ss a z"}
+aa9d1729-aa8c-4afc-982a-0bea826cfd64	{"module":"SETTINGS","configName":"locale","code":"system.currency_code.dk","description":"currency","default": false,"enabled": true,"value": "DKK"}
+2697b6da-69e1-4ac6-a6a7-5edfee9a8b3b	{"module":"SETTINGS","configName":"locale","code":"system.currency_symbol.dk","description":"currency code","default": false,"enabled": true,"value": "kr"}
 \.

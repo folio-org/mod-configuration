@@ -2,7 +2,7 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "COPY config_data (jsonb) FROM 'data/locales.data' ENCODING 'UTF8';",
+      "snippet": "COPY config_data (id, jsonb) FROM 'data/locales.data' WITH ENCODING 'UTF8';",
       "fromModuleVersion": 0
     }
   ],
@@ -11,8 +11,8 @@
       "tableName": "config_data",
       "withMetadata": true,
       "withAuditing": true,
-      "generateId": true,
-      "populateJsonWithId": true,
+      "auditingTableName": "audit_config_data",
+      "auditingFieldName": "config_data",
       "ginIndex": [
         {
           "fieldName": "value",
