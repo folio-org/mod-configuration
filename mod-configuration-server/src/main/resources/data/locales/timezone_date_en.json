@@ -1,0 +1,10 @@
+{
+    "id": "77bbf12f-b2a7-49ad-92e4-2dbb4ffeaf33",
+    "module": "SETTINGS",
+    "configName": "locale",
+    "code": "system.timezone_date.en",
+    "description": "timezone date format",
+    "default": true,
+    "enabled": true,
+    "value": "dd/MM/yyyy"
+}

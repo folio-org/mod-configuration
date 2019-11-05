@@ -1,11 +1,4 @@
 {
-  "scripts": [
-    {
-      "run": "after",
-      "snippet": "COPY config_data (id, jsonb) FROM 'data/locales.data' WITH ENCODING 'UTF8';",
-      "fromModuleVersion": 0
-    }
-  ],
   "tables": [
     {
       "tableName": "config_data",

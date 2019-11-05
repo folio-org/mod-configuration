@@ -1,0 +1,10 @@
+{
+    "id": "b873eb5a-7a50-488a-9624-d4fbc4daad51",
+     "module": "SETTINGS",
+     "configName": "locale",
+     "code": "system.currency_code.dk",
+     "description": "currency",
+     "default": false,
+     "enabled": true,
+     "value": "DKK"
+}
