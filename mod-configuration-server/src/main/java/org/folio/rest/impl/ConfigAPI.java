@@ -53,14 +53,6 @@ public class ConfigAPI implements Configurations {
 
   private final Messages            messages          = Messages.getInstance();
 
-  public ConfigAPI(Vertx vertx, String tenantId) {
-    //calculate facets on all results, this shouldnt be a performance issue as the amount of
-    //records in a configuration result set shouldnt get too high
-    //FacetManager.setCalculateOnFirst(0);
-
-    PostgresClient.getInstance(vertx, tenantId);
-  }
-
   @Validate
   @Override
   public void getConfigurationsEntries(String query, int offset, int limit, List<String> facets,
