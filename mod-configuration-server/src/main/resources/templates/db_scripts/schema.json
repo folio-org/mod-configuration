@@ -4,8 +4,8 @@
       "tableName": "config_data",
       "withMetadata": true,
       "withAuditing": true,
-      "generateId": true,
-      "populateJsonWithId": true,
+      "auditingTableName": "audit_config_data",
+      "auditingFieldName": "config_data",
       "ginIndex": [
         {
           "fieldName": "value",
