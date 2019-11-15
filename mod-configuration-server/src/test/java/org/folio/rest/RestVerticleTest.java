@@ -806,8 +806,7 @@ public class RestVerticleTest {
 
     putCompleted.thenAccept(response -> {
       try {
-        //TODO: Should this be 400/422 instead?
-        testContext.assertEquals(500, response.getStatusCode(),
+        testContext.assertEquals(404, response.getStatusCode(),
           String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
