@@ -11,13 +11,11 @@ public class OkapiHttpClient {
   private final Vertx vertx;
   private final String tenantId;
   private final String userId;
-  private final String token;
 
-  public OkapiHttpClient(Vertx vertx, String tenantId, String userId, String token) {
+  public OkapiHttpClient(Vertx vertx, String tenantId, String userId) {
     this.vertx = vertx;
     this.tenantId = tenantId;
     this.userId = userId;
-    this.token = token;
   }
 
   public CompletableFuture<Response> post(String url, String jsonContent) {
@@ -45,7 +43,6 @@ public class OkapiHttpClient {
       }));
 
     request.putHeader("X-Okapi-Tenant", tenantId);
-    request.putHeader("X-Okapi-Token", token);
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Content-type", "application/json");
     request.putHeader("Accept", "application/json, text/plain");
@@ -79,7 +76,6 @@ public class OkapiHttpClient {
       }));
 
     request.putHeader("X-Okapi-Tenant", tenantId);
-    request.putHeader("X-Okapi-Token", token);
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Accept", "application/json, text/plain");
 
@@ -113,7 +109,6 @@ public class OkapiHttpClient {
       }));
 
     request.putHeader("X-Okapi-Tenant", tenantId);
-    request.putHeader("X-Okapi-Token", token);
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Content-type", "application/json");
     request.putHeader("Accept", "application/json, text/plain");
