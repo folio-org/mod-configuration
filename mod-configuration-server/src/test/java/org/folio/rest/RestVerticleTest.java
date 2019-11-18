@@ -61,14 +61,13 @@ public class RestVerticleTest {
   private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
-  private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9eyJzdWIiOiJhZG1pbiIsInVzZXJfaWQiOiI3OWZmMmE4Yi1kOWMzLTViMzktYWQ0YS0wYTg0MDI1YWIwODUiLCJ0ZW5hbnQiOiJ0ZXN0X3RlbmFudCJ9BShwfHcNClt5ZXJ8ImQTMQtAM1sQEnhsfWNmXGsYVDpuaDN3RVQ9";
 
   private static Locale oldLocale;
   private static final Vertx vertx = Vertx.vertx();
   private static int port;
   private static TenantClient tClient = null;
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
-    vertx, TENANT_ID, USER_ID, TOKEN);
+    vertx, TENANT_ID, USER_ID);
 
   static {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
@@ -93,7 +92,7 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, TOKEN);
+    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, null);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
       new JsonObject().put("http.port", port)).setWorker(true);
@@ -806,8 +805,7 @@ public class RestVerticleTest {
 
     putCompleted.thenAccept(response -> {
       try {
-        //TODO: Should this be 400/422 instead?
-        testContext.assertEquals(500, response.getStatusCode(),
+        testContext.assertEquals(404, response.getStatusCode(),
           String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
             response.getBody()));
       }
@@ -1522,7 +1520,6 @@ public class RestVerticleTest {
     request.putHeader("X-Okapi-Request-Id", "999999999999");
     request.putHeader("Authorization", TENANT_ID);
     request.putHeader("x-Okapi-Tenant", TENANT_ID);
-    request.putHeader("x-Okapi-Token", TOKEN);
     request.putHeader("x-Okapi-User-Id", USER_ID);
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);

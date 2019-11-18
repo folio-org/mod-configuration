@@ -281,7 +281,7 @@ public class ConfigAPI implements Configurations {
               if(reply.succeeded()) {
                 if(reply.result().getUpdated() == 0) {
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
-                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                    .respond404WithTextPlain(entity.getId())));
                 }
                 else{
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
