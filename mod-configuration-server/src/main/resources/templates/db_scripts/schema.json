@@ -2,6 +2,7 @@
   "tables": [
     {
       "tableName": "config_data",
+      "customSnippetPath": "migration/config_data.sql",
       "withMetadata": true,
       "withAuditing": true,
       "auditingTableName": "audit_config_data",
