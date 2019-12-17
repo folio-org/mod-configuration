@@ -1,8 +1,14 @@
 {
+  "scripts": [
+    {
+      "run": "after",
+      "snippetPath": "migration/config_data.sql",
+      "fromModuleVersion": "mod-configuration-5.2.0"
+    }
+  ],
   "tables": [
     {
       "tableName": "config_data",
-      "customSnippetPath": "migration/config_data.sql",
       "withMetadata": true,
       "withAuditing": true,
       "auditingTableName": "audit_config_data",
