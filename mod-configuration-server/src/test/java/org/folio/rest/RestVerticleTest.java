@@ -110,6 +110,7 @@ public class RestVerticleTest {
         });
       } catch (Exception e) {
         context.fail(e);
+        async.complete();
       }
     }));
   }
@@ -161,10 +162,29 @@ public class RestVerticleTest {
   });
   }
 
+  @Test
+  public void verifySampleDataCurrencyCodeDk(TestContext testContext) {
+    final String uuid = "b873eb5a-7a50-488a-9624-d4fbc4daad51";
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries/" + uuid)
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(200, response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+              response.getBody()));
+          JsonObject wrappedRecords = new JsonObject(response.getBody());
+          testContext.assertEquals(uuid, wrappedRecords.getString("id"));
+        } catch (Exception e) {
+          testContext.fail(e);
+        } finally {
+          async.complete();
+        }
+      });
+  }
+
   /**
-   * Upgrading a module with sample data will FAIL because we are setting the parameter "withPostOnly"(which tries to POST the
-   * sample data again, which will fail with data already present) temporarily until MODCONF-35 is fixed
-   * -- Change this test once the bug is fixed
+   * Test upgrade (2nd Tenant POST)
+   * @param testContext
    */
   @Test
   public void upgradeTenantWithSampleDataLoaded(TestContext testContext) {
@@ -180,7 +200,7 @@ public class RestVerticleTest {
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
       tClient.postTenant(ta, res2 -> {
-        testContext.assertEquals(500, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        testContext.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
         async.complete();
       });
     } catch (Exception e) {

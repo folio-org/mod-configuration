@@ -122,6 +122,7 @@ public class ConfigAPI implements Configurations {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
         PostgresClient.getInstance(context.owner(), tenantId).save(
           CONFIG_TABLE,
+          entity.getId(),
           entity,
           reply -> {
             try {
