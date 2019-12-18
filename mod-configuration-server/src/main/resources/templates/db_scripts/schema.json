@@ -1,4 +1,11 @@
 {
+  "scripts": [
+    {
+      "run": "after",
+      "snippetPath": "migration/config_data.sql",
+      "fromModuleVersion": "mod-configuration-5.3.0"
+    }
+  ],
   "tables": [
     {
       "tableName": "config_data",
