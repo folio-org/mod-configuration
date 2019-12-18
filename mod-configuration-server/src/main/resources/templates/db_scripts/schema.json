@@ -3,7 +3,7 @@
     {
       "run": "after",
       "snippetPath": "migration/config_data.sql",
-      "fromModuleVersion": "mod-configuration-5.2.0"
+      "fromModuleVersion": "mod-configuration-5.3.0"
     }
   ],
   "tables": [
