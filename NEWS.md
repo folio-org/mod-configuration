@@ -1,3 +1,11 @@
+## 5.3.0 2019-12-18
+
+ * MODCONF-44 POST item with id still makes server side ID. Version 5.2.0
+   sample data must be wiped out, because the supplied ID in sample data
+   was ignored.
+ * MODCONF-36 Data migration script for changes to PO Number
+   prefix/suffix entries
+
 ## 5.2.0 2019-12-04
 
  * MODCONF-42 Upgrade to RMB 29
