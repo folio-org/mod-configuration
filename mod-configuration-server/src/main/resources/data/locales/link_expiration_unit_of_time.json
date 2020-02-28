@@ -1,0 +1,10 @@
+{
+    "id": "5f8a2a6a-921a-4c8b-ab29-7da67e32a6bc",
+    "module": "USERSBL",
+    "configName": "expirationUnitOfTime",
+    "code": "RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME",
+    "description": "reset password link of expiration unit of time",
+    "default": true,
+    "enabled": true,
+    "value": "hours"
+}
