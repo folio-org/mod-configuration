@@ -1,7 +1,7 @@
 {
     "id": "6c066397-5ad6-4768-9c2b-3d1adcd51b38",
     "module": "USERSBL",
-    "configName": "expirationTime",
+    "configName": "expiration",
     "code": "RESET_PASSWORD_LINK_EXPIRATION_TIME",
     "description": "reset password link expiration of time",
     "default": true,
