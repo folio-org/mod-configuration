@@ -6,5 +6,5 @@
     "description": "reset password link expiration of time",
     "default": true,
     "enabled": true,
-    "value": "86400000"
+    "value": "24"
 }
