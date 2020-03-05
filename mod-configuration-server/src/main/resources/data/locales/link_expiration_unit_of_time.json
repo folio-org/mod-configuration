@@ -3,7 +3,7 @@
     "module": "USERSBL",
     "configName": "expiration",
     "code": "RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME",
-    "description": "reset password link of expiration unit of time",
+    "description": "reset password link expiration unit of time",
     "default": true,
     "enabled": true,
     "value": "hours"
