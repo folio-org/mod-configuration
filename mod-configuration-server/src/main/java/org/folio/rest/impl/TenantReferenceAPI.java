@@ -62,7 +62,8 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isLoadSample(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
-        .add("locales", "configurations/entries");
+        .add("locales", "configurations/entries")
+        .add("expiration_time", "configurations/entries");
       loadData = true;
     }
     return loadData;
