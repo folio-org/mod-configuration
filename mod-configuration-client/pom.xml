@@ -23,14 +23,9 @@
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
 
     <plugins>
+
       <!-- Custom compilation mode -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
