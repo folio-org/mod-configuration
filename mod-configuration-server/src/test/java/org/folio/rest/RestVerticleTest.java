@@ -1313,7 +1313,7 @@ public class RestVerticleTest {
       "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
         if(reply.succeeded()){
           postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            log.debug(r3.result().getResults().size());
+            log.debug(r3.result().size());
             postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
               log.debug(r4.succeeded());
 
@@ -1584,7 +1584,7 @@ public class RestVerticleTest {
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     //Do not delete the sample records created from
-    postgresClient.mutate(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
+    postgresClient.execute(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
       TENANT_ID, "mod_configuration", audit_config_data), reply -> {
       if (reply.succeeded()) {
         allDeleted.complete(null);

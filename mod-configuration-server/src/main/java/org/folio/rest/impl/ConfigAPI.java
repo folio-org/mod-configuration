@@ -98,7 +98,7 @@ public class ConfigAPI implements Configurations {
       }
       catch(CQLQueryValidationException e) {
         handleCqlException(asyncResultHandler, e,
-          GetConfigurationsEntriesResponse::respond422WithApplicationJson);      
+          GetConfigurationsEntriesResponse::respond422WithApplicationJson);
       }
       catch (Exception e) {
         log.error(e.getMessage(), e);
@@ -130,7 +130,7 @@ public class ConfigAPI implements Configurations {
                 String ret = reply.result();
                 entity.setId(ret);
                 asyncResultHandler.handle(succeededFuture(
-                  PostConfigurationsEntriesResponse.respond201WithApplicationJson(entity, 
+                  PostConfigurationsEntriesResponse.respond201WithApplicationJson(entity,
                     PostConfigurationsEntriesResponse.headersFor201().withLocation(LOCATION_PREFIX + ret))));
               }
               else {
@@ -228,14 +228,14 @@ public class ConfigAPI implements Configurations {
             reply -> {
               try {
                 if(reply.succeeded()){
-                  if(reply.result().getUpdated() == 1){
+                  if (reply.result().rowCount() == 1){
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
                       .respond204()));
                   }
                   else{
-                    log.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
+                    log.error(messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().rowCount()));
                     asyncResultHandler.handle(succeededFuture(DeleteConfigurationsEntriesByEntryIdResponse
-                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.DeletedCountError,1 , reply.result().getUpdated()))));
+                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.DeletedCountError,1 , reply.result().rowCount()))));
                   }
                 }
                 else{
@@ -280,7 +280,7 @@ public class ConfigAPI implements Configurations {
           reply -> {
             try {
               if(reply.succeeded()) {
-                if(reply.result().getUpdated() == 0) {
+                if (reply.result().rowCount() == 0) {
                   asyncResultHandler.handle(succeededFuture(PutConfigurationsEntriesByEntryIdResponse
                     .respond404WithTextPlain(entity.getId())));
                 }
