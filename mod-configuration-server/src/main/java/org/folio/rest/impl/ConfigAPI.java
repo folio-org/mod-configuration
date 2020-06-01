@@ -64,7 +64,7 @@ public class ConfigAPI implements Configurations {
     try {
       log.debug("sending... getConfigurationsTables");
       String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-      CQLWrapper cql = getCQL(CONFIG_TABLE, query,limit, offset);
+      CQLWrapper cql = getCQL(CONFIG_TABLE, query, limit, offset);
 
       List<FacetField> facetList = FacetManager.convertFacetStrings2FacetFields(facets, "jsonb");
 
@@ -91,10 +91,6 @@ public class ConfigAPI implements Configurations {
                 lang, MessageConsts.InternalServerError))));
           }
         });
-    }
-    catch (CQLQueryValidationException e) {
-      handleCqlException(asyncResultHandler, e,
-        GetConfigurationsEntriesResponse::respond422WithApplicationJson);
     }
     catch (Exception e) {
       log.error(e.getMessage(), e);

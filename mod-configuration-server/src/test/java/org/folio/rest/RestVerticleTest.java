@@ -163,6 +163,74 @@ public class RestVerticleTest {
   }
 
   @Test
+  public void testGetConfigurationsEntriesBadFacets1(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS&facets=a,")
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(400, response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+              response.getBody()));
+        } catch (Exception e) {
+          testContext.fail(e);
+        } finally {
+          async.complete();
+        }
+      });
+  }
+
+  @Test
+  public void testGetConfigurationsEntriesBadFacets2(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS&facets=,a")
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(400, response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+              response.getBody()));
+        } catch (Exception e) {
+          testContext.fail(e);
+        } finally {
+          async.complete();
+        }
+      });
+  }
+
+  @Test
+  public void testGetConfigurationsEntriesSyntaxError(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=a+and")
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(400, response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+              response.getBody()));
+        } catch (Exception e) {
+          testContext.fail(e);
+        } finally {
+          async.complete();
+        }
+      });
+  }
+
+  @Test
+  public void testGetConfigurationsEntriesNoTenant(TestContext testContext) {
+    final Async async = testContext.async();
+    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS", null)
+      .thenAccept(response -> {
+        try {
+          testContext.assertEquals(400, response.getStatusCode(),
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+              response.getBody()));
+        } catch (Exception e) {
+          testContext.fail(e);
+        } finally {
+          async.complete();
+        }
+      });
+  }
+
+  @Test
   public void verifySampleDataCurrencyCodeDk(TestContext testContext) {
     final String uuid = "b873eb5a-7a50-488a-9624-d4fbc4daad51";
     final Async async = testContext.async();
