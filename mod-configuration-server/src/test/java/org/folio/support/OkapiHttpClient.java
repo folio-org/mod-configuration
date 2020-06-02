@@ -11,16 +11,16 @@ public class OkapiHttpClient {
   private final Vertx vertx;
   private final String tenantId;
   private final String userId;
+  private final HttpClient client;
 
   public OkapiHttpClient(Vertx vertx, String tenantId, String userId) {
     this.vertx = vertx;
     this.tenantId = tenantId;
     this.userId = userId;
+    this.client = vertx.createHttpClient();
   }
 
   public CompletableFuture<Response> post(String url, String jsonContent) {
-    HttpClient client = vertx.createHttpClient();
-
     HttpClientRequest request = client.postAbs(url);
     Buffer requestBuffer = Buffer.buffer(jsonContent);
 
@@ -52,9 +52,8 @@ public class OkapiHttpClient {
     return postCompleted;
   }
 
-  public CompletableFuture<Response> get(String url) {
-    HttpClient client = vertx.createHttpClient();
 
+  public CompletableFuture<Response> get(String url, String tenantId) {
     HttpClientRequest request = client.getAbs(url);
 
     final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
@@ -75,7 +74,9 @@ public class OkapiHttpClient {
         getCompleted.complete(convertedResponse);
       }));
 
-    request.putHeader("X-Okapi-Tenant", tenantId);
+    if (tenantId != null) {
+      request.putHeader("X-Okapi-Tenant", tenantId);
+    }
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Accept", "application/json, text/plain");
 
@@ -84,9 +85,11 @@ public class OkapiHttpClient {
     return getCompleted;
   }
 
-  public CompletableFuture<Response> put(String url, String jsonContent) {
-    HttpClient client = vertx.createHttpClient();
+  public CompletableFuture<Response> get(String url) {
+    return get(url, this.tenantId);
+  }
 
+  public CompletableFuture<Response> put(String url, String jsonContent) {
     HttpClientRequest request = client.putAbs(url);
     Buffer requestBuffer = Buffer.buffer(jsonContent);
 

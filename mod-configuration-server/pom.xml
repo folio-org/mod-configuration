@@ -8,8 +8,8 @@
   <artifactId>mod-configuration-server</artifactId>
 
   <properties>
-    <tablespace_dir>c:\\git\\postgres</tablespace_dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <generate_routing_context>/configurations/entries</generate_routing_context>
   </properties>
 
   <build>
@@ -22,10 +22,6 @@
         <version>2.19.1</version>
         <configuration>
           <systemProperties>
-            <property>
-              <name>http.port</name>
-              <value>8887</value>
-            </property>
             <!--
             <property>
               <name>postgres_secretkey_4_embeddedmode</name>
