@@ -1465,7 +1465,7 @@ public class RestVerticleTest {
 
       //attempt to delete invalud id (not uuid)
       mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
-        "", "application/json", 404);
+        "", "application/json", 400);
 
       mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
         "", "application/json", 404);

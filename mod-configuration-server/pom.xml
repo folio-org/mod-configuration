@@ -8,8 +8,8 @@
   <artifactId>mod-configuration-server</artifactId>
 
   <properties>
-    <tablespace_dir>c:\\git\\postgres</tablespace_dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <generate_routing_context>/configurations/entries</generate_routing_context>
   </properties>
 
   <build>
