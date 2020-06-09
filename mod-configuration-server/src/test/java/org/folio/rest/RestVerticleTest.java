@@ -1,6 +1,5 @@
 package org.folio.rest;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -16,6 +15,23 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandles;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
@@ -36,16 +52,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.invoke.MethodHandles;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static org.folio.support.CompletableFutureExtensions.allOf;
 
@@ -1373,39 +1379,16 @@ public class RestVerticleTest {
 
   @Test
   public void canUsePersistentCaching(TestContext context) {
-    Async async = context.async();
-
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     postgresClient.persistentlyCacheResult("mytablecache",
-      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",  reply -> {
-        if(reply.succeeded()){
-          postgresClient.select("select * from harvard_mod_configuration.mytablecache", r3 -> {
-            log.debug(r3.result().size());
-            postgresClient.removePersistentCacheResult("mytablecache", r4 -> {
-              log.debug(r4.succeeded());
-
-              /* this will probably cause a deadlock as the saveBatch runs within a transaction */
-
-             /*
-             List<Object> a = Arrays.asList(new Object[]{new JsonObject("{\"module1\": \"CIRCULATION\"}"),
-                  new JsonObject("{\"module1\": \"CIRCULATION15\"}"), new JsonObject("{\"module1\": \"CIRCULATION\"}")});
-              try {
-                PostgresClient.getInstance(vertx, "harvard").saveBatch("config_data", a, reply1 -> {
-                  if(reply1.succeeded()){
-                    log.debug(new io.vertx.core.json.JsonArray( reply1.result().getResults() ).encodePrettily());
-                  }
-                  async.complete();
-                  });
-              } catch (Exception e1) {
-                e1.printStackTrace();
-              }*/
-              async.complete();
-
-            });
-          });
-        }
-      });
+      "select * from harvard_mod_configuration.config_data where jsonb->>'config_name' = 'validation_rules'",
+        context.asyncAssertSuccess(r1 ->
+          postgresClient.select("select * from harvard_mod_configuration.mytablecache",
+              context.asyncAssertSuccess(r2 ->
+            postgresClient.removePersistentCacheResult("mytablecache", context.asyncAssertSuccess())
+          ))
+      ));
   }
 
   /**
@@ -1414,21 +1397,12 @@ public class RestVerticleTest {
   @Test
   public void checkURLs(TestContext context) {
     createSampleRecords(context);
-    waitForTwoSeconds();
-    checkResultsFromVariousUrls(context);
-  }
-
-  private void checkResultsFromVariousUrls(TestContext context) {
+    Async async = context.async();
+    vertx.setTimer(1000, res -> {
+      async.complete();
+    });
+    async.await();
     runGETURLoop(context, urlsFromFile());
-  }
-
-  private void waitForTwoSeconds() {
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
   }
 
   private void createSampleRecords(TestContext context) {

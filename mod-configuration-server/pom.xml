@@ -22,12 +22,6 @@
         <version>2.19.1</version>
         <configuration>
           <systemProperties>
-            <!--
-            <property>
-              <name>postgres_secretkey_4_embeddedmode</name>
-              <value>b2+S+X4F/NFys/0jMaEG1A</value>
-            </property>
-            -->
           </systemProperties>
           <environmentVariables>
             <DB_HOST>localhost</DB_HOST>
@@ -39,14 +33,6 @@
             <DB_QUERYTIMEOUT>10000</DB_QUERYTIMEOUT>
             <DB_MAXPOOLSIZE>26</DB_MAXPOOLSIZE>
           </environmentVariables>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.0</version>
-        <configuration>
-          <excludes>**org.drools**</excludes>
         </configuration>
       </plugin>
       <plugin>
@@ -62,7 +48,6 @@
             </goals>
             <configuration>
               <mainClass>org.folio.rest.tools.GenerateRunner</mainClass>
-              <!-- <executable>java</executable> -->
               <cleanupDaemonThreads>false</cleanupDaemonThreads>
               <systemProperties>
                 <systemProperty>
