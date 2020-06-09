@@ -31,10 +31,6 @@ public class ConfigAPI implements Configurations {
   public static final String        CONFIG_TABLE      = "config_data";
   public static final String        AUDIT_TABLE       = "audit_config_data";
 
-  public static final String        METHOD_GET        = "get";
-  public static final String        METHOD_POST       = "post";
-  public static final String        METHOD_PUT        = "put";
-  public static final String        METHOD_DELETE     = "delete";
   private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
@@ -145,7 +141,6 @@ public class ConfigAPI implements Configurations {
       return false;
     }
 
-    //TODO: discriminate better the different unique constraints
     return message.contains("config_data_module_configname_code_idx_unique")
       || message.contains("config_data_module_configname_idx_unique")
       || message.contains("config_data_module_configname_code_userid_idx_unique")
