@@ -39,7 +39,6 @@ import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.security.AES;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.ConfigurationRecordExamples;
@@ -64,7 +63,6 @@ public class RestVerticleTest {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String SECRET_KEY = "b2+S+X4F/NFys/0jMaEG1A";
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
 
@@ -84,15 +82,6 @@ public class RestVerticleTest {
   public static void beforeAll(TestContext context) {
     oldLocale = Locale.getDefault();
     Locale.setDefault(Locale.US);
-
-    try {
-      AES.setSecretKey(SECRET_KEY);
-      setupPostgres();
-    } catch (Exception e) {
-      e.printStackTrace();
-      context.fail(e);
-      return;
-    }
 
     Async async = context.async();
 
@@ -261,12 +250,16 @@ public class RestVerticleTest {
    * @param testContext
    */
   @Test
-  public void upgradeTenantWithSampleDataLoaded(TestContext testContext) {
-    final Async async = testContext.async();
-
-    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
-
+  public void upgradeTenant(TestContext testContext) {
     try {
+      final Async async = testContext.async();
+      String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+
+      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
+          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
+      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
+          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
+
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo(moduleId);
       ta.setModuleFrom("mod-configuration-1.0.0");
@@ -275,12 +268,15 @@ public class RestVerticleTest {
       ta.setParameters(parameters);
       tClient.postTenant(ta, res2 -> {
         testContext.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        testContext.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
+        testContext.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
+        testContext.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
+        testContext.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
         async.complete();
       });
     } catch (Exception e) {
       testContext.fail(e);
     }
-
   }
 
   @Test
@@ -1294,18 +1290,10 @@ public class RestVerticleTest {
 
     allCreated.add(createConfigRecord(secondConfigRecord));
 
-    allOf(allCreated).thenComposeAsync(v ->
-      //Must filter to only check out module entries due to default locale records
-      okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==CHECKOUT"))
-    .thenAccept(response -> {
+    allOf(allCreated).thenRunAsync(() -> {
       try {
-        testContext.assertEquals(200, response.getStatusCode(),
-          String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-            response.getBody()));
-
-        JsonObject wrappedRecords = new JsonObject(response.getBody());
-
-        testContext.assertEquals(2, wrappedRecords.getInteger("totalRecords"));
+        // Must filter to only check out module entries due to default locale records
+        testContext.assertEquals(2, getByCql("module==CHECKOUT").getInteger("totalRecords"));
       }
       catch(Exception e) {
         testContext.fail(e);
@@ -1604,12 +1592,6 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
-  private static void setupPostgres() throws IOException {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
-
   private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
     return deleteAllConfigurationRecordsFromTableExceptLocales("config_data");
   }
@@ -1664,5 +1646,36 @@ public class RestVerticleTest {
     return okapiHttpClient.post(
       "http://localhost:" + port + "/configurations/entries",
       record.encodePrettily());
+  }
+
+  private JsonObject assertCreateConfigRecord(JsonObject record) {
+    try {
+      Response response = okapiHttpClient.post(
+        "http://localhost:" + port + "/configurations/entries",
+        record.encodePrettily()).get(5, TimeUnit.SECONDS);
+      if (response.getStatusCode() != 201) {
+        throw new AssertionError("Expected 201 HTTP status code, but got " + response.getStatusCode()
+          + ". " + response.getBody());
+      }
+      return response.getBodyAsJson();
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private JsonObject getByCql(String cql) {
+    try {
+      String encodedCql = URLEncoder.encode(cql, StandardCharsets.UTF_8.name());
+      Response response  = okapiHttpClient
+          .get("http://localhost:" + port + "/configurations/entries" + "?query=" + encodedCql)
+          .get(5, TimeUnit.SECONDS);
+      if (response.getStatusCode() != 200) {
+        throw new AssertionError("Expected 200 HTTP code, but was " + response.getStatusCode()
+            + ". " + response.getBody());
+      }
+      return response.getBodyAsJson();
+    } catch (UnsupportedEncodingException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

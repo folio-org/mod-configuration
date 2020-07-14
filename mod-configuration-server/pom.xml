@@ -20,20 +20,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.19.1</version>
-        <configuration>
-          <systemProperties>
-          </systemProperties>
-          <environmentVariables>
-            <DB_HOST>localhost</DB_HOST>
-            <DB_PORT>6000</DB_PORT>
-            <DB_DATABASE>postgres</DB_DATABASE>
-            <DB_USERNAME>username</DB_USERNAME>
-            <DB_PASSWORD>GanU/uZmfJOaxn6PaUjDeQ==</DB_PASSWORD>
-            <DB_CHARSET>UTF8</DB_CHARSET>
-            <DB_QUERYTIMEOUT>10000</DB_QUERYTIMEOUT>
-            <DB_MAXPOOLSIZE>26</DB_MAXPOOLSIZE>
-          </environmentVariables>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -220,7 +206,15 @@
                 <filter>
                   <artifact>org.folio:domain-models-api-interfaces</artifact>
                   <excludes>
+                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
+                    <exclude>org/folio/rest/jaxrs/resource/Rmbtests*</exclude>
                     <exclude>org/folio/rest/jaxrs/resource/support/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.folio:domain-models-runtime</artifact>
+                  <excludes>
+                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
                   </excludes>
                 </filter>
                 <filter>

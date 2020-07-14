@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <aspectj.version>1.8.9</aspectj.version>
+    <aspectj.version>1.9.4</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
   </properties>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>30.0.2</version>
+      <version>30.2.4</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
