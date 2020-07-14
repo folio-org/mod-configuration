@@ -206,7 +206,15 @@
                 <filter>
                   <artifact>org.folio:domain-models-api-interfaces</artifact>
                   <excludes>
+                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
+                    <exclude>org/folio/rest/jaxrs/resource/Rmbtests*</exclude>
                     <exclude>org/folio/rest/jaxrs/resource/support/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.folio:domain-models-runtime</artifact>
+                  <excludes>
+                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
                   </excludes>
                 </filter>
                 <filter>
