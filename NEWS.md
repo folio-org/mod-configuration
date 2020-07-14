@@ -1,3 +1,7 @@
+## 5.4.1 2020-07-14
+
+ * [MODCONF-54](https://issues.folio.org/browse/MODCONF-54) RMB v30.2.4, fix "public.gin_trgm_ops" does not exist
+
 ## 5.4.0 2020-06-09
 
  * [MODCONF-53](https://issues.folio.org/browse/MODCONF-53) Update to RMB 30.0.2 and fix all code smells
