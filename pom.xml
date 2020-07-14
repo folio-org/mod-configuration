@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <aspectj.version>1.8.9</aspectj.version>
+    <aspectj.version>1.9.4</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
   </properties>
