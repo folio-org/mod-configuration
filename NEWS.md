@@ -1,6 +1,10 @@
+## 5.4.2 2020-08-28
+
+ * [MODCONF-58](https://issues.folio.org/browse/MODCONF-58) Upgrade branch b5.4 (Goldenrod) from RMB 30.2.4 to RMB 30.2.6
+
 ## 5.4.1 2020-07-14
 
- * [MODCONF-54](https://issues.folio.org/browse/MODCONF-54) RMB v30.2.4, fix "public.gin_trgm_ops" does not exist
+ * [MODCONF-54](https://issues.folio.org/browse/MODCONF-54) RMB v30.2.4, fix "public.gin\_trgm\_ops" does not exist
 
 ## 5.4.0 2020-06-09
 
@@ -35,7 +39,7 @@
 
  * [MODCONF-21](https://issues.folio.org/browse/MODCONF-21) Configuration records are unique for each module, config name and code
  * [MODCONF-21](https://issues.folio.org/browse/MODCONF-21) Configuration records are enabled by default
- * [MODCONF-22](https://issues.folio.org/browse/MODCONF-22) Use dereferenced kv_configuration.schema for metadata sorting
+ * [MODCONF-22](https://issues.folio.org/browse/MODCONF-22) Use dereferenced kv\_configuration.schema for metadata sorting
  * Upgrades to RAML Module Builder 19.3.1
  * CQL queries including an unrecognised index report a 400 instead of 422
 
