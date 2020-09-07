@@ -29,10 +29,10 @@
       <!-- Custom compilation mode -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>3.8.1</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>11</release>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
           <encoding>UTF-8</encoding>
         </configuration>
         <executions>
@@ -70,7 +70,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.5.0</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>generate_interfaces</id>
