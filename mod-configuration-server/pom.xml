@@ -213,40 +213,6 @@
               </transformers>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-              <filters>
-                <filter>
-                  <artifact>org.folio:domain-models-api-interfaces</artifact>
-                  <excludes>
-                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
-                    <exclude>org/folio/rest/jaxrs/resource/Rmbtests*</exclude>
-                    <exclude>org/folio/rest/jaxrs/resource/support/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>org.folio:domain-models-runtime</artifact>
-                  <excludes>
-                    <exclude>org/folio/rest/client/RmbtestsClient.class</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>com.sun.xml.bind:jaxb-xjc</artifact>
-                  <excludes>
-                    <exclude>com/sun/codemodel/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>org.apache.httpcomponents:httpcore</artifact>
-                  <excludes>
-                    <exclude>org/apache/http/annotation/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>xpp3:xpp3</artifact>
-                  <excludes>
-                    <exclude>org/xmlpull/v1/**</exclude>
-                  </excludes>
-                </filter>
-              </filters>
             </configuration>
           </execution>
         </executions>
