@@ -1,3 +1,7 @@
+## 5.4.3 2020-10-14
+
+ * [MODCONF-61](https://issues.folio.org/browse/MODCONF-61) Upgrade branch b5.4 (Goldenrod) to RMB 30.2.8 and release
+
 ## 5.4.2 2020-08-28
 
  * [MODCONF-58](https://issues.folio.org/browse/MODCONF-58) Upgrade branch b5.4 (Goldenrod) from RMB 30.2.4 to RMB 30.2.6
