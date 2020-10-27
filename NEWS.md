@@ -1,3 +1,13 @@
+## 5.4.4 2020-10-27
+
+ * [MODCONF-63](https://issues.folio.org/browse/MODCONF-63) Upgrade RMB to 30.2.9:
+  * [RMB-740](https://issues.folio.org/browse/RMB-740) Use FOLIO fork of vertx-sql-client and vertx-pg-client with
+    the following two patches
+  * [RMB-739](https://issues.folio.org/browse/RMB-739) Make RMB's DB\_CONNECTIONRELEASEDELAY work again, defaults to 60 seconds
+  * [FOLIO-2840](https://issues.folio.org/browse/FOLIO-2840) Fix duplicate names causing 'prepared statement "XYZ" already exists'
+  * [RMB-738](https://issues.folio.org/browse/RMB-738) Upgrade to Vert.x 3.9.4, most notable fix: RowStream fetch
+    can close prematurely the stream https://github.com/eclipse-vertx/vertx-sql-client/issues/778
+
 ## 5.4.3 2020-10-14
 
  * [MODCONF-61](https://issues.folio.org/browse/MODCONF-61) Upgrade branch b5.4 (Goldenrod) to RMB 30.2.8 and release
