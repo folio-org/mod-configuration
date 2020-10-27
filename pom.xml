@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-configuration</artifactId>
-  <version>5.4.4-SNAPSHOT</version>
+  <version>5.4.4</version>
   <packaging>pom</packaging>
   <modules>
     <module>mod-configuration-server</module>
@@ -185,7 +185,7 @@
     <url>https://github.com/folio-org/mod-configuration</url>
     <connection>scm:git:git://github.com/folio-org/mod-configuration.git</connection>
     <developerConnection>scm:git:git@github.com/folio-org/mod-configuration.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v5.4.4</tag>
   </scm>
 
   <distributionManagement>
