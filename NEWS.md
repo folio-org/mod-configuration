@@ -1,3 +1,7 @@
+## 5.5.0 2020-11-02
+
+ * [MODCONF-65](https://issues.folio.org/browse/MODCONF-65) Upgrade to RMB 31.1.5
+
 ## 5.4.1 2020-07-14
 
  * [MODCONF-54](https://issues.folio.org/browse/MODCONF-54) RMB v30.2.4, fix "public.gin_trgm_ops" does not exist
