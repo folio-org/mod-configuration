@@ -1,5 +1,5 @@
 #mvn build
-
+.factorypath
 target/
 #vert.x
 .vertx/
