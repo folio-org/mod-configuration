@@ -96,9 +96,6 @@ public class RestVerticleTest {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
-        List<Parameter> parameters = new LinkedList<>();
-        parameters.add(new Parameter().withKey("loadSample").withValue("true"));
-        ta.setParameters(parameters);
         tClient.postTenant(ta, res2 -> {
           context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
           async.complete();
@@ -133,28 +130,6 @@ public class RestVerticleTest {
     deleteAllConfigurationRecordsExceptLocales()
       .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
       .get(5, TimeUnit.SECONDS);
-  }
-
-
-  @Test
-  public void verifySampleDataLoaded(TestContext testContext) {
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS")
-  .thenAccept(response -> {
-    try {
-      testContext.assertEquals(200, response.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-          response.getBody()));
-      JsonObject wrappedRecords = new JsonObject(response.getBody());
-      testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
-    }
-    catch(Exception e) {
-      testContext.fail(e);
-    }
-    finally {
-      async.complete();
-    }
-  });
   }
 
   @Test
@@ -225,26 +200,6 @@ public class RestVerticleTest {
       });
   }
 
-  @Test
-  public void verifySampleDataCurrencyCodeDk(TestContext testContext) {
-    final String uuid = "b873eb5a-7a50-488a-9624-d4fbc4daad51";
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries/" + uuid)
-      .thenAccept(response -> {
-        try {
-          testContext.assertEquals(200, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-              response.getBody()));
-          JsonObject wrappedRecords = new JsonObject(response.getBody());
-          testContext.assertEquals(uuid, wrappedRecords.getString("id"));
-        } catch (Exception e) {
-          testContext.fail(e);
-        } finally {
-          async.complete();
-        }
-      });
-  }
-
   /**
    * Test upgrade (2nd Tenant POST)
    * @param testContext
@@ -267,7 +222,7 @@ public class RestVerticleTest {
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
       tClient.postTenant(ta, res2 -> {
-        testContext.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        testContext.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
         testContext.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
