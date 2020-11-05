@@ -127,8 +127,8 @@ public class RestVerticleTest {
     ExecutionException,
     TimeoutException {
 
-    deleteAllConfigurationRecordsExceptLocales()
-      .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
+    deleteAllConfigurationRecords()
+      .thenComposeAsync(v -> deleteAllConfigurationAuditRecords())
       .get(5, TimeUnit.SECONDS);
   }
 
@@ -1547,15 +1547,15 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("config_data");
+  private CompletableFuture<Void> deleteAllConfigurationRecords() {
+    return deleteAllConfigurationRecordsFromTable("config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationAuditRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("audit_config_data");
+  private CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
+    return deleteAllConfigurationRecordsFromTable("audit_config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTableExceptLocales(
+  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
     String audit_config_data) {
 
     CompletableFuture<Void> allDeleted = new CompletableFuture<>();
@@ -1563,7 +1563,7 @@ public class RestVerticleTest {
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     //Do not delete the sample records created from
-    postgresClient.execute(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
+    postgresClient.execute(String.format("DELETE FROM %s_%s.%s",
       TENANT_ID, "mod_configuration", audit_config_data), reply -> {
       if (reply.succeeded()) {
         allDeleted.complete(null);
