@@ -1,13 +1,13 @@
 GET , http://localhost:<port>/configurations/entries?facets=code&facets=module , get list of configuration tables , 200 , 4
-GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION&facets=code&facets=module , get list of configuration tables , 200 , 4
-GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION3&facets=code&facets=module , get list of configuration tables , 200 , 0
-GET , http://localhost:<port>/configurations/entries?query=code=system*%20sortBy%20code&facets=code&facets=module , get list of configuration tables , 200 , 0
-GET , http://localhost:<port>/configurations/entries?query=code=system*%20sortBy%20code&facets=code:4&facets=module , get list of configuration tables , 200 , 0
-GET , http://localhost:<port>/configurations/entries?query=code=system*%20sortBy%20code/sort.descending&facets=code:3&facets=module , get list of configuration tables , 200 , 0
+GET , http://localhost:<port>/configurations/entries?query=module==DUMMY&facets=code&facets=module , get list of configuration tables , 200 , 4
+GET , http://localhost:<port>/configurations/entries?query=module==DUMMY3&facets=code&facets=module , get list of configuration tables , 200 , 0
+GET , http://localhost:<port>/configurations/entries?query=code=config_data*%20sortBy%20code&facets=code&facets=module , get list of configuration tables , 200 , 1
+GET , http://localhost:<port>/configurations/entries?query=code=config_data*%20sortBy%20code&facets=code:4&facets=module , get list of configuration tables , 200 , 1
+GET , http://localhost:<port>/configurations/entries?query=code=config_data*%20sortBy%20code/sort.descending&facets=code:3&facets=module , get list of configuration tables , 200 , 1
 GET , http://localhost:<port>/configurations/entries?facets=code1&facets=module , get list of configuration tables , 200 , 4
 GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d34-39cd9fedd8b5 , get specific table , 404
 GET , http://localhost:<port>/configurations/entries/91287080-a81c-4a84-8d3439cd9fedd8b5 , get specific table , 404
-GET , http://localhost:<port>/configurations/entries?query=module==CIRCULATION , get list of configuration tables , 200 , 4
+GET , http://localhost:<port>/configurations/entries?query=module==DUMMY , get list of configuration tables , 200 , 4
 GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables , 200 , 0
 GET , http://localhost:<port>/configurations/audit , get list of audit records , 200 , 8
 GET , http://localhost:<port>/admin/list_locking_queries , list blocking queries , 200 , 0

@@ -1065,7 +1065,7 @@ public class RestVerticleTest {
    */
 
   @Test
-  public void checkURLs(TestContext context) {
+  public void checkAPIEndpointResponses(TestContext context) {
     createSampleRecords(context);
     Async async = context.async();
     vertx.setTimer(1000, res -> {
@@ -1077,16 +1077,24 @@ public class RestVerticleTest {
 
   private void createSampleRecords(TestContext context) {
     try {
-      // save config entry
-      String sample = getFile("kv_configuration.sample");
+      JsonObject configRecord = new ConfigurationRecordBuilder()
+        .withModuleName("DUMMY")
+        .withDescription("dummy module for testing")
+        .withConfigName("dummy_rules")
+        .withCode("config_data")
+        .withValue("")
+        .create();
 
-      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(sample);
+      configRecord.put("default", "true");
 
+      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(configRecord);
+      
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-          baselineFromSample.create().encodePrettily(), "application/json", 201);
-
+        baselineFromSample.create().encodePrettily(), "application/json", 201);
+      
+      String testEncodedData = "this string represents config data for the module, to be posted under a given code";
       // save config entry with value being a base64 encoded file
-      String bytes = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
+      String bytes = Base64.getEncoder().encodeToString(testEncodedData.getBytes());
 
       ConfigurationRecordBuilder encodedValueExample = baselineFromSample.withCode("encoded_example").withValue(bytes);
 
@@ -1106,7 +1114,7 @@ public class RestVerticleTest {
           "application/json", 404);
 
       // check read only
-      Config conf2 = new ObjectMapper().readValue(sample, Config.class);
+      Config conf2 = new ObjectMapper().readValue(configRecord.toString(), Config.class);
 
       conf2.setCode("change_metadata_example");
 
