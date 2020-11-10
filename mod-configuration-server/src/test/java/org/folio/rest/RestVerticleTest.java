@@ -129,7 +129,7 @@ public class RestVerticleTest {
 
   @Before
   public void beforeEach() 
-  
+
     throws InterruptedException, 
     ExecutionException, 
     TimeoutException {
@@ -180,8 +180,8 @@ public class RestVerticleTest {
     okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=a+and").thenAccept(response -> {
       try {
         testContext.assertEquals(400, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
 
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
               response.getBody()));
       } catch (Exception e) {
         testContext.fail(e);
@@ -211,7 +211,6 @@ public class RestVerticleTest {
 
   /**
    * Test upgrade (2nd Tenant POST)
-   * 
    * @param testContext
    */
   @Test
@@ -220,10 +219,12 @@ public class RestVerticleTest {
       final Async async = testContext.async();
       String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
 
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes").put("value",
-          new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes").put("value",
-          new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
+      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
+        .put("value", new JsonObject().put("selectedItems", new 
+        JsonArray().add("foo").add("bar")).encode()));
+      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
+        .put("value", new JsonObject().put("selectedItems", new 
+        JsonArray().add("baz").add("bee").add("beer")).encode()));
 
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo(moduleId);
@@ -270,21 +271,23 @@ public class RestVerticleTest {
         testContext.assertEquals("true", createdRecord.getString("value"));
 
         testContext.assertTrue(createdRecord.containsKey("metadata"),
-            String.format("Should contain change metadata property: '%s'", createdRecord.encodePrettily()));
+            String.format("Should contain change metadata property: '%s'", 
+
+              createdRecord.encodePrettily()));
 
         final JsonObject changeMetadata = createdRecord.getJsonObject("metadata");
 
         testContext.assertTrue(changeMetadata.containsKey("createdDate"),
-            String.format("Should contain created date property: '%s'", changeMetadata));
+          String.format("Should contain created date property: '%s'", changeMetadata));
 
         testContext.assertTrue(changeMetadata.containsKey("createdByUserId"),
-            String.format("Should contain created by property: '%s'", changeMetadata));
+          String.format("Should contain created by property: '%s'", changeMetadata));
 
         testContext.assertTrue(changeMetadata.containsKey("updatedDate"),
-            String.format("Should contain updated date property: '%s'", changeMetadata));
+          String.format("Should contain updated date property: '%s'", changeMetadata));
 
         testContext.assertTrue(changeMetadata.containsKey("updatedByUserId"),
-            String.format("Should contain updated by property: '%s'", changeMetadata));
+          String.format("Should contain updated by property: '%s'", changeMetadata));
       } catch (Exception e) {
         testContext.fail(e);
       } finally {
