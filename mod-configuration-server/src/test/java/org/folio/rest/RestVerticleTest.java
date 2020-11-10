@@ -128,7 +128,11 @@ public class RestVerticleTest {
   }
 
   @Before
-  public void beforeEach() throws InterruptedException, ExecutionException, TimeoutException {
+  public void beforeEach() 
+  
+    throws InterruptedException, 
+    ExecutionException, 
+    TimeoutException {
 
     deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
         TimeUnit.SECONDS);
@@ -141,7 +145,9 @@ public class RestVerticleTest {
         .thenAccept(response -> {
           try {
             testContext.assertEquals(400, response.getStatusCode(),
-                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+                
+                  response.getBody()));
           } catch (Exception e) {
             testContext.fail(e);
           } finally {
@@ -157,7 +163,9 @@ public class RestVerticleTest {
         .thenAccept(response -> {
           try {
             testContext.assertEquals(400, response.getStatusCode(),
-                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+                
+                  response.getBody()));
           } catch (Exception e) {
             testContext.fail(e);
           } finally {
@@ -172,7 +180,9 @@ public class RestVerticleTest {
     okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=a+and").thenAccept(response -> {
       try {
         testContext.assertEquals(400, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+
+              response.getBody()));
       } catch (Exception e) {
         testContext.fail(e);
       } finally {
@@ -188,7 +198,9 @@ public class RestVerticleTest {
         .thenAccept(response -> {
           try {
             testContext.assertEquals(400, response.getStatusCode(),
-                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+                
+                  response.getBody()));
           } catch (Exception e) {
             testContext.fail(e);
           } finally {
@@ -243,7 +255,9 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+            
+              response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -284,7 +298,9 @@ public class RestVerticleTest {
     final Async async = testContext.async();
 
     JsonObject configRecord = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("other_settings")
       .withValue("{ \"audioAlertsEnabled\": \"true\" }")
       .create();
@@ -294,7 +310,9 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+            
+              response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -327,7 +345,9 @@ public class RestVerticleTest {
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+
+              response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -352,19 +372,24 @@ public class RestVerticleTest {
 
     final UUID userId = UUID.randomUUID();
 
-    JsonObject configRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings")
-        .withNoCode()
-        .withValue("some value")
-        .forUser(userId)
-        .create();
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId)
+      .create();
 
     final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     postCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(201, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+            
+              response.getBody()));
 
         log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -386,7 +411,9 @@ public class RestVerticleTest {
   // Only a single example, rather than replicating all of the examples used for POST
   @Test
   public void canReplaceConfigurationRecordUsingPut(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
     JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
@@ -399,7 +426,9 @@ public class RestVerticleTest {
 
     JsonObject putRequest = ConfigurationRecordBuilder
       .from(createdRecord)
+
       .withModuleName("a_new_module")
+
       .withConfigName("a_new_config_name")
       .withCode("a_new_code")
       .withValue("a_new_value")
@@ -411,7 +440,9 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), putResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), 
+        
+          putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient
       .get("http://localhost:" + port + "/configurations/entries/" + id)
@@ -468,7 +499,9 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), putResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), 
+          
+          putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient
       .get("http://localhost:" + port + "/configurations/entries/" + id)
@@ -483,7 +516,9 @@ public class RestVerticleTest {
 
   @Test
   public void configurationRecordIsEnabledByDefaultWhenReplaced(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
     JsonObject configRecord = ConfigurationRecordExamples.audioAlertsExample().create();
 
@@ -502,7 +537,9 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(204, putResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), putResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), 
+        
+          putResponse.getBody()));
 
     final Response getResponse = okapiHttpClient
       .get("http://localhost:" + port + "/configurations/entries/" + id)
@@ -522,8 +559,13 @@ public class RestVerticleTest {
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
 
-    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withCode("example_setting").withValue("some value");
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value");
 
     JsonObject tenantConfigRecord = baselineSetting
       .forNoUser()
@@ -564,7 +606,9 @@ public class RestVerticleTest {
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
 
     final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("main_settings")
       .withNoCode()
       .withValue("some value");
@@ -606,7 +650,9 @@ public class RestVerticleTest {
     final Async async = testContext.async();
 
     JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("main_settings")
       .withValue("some value")
       .create();
@@ -614,7 +660,9 @@ public class RestVerticleTest {
     final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
     JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("other_settings")
       .withValue("some other value")
       .create();
@@ -637,7 +685,9 @@ public class RestVerticleTest {
     final Async async = testContext.async();
 
     JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("main_settings")
       .withValue("some value")
       .create();
@@ -666,13 +716,25 @@ public class RestVerticleTest {
   public void canCreateMultipleConfigurationRecordsWithDifferentConfigName(TestContext testContext) {
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withCode("first_setting").withValue("some value").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some value")
+      .create();
 
     final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withCode("second_setting").withValue("some other value").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withCode("second_setting")
+      .withValue("some other value")
+      .create();
 
     final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
@@ -682,20 +744,35 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
-  public void canCreateMultipleConfigurationRecordsWithDifferentModuleName(TestContext testContext) {
+  public void canCreateMultipleConfigurationRecordsWithDifferentModuleName(
+    TestContext testContext) {
+
     final Async async = testContext.async();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withCode("first_setting").withValue("some value").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some value")
+      .create();
 
     final CompletableFuture<Response> firstRecordCompleted = createConfigRecord(firstConfigRecord);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("RENEWAL")
-        .withConfigName("main_settings").withCode("first_setting").withValue("some other value").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("RENEWAL")
+
+      .withConfigName("main_settings")
+      .withCode("first_setting")
+      .withValue("some other value")
+      .create();
 
     final CompletableFuture<Response> secondRecordCompleted = createConfigRecord(secondConfigRecord);
 
@@ -705,7 +782,8 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -714,15 +792,24 @@ public class RestVerticleTest {
       ExecutionException, 
       TimeoutException {
 
-    JsonObject configRecord = new ConfigurationRecordBuilder().withModuleName("some_module")
-        .withConfigName("other_settings").withCode("some_code").withValue("some value").withNoEnabled().create();
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("some_module")
+
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .withNoEnabled()
+      .create();
 
     final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+        
+          response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -739,15 +826,24 @@ public class RestVerticleTest {
       ExecutionException, 
       TimeoutException {
 
-    JsonObject configRecord = new ConfigurationRecordBuilder().withModuleName("some_module")
-        .withConfigName("other_settings").withCode("some_code").withValue("some value").disabled().create();
+    JsonObject configRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("some_module")
+
+      .withConfigName("other_settings")
+      .withCode("some_code")
+      .withValue("some value")
+      .disabled()
+      .create();
 
     final CompletableFuture<Response> postCompleted = createConfigRecord(configRecord);
 
     final Response response = postCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, response.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+          
+          response.getBody()));
 
     log.debug(String.format("Create Response: '%s'", response.getBody()));
 
@@ -772,7 +868,9 @@ public class RestVerticleTest {
     putCompleted.thenAccept(response -> {
       try {
         testContext.assertEquals(404, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+            
+              response.getBody()));
       } catch (Exception e) {
         testContext.fail(e);
       } finally {
@@ -783,122 +881,202 @@ public class RestVerticleTest {
 
   @Test
   public void cannotCreateMultipleTenantRecordsWithSameModuleConfigAndCode(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withCode("audioAlertsEnabled").withValue("some value").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some value")
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     // Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withCode("audioAlertsEnabled").withValue("some other value").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some other value")
+      .create();
 
     final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), firstRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), 
+        
+          firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), secondRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), 
+        
+          secondRecordResponse.getBody()));
   }
 
   @Test
   public void cannotCreateMultipleTenantRecordsWithSameModuleConfigWithoutCode(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withValue("some value").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withValue("some value")
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     // Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withValue("some other value").create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withValue("some other value")
+      .create();
 
     final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), firstRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), 
+
+          firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), secondRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), 
+
+          secondRecordResponse.getBody()));
   }
 
   @Test
   public void cannotCreateMultipleUserRecordsWithSameModuleConfigAndCode(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+    throws InterruptedException, 
+    ExecutionException, 
+    TimeoutException {
 
     final UUID userId = UUID.randomUUID();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withCode("audioAlertsEnabled").withValue("some value").forUser(userId)
-        .create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some value")
+      .forUser(userId)
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     // Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withCode("audioAlertsEnabled").withValue("some other value").forUser(userId)
-        .create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withCode("audioAlertsEnabled")
+      .withValue("some other value")
+      .forUser(userId)
+      .create();
 
     final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), firstRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), 
+
+          firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), secondRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), 
+
+          secondRecordResponse.getBody()));
   }
 
   @Test
   public void cannotCreateMultipleUserRecordsWithSameModuleConfigWithoutCode(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
     final UUID userId = UUID.randomUUID();
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withNoCode().withValue("some value").forUser(userId).create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some value")
+      .forUser(userId)
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     // Make sure the first record is created before the second
     final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
 
-    JsonObject secondConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withNoCode().withValue("some other value").forUser(userId).create();
+    JsonObject secondConfigRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withNoCode()
+      .withValue("some other value")
+      .forUser(userId)
+      .create();
 
     final CompletableFuture<Response> secondRecordCreated = createConfigRecord(secondConfigRecord);
 
     final Response secondRecordResponse = secondRecordCreated.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(201, firstRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), firstRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, firstRecordResponse.getStatusCode(), 
+
+          firstRecordResponse.getBody()));
 
     testContext.assertEquals(422, secondRecordResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), secondRecordResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, secondRecordResponse.getStatusCode(), 
+
+          secondRecordResponse.getBody()));
   }
 
   // Only a single example, rather than replicating all of the examples used for
   // POST
   @Test
   public void cannotReplaceTenantConfigurationRecordToHaveDuplicateModuleConfigNameAndCode(TestContext testContext)
-      throws InterruptedException, ExecutionException, TimeoutException {
+      throws InterruptedException, 
+      ExecutionException, 
+      TimeoutException {
 
-    JsonObject firstConfigRecord = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("other_settings").withCode("some_setting").withValue("some value").create();
+    JsonObject firstConfigRecord = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("other_settings")
+      .withCode("some_setting")
+      .withValue("some value")
+      .create();
 
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
@@ -916,7 +1094,9 @@ public class RestVerticleTest {
 
     JsonObject putRequest = ConfigurationRecordBuilder
       .from(createdRecord)
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("other_settings")
       .withCode("some_setting")
       .withValue("a new value")
@@ -928,7 +1108,9 @@ public class RestVerticleTest {
     final Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
 
     testContext.assertEquals(422, putResponse.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), putResponse.getBody()));
+        String.format(UNEXPECTED_STATUS_CODE, putResponse.getStatusCode(), 
+          
+          putResponse.getBody()));
   }
 
   @Test
@@ -939,7 +1121,9 @@ public class RestVerticleTest {
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
 
     final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+
       .withModuleName("CHECKOUT")
+
       .withConfigName("main_settings")
       .withCode("example_setting")
       .withValue("some value");
@@ -958,7 +1142,8 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -968,8 +1153,13 @@ public class RestVerticleTest {
 
     List<CompletableFuture<Response>> allRecordsFutures = new ArrayList<>();
 
-    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withNoCode().withValue("some value");
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+    
+      .withModuleName("CHECKOUT")
+      
+      .withConfigName("main_settings")
+      .withNoCode()
+      .withValue("some value");
 
     JsonObject tenantConfigRecord = baselineSetting.create();
 
@@ -985,7 +1175,8 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -997,8 +1188,14 @@ public class RestVerticleTest {
 
     final UUID userId = UUID.randomUUID();
 
-    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withCode("example_setting").withValue("some value").forUser(userId);
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withCode("example_setting")
+      .withValue("some value")
+      .forUser(userId);
 
     JsonObject tenantConfigRecord = baselineSetting.create();
 
@@ -1014,7 +1211,8 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -1026,8 +1224,13 @@ public class RestVerticleTest {
 
     final UUID userId = UUID.randomUUID();
 
-    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder().withModuleName("CHECKOUT")
-        .withConfigName("main_settings").withNoCode().withValue("some value").forUser(userId);
+    final ConfigurationRecordBuilder baselineSetting = new ConfigurationRecordBuilder()
+
+      .withModuleName("CHECKOUT")
+
+      .withConfigName("main_settings")
+      .withNoCode().withValue("some value")
+      .forUser(userId);
 
     JsonObject tenantConfigRecord = baselineSetting.create();
 
@@ -1043,7 +1246,8 @@ public class RestVerticleTest {
 
     CompletableFuture<Void> allRecordsCompleted = allOf(allRecordsFutures);
 
-    allRecordsCompleted.thenAccept(v -> checkAllRecordsCreated(allRecordsFutures, testContext, async));
+    allRecordsCompleted.thenAccept(v -> 
+      checkAllRecordsCreated(allRecordsFutures, testContext, async));
   }
 
   @Test
@@ -1099,7 +1303,9 @@ public class RestVerticleTest {
         .thenAccept(response -> {
           try {
             testContext.assertEquals(200, response.getStatusCode(),
-                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), response.getBody()));
+                String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(), 
+
+                  response.getBody()));
 
             JsonObject wrappedRecords = new JsonObject(response.getBody());
 
@@ -1154,7 +1360,9 @@ public class RestVerticleTest {
   private void createSampleRecords(TestContext context) {
     try {
       JsonObject configRecord = new ConfigurationRecordBuilder()
+
         .withModuleName("DUMMY")
+
         .withDescription("dummy module for testing")
         .withConfigName("dummy_rules")
         .withCode("config_data")
@@ -1372,6 +1580,7 @@ public class RestVerticleTest {
 
         testContext.assertEquals(201, response.getStatusCode(),
           String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
+
             response.getBody()));
       }
     }
