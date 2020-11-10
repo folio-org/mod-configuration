@@ -1402,7 +1402,7 @@ public class RestVerticleTest {
       conf2.setMetadata(md);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-          new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
+        new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
       md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
       md.setCreatedDate(new Date());
@@ -1412,7 +1412,7 @@ public class RestVerticleTest {
 
       log.debug(updatedConf);
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST, updatedConf,
-          "application/json", 201);
+        "application/json", 201);
 
     } catch (Exception e) {
       e.printStackTrace();
