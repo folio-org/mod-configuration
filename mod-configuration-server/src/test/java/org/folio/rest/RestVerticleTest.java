@@ -138,28 +138,6 @@ public class RestVerticleTest {
       .get(5, TimeUnit.SECONDS);
   }
 
-
-  @Test
-  public void verifySampleDataLoaded(TestContext testContext) {
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS")
-  .thenAccept(response -> {
-    try {
-      testContext.assertEquals(200, response.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-          response.getBody()));
-      JsonObject wrappedRecords = new JsonObject(response.getBody());
-      testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
-    }
-    catch(Exception e) {
-      testContext.fail(e);
-    }
-    finally {
-      async.complete();
-    }
-  });
-  }
-
   @Test
   public void testGetConfigurationsEntriesBadFacets1(TestContext testContext) {
     final Async async = testContext.async();
@@ -228,26 +206,6 @@ public class RestVerticleTest {
       });
   }
 
-  @Test
-  public void verifySampleDataCurrencyCodeDk(TestContext testContext) {
-    final String uuid = "b873eb5a-7a50-488a-9624-d4fbc4daad51";
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries/" + uuid)
-      .thenAccept(response -> {
-        try {
-          testContext.assertEquals(200, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-              response.getBody()));
-          JsonObject wrappedRecords = new JsonObject(response.getBody());
-          testContext.assertEquals(uuid, wrappedRecords.getString("id"));
-        } catch (Exception e) {
-          testContext.fail(e);
-        } finally {
-          async.complete();
-        }
-      });
-  }
-
   /**
    * Test upgrade (2nd Tenant POST)
    * @param testContext
@@ -270,7 +228,7 @@ public class RestVerticleTest {
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
       tClient.postTenant(ta, res2 -> {
-        testContext.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        testContext.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
         testContext.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
@@ -1398,45 +1356,44 @@ public class RestVerticleTest {
 
   private void createSampleRecords(TestContext context) {
     try {
-      //save config entry
-      String sample = getFile("kv_configuration.sample");
+      JsonObject configRecord = new ConfigurationRecordBuilder()
+        .withModuleName("DUMMY")
+        .withDescription("dummy module for testing")
+        .withConfigName("dummy_rules")
+        .withCode("config_data")
+        .withValue("")
+        .create();
 
-      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(sample);
+      configRecord.put("default", "true");
 
+      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(configRecord);
+      
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         baselineFromSample.create().encodePrettily(), "application/json", 201);
+      
+      String testEncodedData = "this string represents config data for the module, to be posted under a given code";
+      // save config entry with value being a base64 encoded file
+      String bytes = Base64.getEncoder().encodeToString(testEncodedData.getBytes());
 
-      //save config entry with value being a base64 encoded file
-      String bytes = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
-
-      ConfigurationRecordBuilder encodedValueExample = baselineFromSample
-        .withCode("encoded_example")
-        .withValue(bytes);
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        encodedValueExample.create().encodePrettily(), "application/json", 201);
-
-      ConfigurationRecordBuilder disabledExample = baselineFromSample
-        .withCode("enabled_example")
-        .withValue(bytes)
-        .disabled();
+      ConfigurationRecordBuilder encodedValueExample = baselineFromSample.withCode("encoded_example").withValue(bytes);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        disabledExample.create().encodePrettily(), "application/json", 201);
+          encodedValueExample.create().encodePrettily(), "application/json", 201);
 
-      //This looks to be exactly the same use case
-//      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-//        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+      ConfigurationRecordBuilder disabledExample = baselineFromSample.withCode("enabled_example").withValue(bytes)
+          .disabled();
 
-      //attempt to delete invalud id (not uuid)
-      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
-        "", "application/json", 400);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+          disabledExample.create().encodePrettily(), "application/json", 201);
 
-      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
-        "", "application/json", 404);
+      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE, "",
+          "application/json", 400);
 
-      //check read only
-      Config conf2 =  new ObjectMapper().readValue(sample, Config.class);
+      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE, "",
+          "application/json", 404);
+
+      // check read only
+      Config conf2 = new ObjectMapper().readValue(configRecord.toString(), Config.class);
 
       conf2.setCode("change_metadata_example");
 
@@ -1445,7 +1402,7 @@ public class RestVerticleTest {
       conf2.setMetadata(md);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
+          new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
 
       md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
       md.setCreatedDate(new Date());
@@ -1454,8 +1411,8 @@ public class RestVerticleTest {
       String updatedConf = new ObjectMapper().writeValueAsString(conf2);
 
       log.debug(updatedConf);
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        updatedConf, "application/json", 201);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST, updatedConf,
+          "application/json", 201);
 
     } catch (Exception e) {
       e.printStackTrace();
