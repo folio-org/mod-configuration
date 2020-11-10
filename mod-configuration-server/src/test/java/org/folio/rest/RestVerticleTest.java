@@ -96,9 +96,6 @@ public class RestVerticleTest {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
-        List<Parameter> parameters = new LinkedList<>();
-        parameters.add(new Parameter().withKey("loadSample").withValue("true"));
-        ta.setParameters(parameters);
         tClient.postTenant(ta, res2 -> {
           context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
           async.complete();
@@ -111,11 +108,17 @@ public class RestVerticleTest {
   }
 
   @AfterClass
-  public static void afterAll(TestContext context) {
+  public static void afterAll(TestContext context) 
+    throws InterruptedException, 
+    ExecutionException, 
+    TimeoutException {
+
+    deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
+        TimeUnit.SECONDS);
     Async async = context.async();
     tClient.deleteTenant(reply -> reply.bodyHandler(body -> {
       log.debug(body.toString());
-      vertx.close(context.asyncAssertSuccess(res-> {
+      vertx.close(context.asyncAssertSuccess(res -> {
         PostgresClient.stopEmbeddedPostgres();
         async.complete();
       }));
@@ -130,8 +133,8 @@ public class RestVerticleTest {
     ExecutionException,
     TimeoutException {
 
-    deleteAllConfigurationRecordsExceptLocales()
-      .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
+    deleteAllConfigurationRecords()
+      .thenComposeAsync(v -> deleteAllConfigurationAuditRecords())
       .get(5, TimeUnit.SECONDS);
   }
 
@@ -1592,15 +1595,15 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("config_data");
+  private CompletableFuture<Void> deleteAllConfigurationRecords() {
+    return deleteAllConfigurationRecordsFromTable("config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationAuditRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("audit_config_data");
+  private CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
+    return deleteAllConfigurationRecordsFromTable("audit_config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTableExceptLocales(
+  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
     String audit_config_data) {
 
     CompletableFuture<Void> allDeleted = new CompletableFuture<>();
