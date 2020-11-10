@@ -1595,15 +1595,15 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecords() {
+  private static CompletableFuture<Void> deleteAllConfigurationRecords() {
     return deleteAllConfigurationRecordsFromTable("config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
+  private static CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
     return deleteAllConfigurationRecordsFromTable("audit_config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
+  private static CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
     String audit_config_data) {
 
     CompletableFuture<Void> allDeleted = new CompletableFuture<>();
@@ -1611,7 +1611,7 @@ public class RestVerticleTest {
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     //Do not delete the sample records created from
-    postgresClient.execute(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
+    postgresClient.execute(String.format("DELETE FROM %s_%s.%s",
       TENANT_ID, "mod_configuration", audit_config_data), reply -> {
       if (reply.succeeded()) {
         allDeleted.complete(null);
