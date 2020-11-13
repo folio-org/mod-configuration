@@ -1356,17 +1356,14 @@ public class RestVerticleTest {
 
   private void createSampleRecords(TestContext context) {
     try {
-      JsonObject configRecord = new ConfigurationRecordBuilder()
+
+      ConfigurationRecordBuilder baselineFromSample = new ConfigurationRecordBuilder()
         .withModuleName("DUMMY")
         .withDescription("dummy module for testing")
-        .withConfigName("dummy_rules")
         .withCode("config_data")
+        .withConfigName("dummy_rules")
         .withValue("")
-        .create();
-
-      configRecord.put("default", "true");
-
-      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(configRecord);
+        .withDefault();
       
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         baselineFromSample.create().encodePrettily(), "application/json", 201);
@@ -1392,8 +1389,10 @@ public class RestVerticleTest {
       mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE, "",
           "application/json", 404);
 
+      String baselineAsString = baselineFromSample.create().toString();
+
       // check read only
-      Config conf2 = new ObjectMapper().readValue(configRecord.toString(), Config.class);
+      Config conf2 = new ObjectMapper().readValue(baselineAsString, Config.class);
 
       conf2.setCode("change_metadata_example");
 

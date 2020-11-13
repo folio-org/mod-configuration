@@ -11,9 +11,9 @@ GET , http://localhost:<port>/configurations/entries?query=module==DUMMY , get l
 GET , http://localhost:<port>/configurations/entries?query=scope.institution_id=aaa%20sortBy%20enabled , get list of configuration tables , 200 , 0
 GET , http://localhost:<port>/configurations/audit , get list of audit records , 200 , 8
 GET , http://localhost:<port>/admin/list_locking_queries , list blocking queries , 200 , 0
-GET , http://localhost:<port>/configurations/entries?query=default==true&facets=code&facets=module , get list of configuration tables , 200 , 1
-GET , http://localhost:<port>/configurations/entries?query=default==true , get list of configuration tables , 200 , 1
-GET , http://localhost:<port>/configurations/entries?query=default==true%20sortBy%20code/sort.descending , get list of configuration tables , 200 , 1
+GET , http://localhost:<port>/configurations/entries?query=default==true&facets=code&facets=module , get list of configuration tables , 200 , 4
+GET , http://localhost:<port>/configurations/entries?query=default==true , get list of configuration tables , 200 , 4
+GET , http://localhost:<port>/configurations/entries?query=default==true%20sortBy%20code/sort.descending , get list of configuration tables , 200 , 4
 GET , http://localhost:<port>/configurations/entries?query=module<1%20sortBy%20code/sort.descending&facets=code&facets=description , get list of configuration tables , 200 , 0
 GET , http://localhost:<port>/configurations/entries?query=module>1%20sortBy%20code/sort.descending&facets=module&facets=description , get list of configuration tables , 200 , 4
 GET , http://localhost:<port>/configurations/entries?query=cql.allRecords=1%20NOT%20userId=""%20or%20userId="joeshmoe" , get list of configuration tables , 200 , 4
