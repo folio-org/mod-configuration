@@ -96,9 +96,6 @@ public class RestVerticleTest {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
-        List<Parameter> parameters = new LinkedList<>();
-        parameters.add(new Parameter().withKey("loadSample").withValue("true"));
-        ta.setParameters(parameters);
         tClient.postTenant(ta, res2 -> {
           context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
           async.complete();
@@ -111,11 +108,17 @@ public class RestVerticleTest {
   }
 
   @AfterClass
-  public static void afterAll(TestContext context) {
+  public static void afterAll(TestContext context) 
+    throws InterruptedException, 
+    ExecutionException, 
+    TimeoutException {
+
+    deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
+        TimeUnit.SECONDS);
     Async async = context.async();
     tClient.deleteTenant(reply -> reply.bodyHandler(body -> {
       log.debug(body.toString());
-      vertx.close(context.asyncAssertSuccess(res-> {
+      vertx.close(context.asyncAssertSuccess(res -> {
         PostgresClient.stopEmbeddedPostgres();
         async.complete();
       }));
@@ -130,31 +133,9 @@ public class RestVerticleTest {
     ExecutionException,
     TimeoutException {
 
-    deleteAllConfigurationRecordsExceptLocales()
-      .thenComposeAsync(v -> deleteAllConfigurationAuditRecordsExceptLocales())
+    deleteAllConfigurationRecords()
+      .thenComposeAsync(v -> deleteAllConfigurationAuditRecords())
       .get(5, TimeUnit.SECONDS);
-  }
-
-
-  @Test
-  public void verifySampleDataLoaded(TestContext testContext) {
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries?query=module==SETTINGS")
-  .thenAccept(response -> {
-    try {
-      testContext.assertEquals(200, response.getStatusCode(),
-        String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-          response.getBody()));
-      JsonObject wrappedRecords = new JsonObject(response.getBody());
-      testContext.assertEquals(10, wrappedRecords.getInteger("totalRecords"));
-    }
-    catch(Exception e) {
-      testContext.fail(e);
-    }
-    finally {
-      async.complete();
-    }
-  });
   }
 
   @Test
@@ -225,26 +206,6 @@ public class RestVerticleTest {
       });
   }
 
-  @Test
-  public void verifySampleDataCurrencyCodeDk(TestContext testContext) {
-    final String uuid = "b873eb5a-7a50-488a-9624-d4fbc4daad51";
-    final Async async = testContext.async();
-    okapiHttpClient.get("http://localhost:" + port + "/configurations/entries/" + uuid)
-      .thenAccept(response -> {
-        try {
-          testContext.assertEquals(200, response.getStatusCode(),
-            String.format(UNEXPECTED_STATUS_CODE, response.getStatusCode(),
-              response.getBody()));
-          JsonObject wrappedRecords = new JsonObject(response.getBody());
-          testContext.assertEquals(uuid, wrappedRecords.getString("id"));
-        } catch (Exception e) {
-          testContext.fail(e);
-        } finally {
-          async.complete();
-        }
-      });
-  }
-
   /**
    * Test upgrade (2nd Tenant POST)
    * @param testContext
@@ -267,7 +228,7 @@ public class RestVerticleTest {
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
       tClient.postTenant(ta, res2 -> {
-        testContext.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
+        testContext.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
         testContext.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
         testContext.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
@@ -1395,45 +1356,43 @@ public class RestVerticleTest {
 
   private void createSampleRecords(TestContext context) {
     try {
-      //save config entry
-      String sample = getFile("kv_configuration.sample");
 
-      ConfigurationRecordBuilder baselineFromSample = ConfigurationRecordBuilder.from(sample);
-
+      ConfigurationRecordBuilder baselineFromSample = new ConfigurationRecordBuilder()
+        .withModuleName("DUMMY")
+        .withDescription("dummy module for testing")
+        .withCode("config_data")
+        .withConfigName("dummy_rules")
+        .withValue("")
+        .withDefault();
+      
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         baselineFromSample.create().encodePrettily(), "application/json", 201);
+      
+      String testEncodedData = "this string represents config data for the module, to be posted under a given code";
+      // save config entry with value being a base64 encoded file
+      String bytes = Base64.getEncoder().encodeToString(testEncodedData.getBytes());
 
-      //save config entry with value being a base64 encoded file
-      String bytes = Base64.getEncoder().encodeToString(getFile("Sample.drl").getBytes());
-
-      ConfigurationRecordBuilder encodedValueExample = baselineFromSample
-        .withCode("encoded_example")
-        .withValue(bytes);
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        encodedValueExample.create().encodePrettily(), "application/json", 201);
-
-      ConfigurationRecordBuilder disabledExample = baselineFromSample
-        .withCode("enabled_example")
-        .withValue(bytes)
-        .disabled();
+      ConfigurationRecordBuilder encodedValueExample = baselineFromSample.withCode("encoded_example").withValue(bytes);
 
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        disabledExample.create().encodePrettily(), "application/json", 201);
+          encodedValueExample.create().encodePrettily(), "application/json", 201);
 
-      //This looks to be exactly the same use case
-//      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-//        new ObjectMapper().writeValueAsString(conf), "application/json", 201);
+      ConfigurationRecordBuilder disabledExample = baselineFromSample.withCode("enabled_example").withValue(bytes)
+          .disabled();
 
-      //attempt to delete invalud id (not uuid)
-      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE,
-        "", "application/json", 400);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
+          disabledExample.create().encodePrettily(), "application/json", 201);
 
-      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE,
-        "", "application/json", 404);
+      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE, "",
+          "application/json", 400);
 
-      //check read only
-      Config conf2 =  new ObjectMapper().readValue(sample, Config.class);
+      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE, "",
+          "application/json", 404);
+
+      String baselineAsString = baselineFromSample.create().toString();
+
+      // check read only
+      Config conf2 = new ObjectMapper().readValue(baselineAsString, Config.class);
 
       conf2.setCode("change_metadata_example");
 
@@ -1451,8 +1410,8 @@ public class RestVerticleTest {
       String updatedConf = new ObjectMapper().writeValueAsString(conf2);
 
       log.debug(updatedConf);
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        updatedConf, "application/json", 201);
+      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST, updatedConf,
+        "application/json", 201);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -1592,15 +1551,15 @@ public class RestVerticleTest {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("config_data");
+  private static CompletableFuture<Void> deleteAllConfigurationRecords() {
+    return deleteAllConfigurationRecordsFromTable("config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationAuditRecordsExceptLocales() {
-    return deleteAllConfigurationRecordsFromTableExceptLocales("audit_config_data");
+  private static CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
+    return deleteAllConfigurationRecordsFromTable("audit_config_data");
   }
 
-  private CompletableFuture<Void> deleteAllConfigurationRecordsFromTableExceptLocales(
+  private static CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
     String audit_config_data) {
 
     CompletableFuture<Void> allDeleted = new CompletableFuture<>();
@@ -1608,7 +1567,7 @@ public class RestVerticleTest {
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
     //Do not delete the sample records created from
-    postgresClient.execute(String.format("DELETE FROM %s_%s.%s WHERE jsonb->>'configName' != 'locale'",
+    postgresClient.execute(String.format("DELETE FROM %s_%s.%s",
       TENANT_ID, "mod_configuration", audit_config_data), reply -> {
       if (reply.succeeded()) {
         allDeleted.complete(null);

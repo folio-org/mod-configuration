@@ -14,9 +14,10 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
   private final String description;
   private final Boolean enabled;
   private final UUID userId;
+  private final Boolean isDefault; 
 
   public ConfigurationRecordBuilder() {
-    this(null, null, null, null, null, null, true, null);
+    this(null, null, null, null, null, null, true, null, null);
   }
 
   private ConfigurationRecordBuilder(
@@ -27,6 +28,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     Object value,
     String description,
     Boolean enabled,
+    Boolean isDefault,
     UUID userId) {
 
     this.id = id;
@@ -37,6 +39,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     this.configName = configName;
     this.enabled = enabled;
     this.userId = userId;
+    this.isDefault = isDefault;
   }
 
   public static ConfigurationRecordBuilder from(String example) {
@@ -62,6 +65,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       example.getValue("value"),
       example.getString("description"),
       example.getBoolean("enabled"),
+      example.getBoolean("default"),
       userId);
   }
 
@@ -75,6 +79,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
     put(configurationRecord, "value", this.value);
     put(configurationRecord, "enabled", this.enabled);
     put(configurationRecord, "userId", this.userId);
+    put(configurationRecord, "default", this.isDefault);
 
     return configurationRecord;
   }
@@ -88,6 +93,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -100,6 +106,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -112,6 +119,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -124,6 +132,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -140,6 +149,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       value,
       this.description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -152,6 +162,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       description,
       this.enabled,
+      this.isDefault,
       this.userId);
   }
 
@@ -164,6 +175,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       false,
+      this.isDefault,
       this.userId);
   }
 
@@ -176,7 +188,21 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       this.enabled,
+      this.isDefault,
       userId);
+  }
+
+  public ConfigurationRecordBuilder withDefault() {
+    return new ConfigurationRecordBuilder(
+      this.id,
+      this.moduleName,
+      this.configName,
+      this.code,
+      this.value,
+      this.description,
+      this.enabled,
+      true,
+      this.userId);
   }
 
   public ConfigurationRecordBuilder forNoUser() {
@@ -192,6 +218,7 @@ public class ConfigurationRecordBuilder extends JsonBuilder {
       this.value,
       this.description,
       null,
+      this.isDefault,
       this.userId);
   }
 }
