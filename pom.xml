@@ -21,7 +21,7 @@
     <aspectj.version>1.9.5</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>3.9.4</vertx.version>
+    <vertx.version>4.0.0.CR1</vertx.version>
   </properties>
 
   <repositories>
@@ -41,6 +41,8 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+<!--
+ Must be uncommented when these are available for RMB 32.0.0 -->
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-sql-client</artifactId>
@@ -51,6 +53,7 @@
         <artifactId>vertx-pg-client</artifactId>
         <version>${vertx.version}-FOLIO</version>
       </dependency>
+-->
     </dependencies>
   </dependencyManagement>
 
@@ -58,7 +61,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>31.1.5</version>
+      <version>32.0.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>

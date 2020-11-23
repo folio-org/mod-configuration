@@ -94,26 +94,19 @@ public class TestClient {
     }
   }
 
-
   public void getConfigs(Async async, TestContext context) {
     try {
-      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en", response -> {
-        response.bodyHandler(body -> {
-          System.out.println(body);
-          if(response.statusCode() == 500){
-            context.fail("status " + response.statusCode());
-          }
-          else{
-            async.countDown();
-          }
-          ac.deleteTenant(reply -> {
-            reply.bodyHandler( body2 -> {
-              System.out.println(body2);
+      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
+          context.asyncAssertSuccess(response -> {
+            if (response.statusCode() == 500) {
+              context.fail("status " + response.statusCode());
+            } else {
               async.countDown();
-            });
-          });
-        });
-      });
+            }
+            ac.deleteTenant(context.asyncAssertSuccess(reply -> {
+              async.countDown();
+            }));
+          }));
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     }
@@ -121,21 +114,16 @@ public class TestClient {
 
   public void postConfigs(Async async, TestContext context) throws Exception {
     String content = getFile("kv_configuration.sample");
-    Config conf =  new ObjectMapper().readValue(content, Config.class);
-    cc.postConfigurationsEntries(null, conf, reply -> {
-      reply.bodyHandler( handler -> {
-        try {
-          System.out.println(new String(handler.getBytes(), "UTF8"));
-          async.countDown();
-          getConfigs(async, context);
-        } catch (Exception e) {
-          e.printStackTrace();
-          async.complete();
-        }
-      });
-      System.out.println(reply.statusCode());
-      System.out.println(reply.getHeader("Location"));
-    });
+    Config conf = new ObjectMapper().readValue(content, Config.class);
+    cc.postConfigurationsEntries(null, conf, context.asyncAssertSuccess(reply -> {
+      try {
+        async.countDown();
+        getConfigs(async, context);
+      } catch (Exception e) {
+        e.printStackTrace();
+        async.complete();
+      }
+    }));
   }
 
   private static String getFile(String filename) throws IOException {

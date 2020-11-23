@@ -50,14 +50,4 @@ public class CustomHealthCheckTest {
     }, null);
   }
 
-  @Test
-  public void getAdminModuleStats(TestContext context) throws Exception {
-    CustomHealthCheck customHealthCheck = new CustomHealthCheck();
-    customHealthCheck.getAdminModuleStats(Collections.emptyMap(), result -> {
-      context.assertTrue(result.succeeded());
-      String json = (String) result.result().getEntity();
-      context.assertTrue(json.startsWith("{"));
-      context.assertTrue(json.endsWith("}"));
-    }, null);
-  }
 }

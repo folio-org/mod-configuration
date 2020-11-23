@@ -2,8 +2,9 @@ package org.folio.support;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -11,76 +12,49 @@ public class OkapiHttpClient {
   private final Vertx vertx;
   private final String tenantId;
   private final String userId;
-  private final HttpClient client;
+  private final WebClient client;
 
   public OkapiHttpClient(Vertx vertx, String tenantId, String userId) {
     this.vertx = vertx;
     this.tenantId = tenantId;
     this.userId = userId;
-    this.client = vertx.createHttpClient();
+    WebClientOptions options = new WebClientOptions();
+    options.setConnectTimeout(5000);
+    options.setIdleTimeout(5000);
+    this.client = WebClient.create(vertx);
   }
 
   public CompletableFuture<Response> post(String url, String jsonContent) {
-    HttpClientRequest request = client.postAbs(url);
-    Buffer requestBuffer = Buffer.buffer(jsonContent);
+    HttpRequest<Buffer> request = client.postAbs(url);
 
     final CompletableFuture<Response> postCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(postCompleted::completeExceptionally);
-
-    request.setTimeout(5000);
-
-    request.handler(response ->
-      response.bodyHandler(responseBuffer -> {
-        final Response convertedResponse = new Response(
-          response.statusCode(),
-          responseBuffer.getString(0, responseBuffer.length()));
-
-        System.out.println(String.format("Received response: '%s':'%s'",
-          convertedResponse.getStatusCode(), convertedResponse.getBody()));
-
-        postCompleted.complete(convertedResponse);
-      }));
 
     request.putHeader("X-Okapi-Tenant", tenantId);
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Content-type", "application/json");
     request.putHeader("Accept", "application/json, text/plain");
 
-    request.end(requestBuffer);
-
+    request.sendBuffer(Buffer.buffer(jsonContent))
+        .onFailure(postCompleted::completeExceptionally)
+        .onSuccess(res -> postCompleted.complete(new Response(res.statusCode(), res.bodyAsString())));
     return postCompleted;
   }
 
 
   public CompletableFuture<Response> get(String url, String tenantId) {
-    HttpClientRequest request = client.getAbs(url);
+    HttpRequest<Buffer> request = client.getAbs(url);
 
     final CompletableFuture<Response> getCompleted = new CompletableFuture<>();
 
-    request.exceptionHandler(getCompleted::completeExceptionally);
-
-    request.setTimeout(5000);
-
-    request.handler(response ->
-      response.bodyHandler(responseBuffer -> {
-        final Response convertedResponse = new Response(
-          response.statusCode(),
-          responseBuffer.getString(0, responseBuffer.length()));
-
-        System.out.println(String.format("Received response: '%s':'%s'",
-          convertedResponse.getStatusCode(), convertedResponse.getBody()));
-
-        getCompleted.complete(convertedResponse);
-      }));
-
+    request.putHeader("X-Okapi-User-Id", userId);
+    request.putHeader("Accept", "application/json, text/plain");
     if (tenantId != null) {
       request.putHeader("X-Okapi-Tenant", tenantId);
     }
-    request.putHeader("X-Okapi-User-Id", userId);
-    request.putHeader("Accept", "application/json, text/plain");
 
-    request.end();
+    request.send()
+        .onFailure(getCompleted::completeExceptionally)
+        .onSuccess(res -> getCompleted.complete(new Response(res.statusCode(), res.bodyAsString())));
 
     return getCompleted;
   }
@@ -90,34 +64,18 @@ public class OkapiHttpClient {
   }
 
   public CompletableFuture<Response> put(String url, String jsonContent) {
-    HttpClientRequest request = client.putAbs(url);
-    Buffer requestBuffer = Buffer.buffer(jsonContent);
+    HttpRequest<Buffer> request = client.putAbs(url);
 
     final CompletableFuture<Response> putCompleted = new CompletableFuture<>();
-
-    request.exceptionHandler(putCompleted::completeExceptionally);
-
-    request.setTimeout(5000);
-
-    request.handler(response ->
-      response.bodyHandler(responseBuffer -> {
-        final Response convertedResponse = new Response(
-          response.statusCode(),
-          responseBuffer.getString(0, responseBuffer.length()));
-
-        System.out.println(String.format("Received response: '%s':'%s'",
-          convertedResponse.getStatusCode(), convertedResponse.getBody()));
-
-        putCompleted.complete(convertedResponse);
-      }));
 
     request.putHeader("X-Okapi-Tenant", tenantId);
     request.putHeader("X-Okapi-User-Id", userId);
     request.putHeader("Content-type", "application/json");
     request.putHeader("Accept", "application/json, text/plain");
 
-    request.end(requestBuffer);
-
+    request.sendBuffer(Buffer.buffer(jsonContent))
+        .onFailure(putCompleted::completeExceptionally)
+        .onSuccess(res -> putCompleted.complete(new Response(res.statusCode(), res.bodyAsString())));
     return putCompleted;
   }
 }
