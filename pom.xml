@@ -41,8 +41,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-<!--
- Must be uncommented when these are available for RMB 32.0.0
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-sql-client</artifactId>
@@ -53,7 +51,6 @@
         <artifactId>vertx-pg-client</artifactId>
         <version>${vertx.version}-FOLIO</version>
       </dependency>
--->
     </dependencies>
   </dependencyManagement>
 
