@@ -95,7 +95,7 @@ public class RestVerticleTest {
     tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, null);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
-      new JsonObject().put("http.port", port)).setWorker(true);
+      new JsonObject().put("http.port", port));
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
