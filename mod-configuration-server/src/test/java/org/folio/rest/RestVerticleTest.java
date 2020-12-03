@@ -43,6 +43,7 @@ import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -65,6 +66,7 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
   private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
+  private static final int TENANT_OP_WAITINGTIME = 60000; // in ms
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -103,7 +105,11 @@ public class RestVerticleTest {
         ta.setModuleTo("mod-configuration-1.0.0");
         tClient.postTenant(ta, context.asyncAssertSuccess(res -> {
           context.assertEquals(201, res.statusCode(), "postTenant: " + res.statusMessage());
-          async.complete();
+          String jobId = res.bodyAsJson(TenantJob.class).getId();
+          tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+            context.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
+            async.complete();
+          }));
         }));
       } catch (Exception e) {
         context.fail(e);
@@ -120,9 +126,24 @@ public class RestVerticleTest {
 
     deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
         TimeUnit.SECONDS);
-    tClient.deleteTenant(context.asyncAssertSuccess(body ->
-        vertx.close(context.asyncAssertSuccess(res -> PostgresClient.stopEmbeddedPostgres()))
-    ));
+
+    Async async = context.async();
+    TenantAttributes ta = new TenantAttributes();
+    ta.setModuleFrom("mod-configuration-1.0.0");
+    ta.setPurge(true);
+    try {
+      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+        String jobId = res1.bodyAsJson(TenantJob.class).getId();
+        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
+          async.complete();
+        }));
+      }));
+    } catch (Exception e) {
+      context.fail(e);
+      async.complete();
+    }
     Locale.setDefault(oldLocale);
   }
 
@@ -226,13 +247,18 @@ public class RestVerticleTest {
       List<Parameter> parameters = new LinkedList<>();
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
-      tClient.postTenant(ta, context.asyncAssertSuccess(res2 -> {
-        context.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
-        context.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
-        context.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
-        context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
-        context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
-        async.complete();
+      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+        String jobId = res1.bodyAsJson(TenantJob.class).getId();
+        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
+          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
+          context.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
+          context.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
+          context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
+          context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
+          async.complete();
+        }));
       }));
     } catch (Exception e) {
       context.fail(e);

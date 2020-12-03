@@ -9,6 +9,7 @@ import org.folio.rest.client.ConfigurationsClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
@@ -47,6 +48,7 @@ public class TestClient {
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
+      context.fail(e);
     }
     Async async = context.async();
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
@@ -82,13 +84,20 @@ public class TestClient {
       ac = new TenantClient("localhost", port, "harvard", "harvard");
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
-      ac.postTenant(ta,reply -> {
+      ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+        context.assertEquals(201, res.statusCode());
+        String jobId = res.bodyAsJson(TenantJob.class).getId();
+        ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode());
+          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
           try {
             postConfigs(async, context);
           } catch (Exception e) {
             e.printStackTrace();
+            context.fail(e);
           }
-        });
+        }));
+      }));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -98,17 +107,30 @@ public class TestClient {
     try {
       cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
           context.asyncAssertSuccess(response -> {
-            if (response.statusCode() == 500) {
+            if (response.statusCode() == 500) { // TODO: update this to be more specific (also in stable release)
               context.fail("status " + response.statusCode());
-            } else {
-              async.countDown();
+              return;
             }
-            ac.deleteTenant(context.asyncAssertSuccess(reply -> {
-              async.countDown();
-            }));
+            TenantAttributes ta = new TenantAttributes();
+            ta.setPurge(true);
+            try {
+              ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+                context.assertEquals(201, res.statusCode());
+                String jobId = res.bodyAsJson(TenantJob.class).getId();
+                ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
+                  context.assertEquals(200, res2.statusCode());
+                  context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
+                  async.complete();
+                }));
+              }));
+            } catch (Exception e) {
+              context.fail(e);
+              e.printStackTrace();
+            }
           }));
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
+      context.fail(e);
     }
   }
 
@@ -117,7 +139,6 @@ public class TestClient {
     Config conf = new ObjectMapper().readValue(content, Config.class);
     cc.postConfigurationsEntries(null, conf, context.asyncAssertSuccess(reply -> {
       try {
-        async.countDown();
         getConfigs(async, context);
       } catch (Exception e) {
         e.printStackTrace();
