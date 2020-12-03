@@ -103,11 +103,11 @@ public class RestVerticleTest {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
-        tClient.postTenant(ta, context.asyncAssertSuccess(res -> {
-          context.assertEquals(201, res.statusCode(), "postTenant: " + res.statusMessage());
-          String jobId = res.bodyAsJson(TenantJob.class).getId();
+        tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+          context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+          String jobId = res1.bodyAsJson(TenantJob.class).getId();
           tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-            context.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
+            context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
             async.complete();
           }));
         }));
@@ -136,7 +136,7 @@ public class RestVerticleTest {
         context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
         String jobId = res1.bodyAsJson(TenantJob.class).getId();
         tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
+          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
           async.complete();
         }));
       }));
