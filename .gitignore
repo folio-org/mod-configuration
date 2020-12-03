@@ -10,3 +10,6 @@ nbproject/
 .settings/
 .classpath
 /bin/
+.idea/
+*.iml
+out
