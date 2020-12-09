@@ -1,6 +1,7 @@
 package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -32,12 +33,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -60,6 +66,7 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
 @RunWith(VertxUnitRunner.class)
 public class RestVerticleTest {
   private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
+  private static final int TENANT_OP_WAITINGTIME = 60000; // in ms
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -90,16 +97,20 @@ public class RestVerticleTest {
     tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, null);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
-      new JsonObject().put("http.port", port)).setWorker(true);
+      new JsonObject().put("http.port", port));
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
       try {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
-        tClient.postTenant(ta, res2 -> {
-          context.assertEquals(201, res2.statusCode(), "postTenant: " + res2.statusMessage());
-          async.complete();
-        });
+        tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+          context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+          String jobId = res1.bodyAsJson(TenantJob.class).getId();
+          tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+            context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
+            async.complete();
+          }));
+        }));
       } catch (Exception e) {
         context.fail(e);
         async.complete();
@@ -108,22 +119,31 @@ public class RestVerticleTest {
   }
 
   @AfterClass
-  public static void afterAll(TestContext context) 
-    throws InterruptedException, 
-    ExecutionException, 
-    TimeoutException {
+  public static void afterAll(TestContext context)
+      throws InterruptedException,
+      ExecutionException,
+      TimeoutException {
 
     deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
         TimeUnit.SECONDS);
-    Async async = context.async();
-    tClient.deleteTenant(reply -> reply.bodyHandler(body -> {
-      log.debug(body.toString());
-      vertx.close(context.asyncAssertSuccess(res -> {
-        PostgresClient.stopEmbeddedPostgres();
-        async.complete();
-      }));
-    }));
 
+    Async async = context.async();
+    TenantAttributes ta = new TenantAttributes();
+    ta.setModuleFrom("mod-configuration-1.0.0");
+    ta.setPurge(true);
+    try {
+      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+        String jobId = res1.bodyAsJson(TenantJob.class).getId();
+        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
+          async.complete();
+        }));
+      }));
+    } catch (Exception e) {
+      context.fail(e);
+      async.complete();
+    }
     Locale.setDefault(oldLocale);
   }
 
@@ -208,12 +228,12 @@ public class RestVerticleTest {
 
   /**
    * Test upgrade (2nd Tenant POST)
-   * @param testContext
+   * @param context
    */
   @Test
-  public void upgradeTenant(TestContext testContext) {
+  public void upgradeTenant(TestContext context) {
     try {
-      final Async async = testContext.async();
+      final Async async = context.async();
       String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
 
       assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
@@ -227,16 +247,21 @@ public class RestVerticleTest {
       List<Parameter> parameters = new LinkedList<>();
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
       ta.setParameters(parameters);
-      tClient.postTenant(ta, res2 -> {
-        testContext.assertEquals(200, res2.statusCode(), "postTenant: " + res2.statusMessage());
-        testContext.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
-        testContext.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
-        testContext.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
-        testContext.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
-        async.complete();
-      });
+      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+        String jobId = res1.bodyAsJson(TenantJob.class).getId();
+        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
+        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
+          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
+          context.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
+          context.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
+          context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
+          context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
+          async.complete();
+        }));
+      }));
     } catch (Exception e) {
-      testContext.fail(e);
+      context.fail(e);
     }
   }
 
@@ -1474,65 +1499,57 @@ public class RestVerticleTest {
     int expectedStatusCode) {
 
     Async async = context.async();
-    HttpClient client = vertx.createHttpClient();
-    HttpClientRequest request;
+    WebClient client = WebClient.create(vertx);
+    HttpRequest<Buffer> request;
     Buffer buffer = Buffer.buffer(content);
 
     if (method == HttpMethod.POST) {
       request = client.postAbs(url);
-    }
-    else if (method == HttpMethod.DELETE) {
+    } else if (method == HttpMethod.DELETE) {
       request = client.deleteAbs(url);
-    }
-    else if (method == HttpMethod.GET) {
+    } else if (method == HttpMethod.GET) {
       request = client.getAbs(url);
-    }
-    else {
+    } else {
       request = client.putAbs(url);
     }
-    request.exceptionHandler(error -> {
-      async.complete();
-      context.fail(error.getMessage());
-    }).handler(response -> {
-      response.headers().forEach( header ->
-        log.debug(header.getKey() + " " + header.getValue()));
-
-      int statusCode = response.statusCode();
-      if(method == HttpMethod.POST && statusCode == 201){
-        try {
-          log.debug("Location - " + response.getHeader("Location"));
-          Config conf =  new ObjectMapper().readValue(content, Config.class);
-          conf.setDescription(conf.getDescription());
-          mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
-            new ObjectMapper().writeValueAsString(conf), "application/json", 204);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-      log.debug("Status - " + statusCode + " at " + System.currentTimeMillis() + " for " + url);
-      if(expectedStatusCode == statusCode){
-        context.assertTrue(true);
-      }
-      else if(expectedStatusCode == 0){
-        //currently don't care about return value
-        context.assertTrue(true);
-      }
-      else {
-        context.fail("expected " + expectedStatusCode +" code, but got " + statusCode);
-      }
-      if(!async.isCompleted()){
-        async.complete();
-      }
-      log.debug("complete");
-    });
-    request.setChunked(true);
     request.putHeader("X-Okapi-Request-Id", "999999999999");
     request.putHeader("Authorization", TENANT_ID);
     request.putHeader("x-Okapi-Tenant", TENANT_ID);
     request.putHeader("x-Okapi-User-Id", USER_ID);
     request.putHeader("Accept", "application/json,text/plain");
     request.putHeader("Content-type", contentType);
-    request.end(buffer);
+    request.sendBuffer(buffer)
+        .onFailure(cause -> {
+          async.complete();
+          context.fail(cause.getMessage());
+        })
+        .onSuccess(response -> {
+          int statusCode = response.statusCode();
+          if (method == HttpMethod.POST && statusCode == 201) {
+            try {
+              log.debug("Location - " + response.getHeader("Location"));
+              Config conf = new ObjectMapper().readValue(content, Config.class);
+              conf.setDescription(conf.getDescription());
+              mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
+                  new ObjectMapper().writeValueAsString(conf), "application/json", 204);
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+          if (expectedStatusCode == statusCode) {
+            context.assertTrue(true);
+          } else if (expectedStatusCode == 0) {
+            //currently don't care about return value
+            context.assertTrue(true);
+          } else {
+            context.fail("expected " + expectedStatusCode + " code, but got " + statusCode);
+          }
+          if (!async.isCompleted()) {
+            async.complete();
+          }
+          log.debug("complete");
+
+        });
   }
 
   private ArrayList<String> urlsFromFile() {

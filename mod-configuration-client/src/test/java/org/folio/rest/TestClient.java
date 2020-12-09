@@ -9,6 +9,7 @@ import org.folio.rest.client.ConfigurationsClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.After;
@@ -47,6 +48,7 @@ public class TestClient {
       setupPostgres();
     } catch (Exception e) {
       e.printStackTrace();
+      context.fail(e);
     }
     Async async = context.async();
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
@@ -82,60 +84,67 @@ public class TestClient {
       ac = new TenantClient("localhost", port, "harvard", "harvard");
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
-      ac.postTenant(ta,reply -> {
+      ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+        context.assertEquals(201, res.statusCode());
+        String jobId = res.bodyAsJson(TenantJob.class).getId();
+        ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
+          context.assertEquals(200, res2.statusCode());
+          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
           try {
             postConfigs(async, context);
           } catch (Exception e) {
             e.printStackTrace();
+            context.fail(e);
           }
-        });
+        }));
+      }));
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-
   public void getConfigs(Async async, TestContext context) {
     try {
-      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en", response -> {
-        response.bodyHandler(body -> {
-          System.out.println(body);
-          if(response.statusCode() == 500){
-            context.fail("status " + response.statusCode());
-          }
-          else{
-            async.countDown();
-          }
-          ac.deleteTenant(reply -> {
-            reply.bodyHandler( body2 -> {
-              System.out.println(body2);
-              async.countDown();
-            });
-          });
-        });
-      });
+      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
+          context.asyncAssertSuccess(response -> {
+            if (response.statusCode() == 500) { // TODO: update this to be more specific (also in stable release)
+              context.fail("status " + response.statusCode());
+              return;
+            }
+            TenantAttributes ta = new TenantAttributes();
+            ta.setPurge(true);
+            try {
+              ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+                context.assertEquals(201, res.statusCode());
+                String jobId = res.bodyAsJson(TenantJob.class).getId();
+                ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
+                  context.assertEquals(200, res2.statusCode());
+                  context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
+                  async.complete();
+                }));
+              }));
+            } catch (Exception e) {
+              context.fail(e);
+              e.printStackTrace();
+            }
+          }));
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
+      context.fail(e);
     }
   }
 
   public void postConfigs(Async async, TestContext context) throws Exception {
     String content = getFile("kv_configuration.sample");
-    Config conf =  new ObjectMapper().readValue(content, Config.class);
-    cc.postConfigurationsEntries(null, conf, reply -> {
-      reply.bodyHandler( handler -> {
-        try {
-          System.out.println(new String(handler.getBytes(), "UTF8"));
-          async.countDown();
-          getConfigs(async, context);
-        } catch (Exception e) {
-          e.printStackTrace();
-          async.complete();
-        }
-      });
-      System.out.println(reply.statusCode());
-      System.out.println(reply.getHeader("Location"));
-    });
+    Config conf = new ObjectMapper().readValue(content, Config.class);
+    cc.postConfigurationsEntries(null, conf, context.asyncAssertSuccess(reply -> {
+      try {
+        getConfigs(async, context);
+      } catch (Exception e) {
+        e.printStackTrace();
+        async.complete();
+      }
+    }));
   }
 
   private static String getFile(String filename) throws IOException {

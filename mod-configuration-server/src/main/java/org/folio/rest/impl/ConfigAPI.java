@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -13,8 +14,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.jaxrs.model.Audit;
+import org.folio.rest.jaxrs.model.Audits;
+import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Error;
+import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.resource.Configurations;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
@@ -22,8 +26,6 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
-
-import static io.vertx.core.Future.succeededFuture;
 
 @Path("configurations")
 public class ConfigAPI implements Configurations {
@@ -63,30 +65,30 @@ public class ConfigAPI implements Configurations {
             if (reply.succeeded()){
               String ret = reply.result();
               entity.setId(ret);
-              asyncResultHandler.handle(succeededFuture(
+              asyncResultHandler.handle(Future.succeededFuture(
                 PostConfigurationsEntriesResponse.respond201WithApplicationJson(entity,
                   PostConfigurationsEntriesResponse.headersFor201().withLocation(LOCATION_PREFIX + ret))));
             } else {
               log.error(reply.cause().getMessage(), reply.cause());
               if (isNotUniqueModuleConfigAndCode(reply)) {
-                asyncResultHandler.handle(succeededFuture(
+                asyncResultHandler.handle(Future.succeededFuture(
                   PostConfigurationsEntriesResponse
                     .respond422WithApplicationJson(uniqueModuleConfigAndCodeError(entity))));
               } else {
-                asyncResultHandler.handle(succeededFuture(
+                asyncResultHandler.handle(Future.succeededFuture(
                   PostConfigurationsEntriesResponse.respond500WithTextPlain(
                     messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             }
           } catch (Exception e) {
             log.error(e.getMessage(), e);
-            asyncResultHandler.handle(succeededFuture(PostConfigurationsEntriesResponse
+            asyncResultHandler.handle(Future.succeededFuture(PostConfigurationsEntriesResponse
               .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
           }
         });
     } catch (Exception e) {
       log.error(e.getMessage(), e);
-      asyncResultHandler.handle(succeededFuture(PostConfigurationsEntriesResponse
+      asyncResultHandler.handle(Future.succeededFuture(PostConfigurationsEntriesResponse
         .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
     }
   }
