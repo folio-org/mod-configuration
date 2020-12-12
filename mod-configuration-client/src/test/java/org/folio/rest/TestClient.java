@@ -115,6 +115,10 @@ public class TestClient {
             ta.setPurge(true);
             try {
               ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+                if (res.statusCode() == 204) {
+                  async.complete();
+                  return;
+                }
                 context.assertEquals(201, res.statusCode());
                 String jobId = res.bodyAsJson(TenantJob.class).getId();
                 ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
