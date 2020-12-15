@@ -21,7 +21,7 @@
     <aspectj.version>1.9.6</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.0.0.CR2</vertx.version>
+    <vertx.version>4.0.0</vertx.version>
   </properties>
 
   <repositories>
