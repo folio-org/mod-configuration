@@ -104,6 +104,10 @@ public class RestVerticleTest {
         TenantAttributes ta = new TenantAttributes();
         ta.setModuleTo("mod-configuration-1.0.0");
         tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+          if (res1.statusCode() == 204) {
+            async.complete();
+            return;
+          }
           context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
           String jobId = res1.bodyAsJson(TenantJob.class).getId();
           tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
@@ -133,6 +137,10 @@ public class RestVerticleTest {
     ta.setPurge(true);
     try {
       tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
+        if (res1.statusCode() == 204) {
+          async.complete();
+          return;
+        }
         context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
         String jobId = res1.bodyAsJson(TenantJob.class).getId();
         tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
@@ -1389,10 +1397,10 @@ public class RestVerticleTest {
         .withConfigName("dummy_rules")
         .withValue("")
         .withDefault();
-      
+
       mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
         baselineFromSample.create().encodePrettily(), "application/json", 201);
-      
+
       String testEncodedData = "this string represents config data for the module, to be posted under a given code";
       // save config entry with value being a base64 encoded file
       String bytes = Base64.getEncoder().encodeToString(testEncodedData.getBytes());
