@@ -268,6 +268,7 @@ public class RestVerticleTest {
           async.complete();
         }));
       }));
+      async.await();
     } catch (Exception e) {
       context.fail(e);
     }
