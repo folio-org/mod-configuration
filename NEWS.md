@@ -1,3 +1,8 @@
+## 5.6.0 2021-01-01
+
+ * [MODCONF-68](https://issues.folio.org/browse/MODCONF-68) Update to RMB 32 / Vert.x 4.0.0)
+ * [MODCONF-56](https://issues.folio.org/browse/MODCONF-56) Remove unused default configuration settings (settings/locale)
+
 ## 5.5.0 2020-11-02
 
  * [MODCONF-65](https://issues.folio.org/browse/MODCONF-65) Upgrade to RMB 31.1.5
