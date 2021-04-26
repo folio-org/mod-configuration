@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
+import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.client.ConfigurationsClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
@@ -44,12 +45,7 @@ public class TestClient {
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
 
-    try {
-      setupPostgres();
-    } catch (Exception e) {
-      e.printStackTrace();
-      context.fail(e);
-    }
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());
     Async async = context.async();
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
       port = NetworkUtils.nextFreePort()));
@@ -61,17 +57,10 @@ public class TestClient {
 
   }
 
-  private static void setupPostgres() throws Exception {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(NetworkUtils.nextFreePort());
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
-
   @After
   public void tearDown(TestContext context) {
     Async async = context.async();
     vertx.close(context.asyncAssertSuccess( res-> {
-      PostgresClient.stopEmbeddedPostgres();
       async.complete();
     }));
   }
@@ -104,38 +93,33 @@ public class TestClient {
   }
 
   public void getConfigs(Async async, TestContext context) {
-    try {
-      cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
-          context.asyncAssertSuccess(response -> {
-            if (response.statusCode() == 500) { // TODO: update this to be more specific (also in stable release)
-              context.fail("status " + response.statusCode());
+    cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
+      context.asyncAssertSuccess(response -> {
+        if (response.statusCode() == 500) { // TODO: update this to be more specific (also in stable release)
+          context.fail("status " + response.statusCode());
+          return;
+        }
+        TenantAttributes ta = new TenantAttributes();
+        ta.setPurge(true);
+        try {
+          ac.postTenant(ta, context.asyncAssertSuccess(res -> {
+            if (res.statusCode() == 204) {
+              async.complete();
               return;
             }
-            TenantAttributes ta = new TenantAttributes();
-            ta.setPurge(true);
-            try {
-              ac.postTenant(ta, context.asyncAssertSuccess(res -> {
-                if (res.statusCode() == 204) {
-                  async.complete();
-                  return;
-                }
-                context.assertEquals(201, res.statusCode());
-                String jobId = res.bodyAsJson(TenantJob.class).getId();
-                ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
-                  context.assertEquals(200, res2.statusCode());
-                  context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-                  async.complete();
-                }));
-              }));
-            } catch (Exception e) {
-              context.fail(e);
-              e.printStackTrace();
-            }
+            context.assertEquals(201, res.statusCode());
+            String jobId = res.bodyAsJson(TenantJob.class).getId();
+            ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
+              context.assertEquals(200, res2.statusCode());
+              context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
+              async.complete();
+            }));
           }));
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      context.fail(e);
-    }
+        } catch (Exception e) {
+          context.fail(e);
+          e.printStackTrace();
+        }
+      }));
   }
 
   public void postConfigs(Async async, TestContext context) throws Exception {

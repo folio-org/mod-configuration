@@ -38,6 +38,7 @@ import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import org.apache.commons.io.IOUtils;
+import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -45,7 +46,6 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
@@ -73,7 +73,6 @@ public class RestVerticleTest {
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
 
-  private static Locale oldLocale;
   private static final Vertx vertx = Vertx.vertx();
   private static int port;
   private static TenantClient tClient = null;
@@ -87,8 +86,7 @@ public class RestVerticleTest {
 
   @BeforeClass
   public static void beforeAll(TestContext context) {
-    oldLocale = Locale.getDefault();
-    Locale.setDefault(Locale.US);
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());;
 
     Async async = context.async();
 
@@ -152,7 +150,6 @@ public class RestVerticleTest {
       context.fail(e);
       async.complete();
     }
-    Locale.setDefault(oldLocale);
   }
 
   @Before
@@ -242,7 +239,7 @@ public class RestVerticleTest {
   public void upgradeTenant(TestContext context) {
     try {
       final Async async = context.async();
-      String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+      String moduleId = "mod-configuration-1.0.0";
 
       assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
           .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
