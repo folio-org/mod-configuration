@@ -22,6 +22,7 @@
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
     <vertx.version>4.0.0</vertx.version>
+    <raml-module-builder-version>33.0.0-SNAPSHOT</raml-module-builder-version>
   </properties>
 
   <repositories>
@@ -31,6 +32,14 @@
       <url>https://repository.folio.org/repository/maven-folio</url>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+   <pluginRepository>
+     <id>folio-nexus</id>
+     <name>FOLIO Maven repository</name>
+     <url>https://repository.folio.org/repository/maven-folio</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencyManagement>
     <dependencies>
@@ -58,7 +67,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>32.0.0</version>
+      <version>${raml-module-builder-version}</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
