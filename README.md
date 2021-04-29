@@ -58,7 +58,7 @@ clone / download mod-configuration then `mvn clean install`
 
 Run:
 
-`java -jar mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=8081 embed_postgres=true`
+`java -jar mod-configuration-server/target/mod-configuration-server-fat.jar -Dhttp.port=8081
 
 
 Or run via Dockerfile
