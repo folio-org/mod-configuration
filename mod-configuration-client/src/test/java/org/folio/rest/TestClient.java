@@ -1,8 +1,7 @@
 package org.folio.rest;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.postgres.testing.PostgresTesterContainer;
@@ -36,13 +35,12 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 public class TestClient {
 
   private static Vertx      vertx;
-  private ArrayList<String> urls;
   int                       port;
   ConfigurationsClient cc = null;
   TenantClient ac = null;
 
   @Before
-  public void setUp(TestContext context) throws IOException {
+  public void setUp(TestContext context) {
     vertx = Vertx.vertx();
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
@@ -136,7 +134,7 @@ public class TestClient {
   }
 
   private static String getFile(String filename) throws IOException {
-    return IOUtils.toString(TestClient.class.getClassLoader().getResourceAsStream(filename), "UTF-8");
+    return IOUtils.toString(TestClient.class.getClassLoader().getResourceAsStream(filename), StandardCharsets.UTF_8);
   }
 
 }

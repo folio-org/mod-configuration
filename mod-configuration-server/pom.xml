@@ -33,8 +33,6 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <generateInterfaces>true</generateInterfaces>
-              <generateClients>false</generateClients>
               <ramlDirs>${ramlfiles_path}/configuration</ramlDirs>
             </configuration>
           </execution>

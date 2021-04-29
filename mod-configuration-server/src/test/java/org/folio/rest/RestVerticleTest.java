@@ -1,24 +1,18 @@
 package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -26,7 +20,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -35,9 +28,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
@@ -68,7 +62,7 @@ public class RestVerticleTest {
   private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
   private static final int TENANT_OP_WAITINGTIME = 60000; // in ms
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger log = LogManager.getLogger(RestVerticleTest.class);
 
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
@@ -78,11 +72,6 @@ public class RestVerticleTest {
   private static TenantClient tClient = null;
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
     vertx, TENANT_ID, USER_ID);
-
-  static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
-      "io.vertx.core.logging.Log4jLogDelegateFactory");
-  }
 
   @BeforeClass
   public static void beforeAll(TestContext context) {
@@ -239,7 +228,6 @@ public class RestVerticleTest {
   public void upgradeTenant(TestContext context) {
     try {
       final Async async = context.async();
-      String moduleId = "mod-configuration-1.0.0";
 
       assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
           .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
@@ -247,7 +235,7 @@ public class RestVerticleTest {
           .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
 
       TenantAttributes ta = new TenantAttributes();
-      ta.setModuleTo(moduleId);
+      ta.setModuleTo("mod-configuration-1.0.1");
       ta.setModuleFrom("mod-configuration-1.0.0");
       List<Parameter> parameters = new LinkedList<>();
       parameters.add(new Parameter().withKey("loadSample").withValue("true"));
