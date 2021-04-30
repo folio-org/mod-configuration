@@ -3,6 +3,7 @@ package org.folio.rest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import io.vertx.ext.web.client.WebClient;
 import org.apache.commons.io.IOUtils;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.client.ConfigurationsClient;
@@ -12,8 +13,8 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,10 +39,12 @@ public class TestClient {
   int                       port;
   ConfigurationsClient cc = null;
   TenantClient ac = null;
+  WebClient webClient;
 
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
+    webClient = WebClient.create(vertx);
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
     Async async = context.async();
@@ -51,24 +54,16 @@ public class TestClient {
       async.complete();
     }));
 
-    cc = new ConfigurationsClient("localhost", port, "harvard", "harvard");
+    cc = new ConfigurationsClient("http://localhost:" + port, "harvard", "harvard", webClient);
 
   }
 
-  @After
-  public void tearDown(TestContext context) {
-    Async async = context.async();
-    vertx.close(context.asyncAssertSuccess( res-> {
-      async.complete();
-    }));
-  }
-
-  @org.junit.Test
+  @Test
   public void test1(TestContext context){
 
     try {
       Async async = context.async(2);
-      ac = new TenantClient("localhost", port, "harvard", "harvard");
+      ac = new TenantClient("http://localhost:" + port, "harvard", "harvard", webClient);
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
       ac.postTenant(ta, context.asyncAssertSuccess(res -> {

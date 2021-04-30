@@ -1,6 +1,7 @@
 package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeoutException;
 
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +43,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.rest.tools.utils.VertxUtils;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
@@ -68,6 +71,7 @@ public class RestVerticleTest {
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
 
   private static final Vertx vertx = Vertx.vertx();
+  private static WebClient webClient;
   private static int port;
   private static TenantClient tClient = null;
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
@@ -81,7 +85,9 @@ public class RestVerticleTest {
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, null);
+    webClient = WebClient.create(Vertx.vertx());
+
+    tClient = new TenantClient("http://localhost:" + port, TENANT_ID, null, webClient);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
       new JsonObject().put("http.port", port));
@@ -230,9 +236,9 @@ public class RestVerticleTest {
       final Async async = context.async();
 
       assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
-          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
+        .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
       assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
-          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
+        .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
 
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("mod-configuration-1.0.1");
@@ -246,8 +252,8 @@ public class RestVerticleTest {
         tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
           context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
           context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-          context.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
-          context.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
+          context.assertEquals(0, getByCql("configName==prefixes").getJsonArray("configs").size());
+          context.assertEquals(0, getByCql("configName==suffixes").getJsonArray("configs").size());
           context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
           context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
           async.complete();
