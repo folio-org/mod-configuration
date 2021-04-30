@@ -10,9 +10,9 @@ import org.folio.rest.client.ConfigurationsClient;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.rest.tools.utils.TenantInit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
@@ -46,86 +45,45 @@ public class TestClient {
     vertx = Vertx.vertx();
     webClient = WebClient.create(vertx);
 
-    PostgresClient.setPostgresTester(new PostgresTesterContainer());
-    Async async = context.async();
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port",
-      port = NetworkUtils.nextFreePort()));
-    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      async.complete();
-    }));
+    port = NetworkUtils.nextFreePort();
 
     cc = new ConfigurationsClient("http://localhost:" + port, "harvard", "harvard", webClient);
 
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());
+    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port));
+    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess());
   }
 
   @Test
   public void test1(TestContext context){
-
-    try {
-      Async async = context.async(2);
       ac = new TenantClient("http://localhost:" + port, "harvard", "harvard", webClient);
       TenantAttributes ta = new TenantAttributes();
       ta.setModuleTo("v1");
-      ac.postTenant(ta, context.asyncAssertSuccess(res -> {
-        context.assertEquals(201, res.statusCode());
-        String jobId = res.bodyAsJson(TenantJob.class).getId();
-        ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode());
-          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-          try {
-            postConfigs(async, context);
-          } catch (Exception e) {
-            e.printStackTrace();
-            context.fail(e);
-          }
-        }));
+      TenantInit.exec(ac, ta, 10000).onComplete(context.asyncAssertSuccess(res -> {
+        postConfigs(context);
       }));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
-  public void getConfigs(Async async, TestContext context) {
+  public void getConfigs(TestContext context) {
     cc.getConfigurationsEntries("module==CIRCULATION", 0, 10, new String[]{"enabled:5" , "code"} ,"en",
       context.asyncAssertSuccess(response -> {
         if (response.statusCode() == 500) { // TODO: update this to be more specific (also in stable release)
           context.fail("status " + response.statusCode());
           return;
         }
-        TenantAttributes ta = new TenantAttributes();
-        ta.setPurge(true);
-        try {
-          ac.postTenant(ta, context.asyncAssertSuccess(res -> {
-            if (res.statusCode() == 204) {
-              async.complete();
-              return;
-            }
-            context.assertEquals(201, res.statusCode());
-            String jobId = res.bodyAsJson(TenantJob.class).getId();
-            ac.getTenantByOperationId(jobId, 10000, context.asyncAssertSuccess(res2 -> {
-              context.assertEquals(200, res2.statusCode());
-              context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-              async.complete();
-            }));
-          }));
-        } catch (Exception e) {
-          context.fail(e);
-          e.printStackTrace();
-        }
+        TenantInit.purge(ac,  10000).onComplete(context.asyncAssertSuccess());
       }));
   }
 
-  public void postConfigs(Async async, TestContext context) throws Exception {
-    String content = getFile("kv_configuration.sample");
-    Config conf = new ObjectMapper().readValue(content, Config.class);
-    cc.postConfigurationsEntries(null, conf, context.asyncAssertSuccess(reply -> {
-      try {
-        getConfigs(async, context);
-      } catch (Exception e) {
-        e.printStackTrace();
-        async.complete();
-      }
-    }));
+  public void postConfigs(TestContext context) {
+    try {
+      String content = getFile("kv_configuration.sample");
+      Config conf = new ObjectMapper().readValue(content, Config.class);
+      cc.postConfigurationsEntries(null, conf, context.asyncAssertSuccess(reply -> getConfigs(context)));
+    } catch (Exception e) {
+      e.printStackTrace();
+      context.fail(e);
+    }
   }
 
   private static String getFile(String filename) throws IOException {
