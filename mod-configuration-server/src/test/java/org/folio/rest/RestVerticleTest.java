@@ -1,7 +1,6 @@
 package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,10 +38,9 @@ import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.folio.rest.tools.utils.VertxUtils;
+import org.folio.rest.tools.utils.TenantInit;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
@@ -51,7 +48,10 @@ import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 
 
@@ -77,11 +77,17 @@ public class RestVerticleTest {
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
     vertx, TENANT_ID, USER_ID);
 
+  @Rule
+  public TestWatcher watchman = new TestWatcher() {
+    @Override
+    public void starting(final Description description) {
+      log.info("Starting {}", description.getMethodName() );
+    }
+  };
+
   @BeforeClass
   public static void beforeAll(TestContext context) {
     PostgresClient.setPostgresTester(new PostgresTesterContainer());;
-
-    Async async = context.async();
 
     port = NetworkUtils.nextFreePort();
 
@@ -93,25 +99,9 @@ public class RestVerticleTest {
       new JsonObject().put("http.port", port));
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      try {
-        TenantAttributes ta = new TenantAttributes();
-        ta.setModuleTo("mod-configuration-1.0.0");
-        tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-          if (res1.statusCode() == 204) {
-            async.complete();
-            return;
-          }
-          context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-          String jobId = res1.bodyAsJson(TenantJob.class).getId();
-          tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-            context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-            async.complete();
-          }));
-        }));
-      } catch (Exception e) {
-        context.fail(e);
-        async.complete();
-      }
+      TenantAttributes ta = new TenantAttributes();
+      ta.setModuleTo("mod-configuration-1.0.0");
+      TenantInit.exec(tClient, ta, 60000).onComplete(context.asyncAssertSuccess());
     }));
   }
 
@@ -124,27 +114,7 @@ public class RestVerticleTest {
     deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
         TimeUnit.SECONDS);
 
-    Async async = context.async();
-    TenantAttributes ta = new TenantAttributes();
-    ta.setModuleFrom("mod-configuration-1.0.0");
-    ta.setPurge(true);
-    try {
-      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-        if (res1.statusCode() == 204) {
-          async.complete();
-          return;
-        }
-        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-        String jobId = res1.bodyAsJson(TenantJob.class).getId();
-        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-          async.complete();
-        }));
-      }));
-    } catch (Exception e) {
-      context.fail(e);
-      async.complete();
-    }
+    TenantInit.purge(tClient, 60000).onComplete(context.asyncAssertSuccess());
   }
 
   @Before
@@ -232,37 +202,24 @@ public class RestVerticleTest {
    */
   @Test
   public void upgradeTenant(TestContext context) {
-    try {
-      final Async async = context.async();
+    assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
+      .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
+    assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
+      .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
 
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
-        .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
-        .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
+    TenantAttributes ta = new TenantAttributes();
+    ta.setModuleTo("mod-configuration-1.0.1");
+    ta.setModuleFrom("mod-configuration-1.0.0");
+    List<Parameter> parameters = new LinkedList<>();
+    parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+    ta.setParameters(parameters);
 
-      TenantAttributes ta = new TenantAttributes();
-      ta.setModuleTo("mod-configuration-1.0.1");
-      ta.setModuleFrom("mod-configuration-1.0.0");
-      List<Parameter> parameters = new LinkedList<>();
-      parameters.add(new Parameter().withKey("loadSample").withValue("true"));
-      ta.setParameters(parameters);
-      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-        String jobId = res1.bodyAsJson(TenantJob.class).getId();
-        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-          context.assertEquals(0, getByCql("configName==prefixes").getJsonArray("configs").size());
-          context.assertEquals(0, getByCql("configName==suffixes").getJsonArray("configs").size());
-          context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
-          context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
-          async.complete();
-        }));
-      }));
-      async.await();
-    } catch (Exception e) {
-      context.fail(e);
-    }
+    TenantInit.exec(tClient, ta, 6000).onComplete(context.asyncAssertSuccess(res2 -> {
+      context.assertEquals(0, getByCql("configName==prefixes").getJsonArray("configs").size());
+      context.assertEquals(0, getByCql("configName==suffixes").getJsonArray("configs").size());
+      context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
+      context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
+    }));
   }
 
   @Test
