@@ -21,7 +21,8 @@
     <aspectj.version>1.9.6</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.0.0</vertx.version>
+    <vertx.version>4.0.2</vertx.version>
+    <raml-module-builder-version>33.0.0-SNAPSHOT</raml-module-builder-version>
   </properties>
 
   <repositories>
@@ -31,6 +32,14 @@
       <url>https://repository.folio.org/repository/maven-folio</url>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+   <pluginRepository>
+     <id>folio-nexus</id>
+     <name>FOLIO Maven repository</name>
+     <url>https://repository.folio.org/repository/maven-folio</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencyManagement>
     <dependencies>
@@ -58,7 +67,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>32.0.0</version>
+      <version>${raml-module-builder-version}</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-collections</artifactId>
@@ -77,6 +86,18 @@
           <groupId>xpp3</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.10.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>postgres-testing</artifactId>
+      <version>${raml-module-builder-version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

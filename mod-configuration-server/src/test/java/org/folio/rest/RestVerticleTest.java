@@ -1,24 +1,18 @@
 package org.folio.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -26,7 +20,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -35,18 +28,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.rest.tools.utils.TenantInit;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
@@ -54,7 +48,10 @@ import org.folio.support.builders.ConfigurationRecordBuilder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 
 
@@ -68,57 +65,43 @@ public class RestVerticleTest {
   private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
   private static final int TENANT_OP_WAITINGTIME = 60000; // in ms
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger log = LogManager.getLogger(RestVerticleTest.class);
 
   private static final String TENANT_ID = "harvard";
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
 
-  private static Locale oldLocale;
   private static final Vertx vertx = Vertx.vertx();
+  private static WebClient webClient;
   private static int port;
   private static TenantClient tClient = null;
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
     vertx, TENANT_ID, USER_ID);
 
-  static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME,
-      "io.vertx.core.logging.Log4jLogDelegateFactory");
-  }
+  @Rule
+  public TestWatcher watchman = new TestWatcher() {
+    @Override
+    public void starting(final Description description) {
+      log.info("Starting {}", description.getMethodName() );
+    }
+  };
 
   @BeforeClass
   public static void beforeAll(TestContext context) {
-    oldLocale = Locale.getDefault();
-    Locale.setDefault(Locale.US);
-
-    Async async = context.async();
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());;
 
     port = NetworkUtils.nextFreePort();
 
-    tClient = new TenantClient("http://localhost:"+Integer.toString(port), TENANT_ID, null);
+    webClient = WebClient.create(Vertx.vertx());
+
+    tClient = new TenantClient("http://localhost:" + port, TENANT_ID, null, webClient);
 
     DeploymentOptions options = new DeploymentOptions().setConfig(
       new JsonObject().put("http.port", port));
 
     vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      try {
-        TenantAttributes ta = new TenantAttributes();
-        ta.setModuleTo("mod-configuration-1.0.0");
-        tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-          if (res1.statusCode() == 204) {
-            async.complete();
-            return;
-          }
-          context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-          String jobId = res1.bodyAsJson(TenantJob.class).getId();
-          tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-            context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-            async.complete();
-          }));
-        }));
-      } catch (Exception e) {
-        context.fail(e);
-        async.complete();
-      }
+      TenantAttributes ta = new TenantAttributes();
+      ta.setModuleTo("mod-configuration-1.0.0");
+      TenantInit.exec(tClient, ta, 60000).onComplete(context.asyncAssertSuccess());
     }));
   }
 
@@ -131,28 +114,7 @@ public class RestVerticleTest {
     deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
         TimeUnit.SECONDS);
 
-    Async async = context.async();
-    TenantAttributes ta = new TenantAttributes();
-    ta.setModuleFrom("mod-configuration-1.0.0");
-    ta.setPurge(true);
-    try {
-      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-        if (res1.statusCode() == 204) {
-          async.complete();
-          return;
-        }
-        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-        String jobId = res1.bodyAsJson(TenantJob.class).getId();
-        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-          async.complete();
-        }));
-      }));
-    } catch (Exception e) {
-      context.fail(e);
-      async.complete();
-    }
-    Locale.setDefault(oldLocale);
+    TenantInit.purge(tClient, 60000).onComplete(context.asyncAssertSuccess());
   }
 
   @Before
@@ -240,38 +202,24 @@ public class RestVerticleTest {
    */
   @Test
   public void upgradeTenant(TestContext context) {
-    try {
-      final Async async = context.async();
-      String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+    assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
+      .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
+    assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
+      .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
 
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "prefixes")
-          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("foo").add("bar")).encode()));
-      assertCreateConfigRecord(new JsonObject().put("module", "ORDERS").put("configName", "suffixes")
-          .put("value", new JsonObject().put("selectedItems", new JsonArray().add("baz").add("bee").add("beer")).encode()));
+    TenantAttributes ta = new TenantAttributes();
+    ta.setModuleTo("mod-configuration-1.0.1");
+    ta.setModuleFrom("mod-configuration-1.0.0");
+    List<Parameter> parameters = new LinkedList<>();
+    parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+    ta.setParameters(parameters);
 
-      TenantAttributes ta = new TenantAttributes();
-      ta.setModuleTo(moduleId);
-      ta.setModuleFrom("mod-configuration-1.0.0");
-      List<Parameter> parameters = new LinkedList<>();
-      parameters.add(new Parameter().withKey("loadSample").withValue("true"));
-      ta.setParameters(parameters);
-      tClient.postTenant(ta, context.asyncAssertSuccess(res1 -> {
-        String jobId = res1.bodyAsJson(TenantJob.class).getId();
-        context.assertEquals(201, res1.statusCode(), "postTenant: " + res1.statusMessage());
-        tClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, context.asyncAssertSuccess(res2 -> {
-          context.assertEquals(200, res2.statusCode(), "getTenant: " + res2.statusMessage());
-          context.assertTrue(res2.bodyAsJson(TenantJob.class).getComplete());
-          context.assertEquals(0, getByCql("configName==prefixes"     ).getJsonArray("configs").size());
-          context.assertEquals(0, getByCql("configName==suffixes"     ).getJsonArray("configs").size());
-          context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
-          context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
-          async.complete();
-        }));
-      }));
-      async.await();
-    } catch (Exception e) {
-      context.fail(e);
-    }
+    TenantInit.exec(tClient, ta, 6000).onComplete(context.asyncAssertSuccess(res2 -> {
+      context.assertEquals(0, getByCql("configName==prefixes").getJsonArray("configs").size());
+      context.assertEquals(0, getByCql("configName==suffixes").getJsonArray("configs").size());
+      context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
+      context.assertEquals(3, getByCql("configName==orders.suffix").getJsonArray("configs").size());
+    }));
   }
 
   @Test

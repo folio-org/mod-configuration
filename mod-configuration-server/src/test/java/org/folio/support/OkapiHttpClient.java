@@ -9,13 +9,11 @@ import io.vertx.ext.web.client.WebClientOptions;
 import java.util.concurrent.CompletableFuture;
 
 public class OkapiHttpClient {
-  private final Vertx vertx;
   private final String tenantId;
   private final String userId;
   private final WebClient client;
 
   public OkapiHttpClient(Vertx vertx, String tenantId, String userId) {
-    this.vertx = vertx;
     this.tenantId = tenantId;
     this.userId = userId;
     WebClientOptions options = new WebClientOptions();

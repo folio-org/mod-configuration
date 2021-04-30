@@ -4,14 +4,15 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Audit;
@@ -33,7 +34,7 @@ public class ConfigAPI implements Configurations {
   public static final String        CONFIG_TABLE      = "config_data";
   public static final String        AUDIT_TABLE       = "audit_config_data";
 
-  private static final Logger       log               = LoggerFactory.getLogger(ConfigAPI.class);
+  private static final Logger log               = LogManager.getLogger(ConfigAPI.class);
 
   private static final String       LOCATION_PREFIX   = "/configurations/entries/";
 
