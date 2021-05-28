@@ -1,3 +1,11 @@
+## 5.7.0 2021-05-27
+
+No functional changes since 5.6.0.
+
+ * Upgrade to Vert.x 4.1.0.CR1
+ * [MODCONF-82](https://issues.folio.org/browse/MODCONF-82) Upgrade to RMB 33
+ * [MODCONF-69](https://issues.folio.org/browse/MODCONF-69) Add personal data disclosure form
+
 ## 5.6.0 2021-01-01
 
  * [MODCONF-68](https://issues.folio.org/browse/MODCONF-68) Update to RMB 32 / Vert.x 4.0.0)
@@ -81,5 +89,5 @@ w* [MODCONF-16](https://issues.folio.org/browse/MODCONF-16) Move to RMB 19 - gen
 
 ## 1.0.0
 
- * FOLIO-649 User-specific preferences in mod-config
+ * [FOLIO-649](https://issues.folio.org/browse/FOLIO-649) User-specific preferences in mod-config
  * Align with camelCase naming conventions
