@@ -1,53 +1,36 @@
 package org.folio.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import java.io.IOException;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.WebClient;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.postgres.testing.PostgresTesterContainer;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.jaxrs.model.Config;
-import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.rest.tools.utils.TenantInit;
 import org.folio.support.ConfigurationRecordExamples;
 import org.folio.support.OkapiHttpClient;
 import org.folio.support.Response;
 import org.folio.support.builders.ConfigurationRecordBuilder;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestWatcher;
@@ -61,9 +44,8 @@ import static org.folio.support.CompletableFutureExtensions.allOf;
  * This is our JUnit test for our verticle. The test uses vertx-unit, so we declare a custom runner.
  */
 @RunWith(VertxUnitRunner.class)
-public class RestVerticleTest {
+public class RestVerticleTest extends TestBase {
   private static final String UNEXPECTED_STATUS_CODE = "Unexpected status code: '%s': '%s'";
-  private static final int TENANT_OP_WAITINGTIME = 60000; // in ms
 
   private static final Logger log = LogManager.getLogger(RestVerticleTest.class);
 
@@ -71,11 +53,11 @@ public class RestVerticleTest {
   private static final String USER_ID = "79ff2a8b-d9c3-5b39-ad4a-0a84025ab085";
 
   private static final Vertx vertx = Vertx.vertx();
-  private static WebClient webClient;
-  private static int port;
-  private static TenantClient tClient = null;
   private static final OkapiHttpClient okapiHttpClient = new OkapiHttpClient(
     vertx, TENANT_ID, USER_ID);
+
+  //@Rule
+  //public Timeout timeout = Timeout.seconds(10);
 
   @Rule
   public TestWatcher watchman = new TestWatcher() {
@@ -85,47 +67,17 @@ public class RestVerticleTest {
     }
   };
 
-  @BeforeClass
-  public static void beforeAll(TestContext context) {
-    PostgresClient.setPostgresTester(new PostgresTesterContainer());;
-
-    port = NetworkUtils.nextFreePort();
-
-    webClient = WebClient.create(Vertx.vertx());
-
-    tClient = new TenantClient("http://localhost:" + port, TENANT_ID, null, webClient);
-
-    DeploymentOptions options = new DeploymentOptions().setConfig(
-      new JsonObject().put("http.port", port));
-
-    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess(id -> {
-      TenantAttributes ta = new TenantAttributes();
-      ta.setModuleTo("mod-configuration-1.0.0");
-      TenantInit.exec(tClient, ta, 60000).onComplete(context.asyncAssertSuccess());
-    }));
-  }
-
-  @AfterClass
-  public static void afterAll(TestContext context)
-      throws InterruptedException,
-      ExecutionException,
-      TimeoutException {
-
-    deleteAllConfigurationRecords().thenComposeAsync(v -> deleteAllConfigurationAuditRecords()).get(5,
-        TimeUnit.SECONDS);
-
-    TenantInit.purge(tClient, 60000).onComplete(context.asyncAssertSuccess());
-  }
-
   @Before
-  public void beforeEach()
+  public void beforeEach(TestContext context)
     throws InterruptedException,
     ExecutionException,
     TimeoutException {
 
+    vertx.exceptionHandler(context.exceptionHandler());  // fail test if exception is not caught
+
     deleteAllConfigurationRecords()
-      .thenComposeAsync(v -> deleteAllConfigurationAuditRecords())
-      .get(5, TimeUnit.SECONDS);
+    .compose(x ->  deleteAllConfigurationAuditRecords())
+    .onComplete(context.asyncAssertSuccess());
   }
 
   @Test
@@ -214,7 +166,7 @@ public class RestVerticleTest {
     parameters.add(new Parameter().withKey("loadSample").withValue("true"));
     ta.setParameters(parameters);
 
-    TenantInit.exec(tClient, ta, 6000).onComplete(context.asyncAssertSuccess(res2 -> {
+    TenantInit.exec(tenantClient, ta, 6000).onComplete(context.asyncAssertSuccess(res2 -> {
       context.assertEquals(0, getByCql("configName==prefixes").getJsonArray("configs").size());
       context.assertEquals(0, getByCql("configName==suffixes").getJsonArray("configs").size());
       context.assertEquals(2, getByCql("configName==orders.prefix").getJsonArray("configs").size());
@@ -1030,7 +982,7 @@ public class RestVerticleTest {
     final CompletableFuture<Response> firstRecordCreated = createConfigRecord(firstConfigRecord);
 
     //Make sure the first record is created before the second
-    final Response firstRecordResponse = firstRecordCreated.get(5, TimeUnit.SECONDS);
+    firstRecordCreated.get(5, TimeUnit.SECONDS);
 
     JsonObject recordToBeUpdated = ConfigurationRecordExamples
       .audioAlertsExample()
@@ -1302,13 +1254,6 @@ public class RestVerticleTest {
   }
 
   @Test
-  public void canChangeLogLevel(TestContext context) {
-    mutateURLs("http://localhost:" + port +
-        "/admin/loglevel?level=FINE&java_package=org.folio.rest.persist",
-      context, HttpMethod.PUT,"",  "application/json", 200);
-  }
-
-  @Test
   public void canUsePersistentCaching(TestContext context) {
     final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
 
@@ -1322,235 +1267,18 @@ public class RestVerticleTest {
       ));
   }
 
-  /**
-   * This method, iterates through the urls.csv and runs each url - currently only checking the returned status codes
-   */
-  @Test
-  public void checkURLs(TestContext context) {
-    createSampleRecords(context);
-    Async async = context.async();
-    vertx.setTimer(1000, res -> {
-      async.complete();
-    });
-    async.await();
-    runGETURLoop(context, urlsFromFile());
-  }
 
-  private void createSampleRecords(TestContext context) {
-    try {
-
-      ConfigurationRecordBuilder baselineFromSample = new ConfigurationRecordBuilder()
-        .withModuleName("DUMMY")
-        .withDescription("dummy module for testing")
-        .withCode("config_data")
-        .withConfigName("dummy_rules")
-        .withValue("")
-        .withDefault();
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        baselineFromSample.create().encodePrettily(), "application/json", 201);
-
-      String testEncodedData = "this string represents config data for the module, to be posted under a given code";
-      // save config entry with value being a base64 encoded file
-      String bytes = Base64.getEncoder().encodeToString(testEncodedData.getBytes());
-
-      ConfigurationRecordBuilder encodedValueExample = baselineFromSample.withCode("encoded_example").withValue(bytes);
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-          encodedValueExample.create().encodePrettily(), "application/json", 201);
-
-      ConfigurationRecordBuilder disabledExample = baselineFromSample.withCode("enabled_example").withValue(bytes)
-          .disabled();
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-          disabledExample.create().encodePrettily(), "application/json", 201);
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries/123456", context, HttpMethod.DELETE, "",
-          "application/json", 400);
-
-      mutateURLs("http://localhost:" + port + "/admin/kill_query?pid=11", context, HttpMethod.DELETE, "",
-          "application/json", 404);
-
-      String baselineAsString = baselineFromSample.create().toString();
-
-      // check read only
-      Config conf2 = new ObjectMapper().readValue(baselineAsString, Config.class);
-
-      conf2.setCode("change_metadata_example");
-
-      Metadata md = new Metadata();
-      md.setCreatedByUserId("123456");
-      conf2.setMetadata(md);
-
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST,
-        new ObjectMapper().writeValueAsString(conf2), "application/json", 422);
-
-      md.setCreatedByUserId("2b94c631-fca9-a892-c730-03ee529ffe2a");
-      md.setCreatedDate(new Date());
-      md.setUpdatedDate(new Date());
-
-      String updatedConf = new ObjectMapper().writeValueAsString(conf2);
-
-      log.debug(updatedConf);
-      mutateURLs("http://localhost:" + port + "/configurations/entries", context, HttpMethod.POST, updatedConf,
-        "application/json", 201);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      context.assertTrue(false, e.getMessage());
-    }
-  }
-
-  private void runGETURLoop(TestContext context, ArrayList<String> urlsToCheck){
-    try {
-      urlsToCheck.forEach(line -> {
-        Async async = context.async();
-
-        String[] urlInfo = line.split(" , ");
-        final String url = urlInfo[1].trim().replaceFirst("<port>", port + "");
-        final Integer expectedStatusCode = Integer.parseInt(urlInfo[3]);
-
-        final Integer expectedRecordCount = urlInfo.length == 5
-          ? Integer.parseInt(urlInfo[4])
-          : null;
-
-        final CompletableFuture<Response> responded = okapiHttpClient.get(url);
-
-        try {
-          Response response = responded.get(5, TimeUnit.SECONDS);
-
-          context.assertEquals(expectedStatusCode, response.getStatusCode(),
-            String.format("Unexpected status code from '%s': '%s'", url, response.getBody()));
-
-          if(expectedRecordCount != null && expectedRecordCount > 0) {
-            try {
-              JsonObject wrappedRecords = new JsonObject(response.getBody());
-
-              context.assertEquals(expectedRecordCount, wrappedRecords.getInteger("totalRecords"),
-                String.format("Unexpected record count for '%s': '%s'", url, response.getBody()));
-            }
-            catch(DecodeException e) {
-              context.fail(String.format("Could not decide '%s' - %s", response.getBody(), e.getMessage()));
-            }
-          }
-        }
-        catch(Exception e) {
-          context.fail(e);
-        }
-        finally {
-          async.complete();
-        }
-        });
-    } catch (Throwable e) {
-      e.printStackTrace();
-      context.fail(e);
-    }
-  }
-
-  private void mutateURLs(
-    String url,
-    TestContext context,
-    HttpMethod method,
-    String content,
-    String contentType,
-    int expectedStatusCode) {
-
-    Async async = context.async();
-    WebClient client = WebClient.create(vertx);
-    HttpRequest<Buffer> request;
-    Buffer buffer = Buffer.buffer(content);
-
-    if (method == HttpMethod.POST) {
-      request = client.postAbs(url);
-    } else if (method == HttpMethod.DELETE) {
-      request = client.deleteAbs(url);
-    } else if (method == HttpMethod.GET) {
-      request = client.getAbs(url);
-    } else {
-      request = client.putAbs(url);
-    }
-    request.putHeader("X-Okapi-Request-Id", "999999999999");
-    request.putHeader("Authorization", TENANT_ID);
-    request.putHeader("x-Okapi-Tenant", TENANT_ID);
-    request.putHeader("x-Okapi-User-Id", USER_ID);
-    request.putHeader("Accept", "application/json,text/plain");
-    request.putHeader("Content-type", contentType);
-    request.sendBuffer(buffer)
-        .onFailure(cause -> {
-          async.complete();
-          context.fail(cause.getMessage());
-        })
-        .onSuccess(response -> {
-          int statusCode = response.statusCode();
-          if (method == HttpMethod.POST && statusCode == 201) {
-            try {
-              log.debug("Location - " + response.getHeader("Location"));
-              Config conf = new ObjectMapper().readValue(content, Config.class);
-              conf.setDescription(conf.getDescription());
-              mutateURLs("http://localhost:" + port + response.getHeader("Location"), context, HttpMethod.PUT,
-                  new ObjectMapper().writeValueAsString(conf), "application/json", 204);
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-          }
-          if (expectedStatusCode == statusCode) {
-            context.assertTrue(true);
-          } else if (expectedStatusCode == 0) {
-            //currently don't care about return value
-            context.assertTrue(true);
-          } else {
-            context.fail("expected " + expectedStatusCode + " code, but got " + statusCode);
-          }
-          if (!async.isCompleted()) {
-            async.complete();
-          }
-          log.debug("complete");
-
-        });
-  }
-
-  private ArrayList<String> urlsFromFile() {
-    ArrayList<String> ret = new ArrayList<>();
-
-    try (Scanner scanner = new Scanner(getClass().getResourceAsStream("/urls.csv"))) {
-    while(scanner.hasNext()) {
-        ret.add(scanner.nextLine());
-      }
-    }
-
-    return ret;
-  }
-
-  private String getFile(String filename) throws IOException {
-    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(filename), "UTF-8");
-  }
-
-  private static CompletableFuture<Void> deleteAllConfigurationRecords() {
+  private static Future<RowSet<Row>> deleteAllConfigurationRecords() {
     return deleteAllConfigurationRecordsFromTable("config_data");
   }
 
-  private static CompletableFuture<Void> deleteAllConfigurationAuditRecords() {
+  private static Future<RowSet<Row>> deleteAllConfigurationAuditRecords() {
     return deleteAllConfigurationRecordsFromTable("audit_config_data");
   }
 
-  private static CompletableFuture<Void> deleteAllConfigurationRecordsFromTable(
-    String audit_config_data) {
-
-    CompletableFuture<Void> allDeleted = new CompletableFuture<>();
-
-    final PostgresClient postgresClient = PostgresClient.getInstance(vertx, TENANT_ID);
-
-    //Do not delete the sample records created from
-    postgresClient.execute(String.format("DELETE FROM %s_%s.%s",
-      TENANT_ID, "mod_configuration", audit_config_data), reply -> {
-      if (reply.succeeded()) {
-        allDeleted.complete(null);
-      } else {
-        allDeleted.completeExceptionally(reply.cause());
-      }
-    });
-
-    return allDeleted;
+  private static Future<RowSet<Row>> deleteAllConfigurationRecordsFromTable(String table) {
+    return PostgresClient.getInstance(vertx, TENANT_ID)
+        .execute("DELETE FROM " + SCHEMA + "." + table);
   }
 
   private void checkAllRecordsCreated(
