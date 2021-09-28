@@ -1,6 +1,6 @@
 ## 5.7.1 2021-09-28
 
- * [MODCONF-82](https://issues.folio.org/browse/MODCONF-92) Update RMB to 33.1.1 and Vert.x to 4.1.4
+ * [MODCONF-92](https://issues.folio.org/browse/MODCONF-92) Update RMB to 33.1.1 and Vert.x to 4.1.4
 
 ## 5.7.0 2021-05-27
 
