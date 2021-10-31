@@ -174,6 +174,29 @@ public class RestVerticleTest extends TestBase {
     }));
   }
 
+  /**
+   * Test config data other settings namings migration
+   * @param context
+   */
+  @Test
+  public void shouldMigrateConfigDataOtherSettingsNamings(TestContext context) {
+    assertCreateConfigRecord(new JsonObject().put("module", "CHECKOUT").put("configName", "other_settings")
+      .put("value", new JsonObject().put("prefPatronIdentifier", "BARCODE,EXTERNAL,FOLIO,USER").encode()));
+
+    TenantAttributes ta = new TenantAttributes();
+    ta.setModuleTo("mod-configuration-5.9.0");
+    ta.setModuleFrom("mod-configuration-5.8.0");
+    List<Parameter> parameters = new LinkedList<>();
+    parameters.add(new Parameter().withKey("loadSample").withValue("true"));
+    ta.setParameters(parameters);
+
+    TenantInit.exec(tenantClient, ta, 6000).onComplete(context.asyncAssertSuccess(res2 ->
+      context.assertTrue(getByCql("configName==other_settings").getJsonArray("configs")
+        .getJsonObject(0).getString("value").contains("barcode,externalSystemId,id,username"))
+    ));
+  }
+
+
   @Test
   public void canCreateTenantConfigurationRecord(TestContext testContext) {
     final Async async = testContext.async();
