@@ -8,7 +8,7 @@
     {
       "run": "after",
       "snippetPath": "migration/migrateConfigDataOtherSettingsNamings.sql",
-      "fromModuleVersion": "mod-configuration-5.9.0"
+      "fromModuleVersion": "mod-configuration-5.8.1"
     }
   ],
   "tables": [
