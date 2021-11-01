@@ -184,8 +184,8 @@ public class RestVerticleTest extends TestBase {
       .put("value", new JsonObject().put("prefPatronIdentifier", "BARCODE,EXTERNAL,FOLIO,USER").encode()));
 
     TenantAttributes ta = new TenantAttributes();
-    ta.setModuleTo("mod-configuration-5.8.1");
-    ta.setModuleFrom("mod-configuration-5.8.0");
+    ta.setModuleTo("mod-configuration-5.8.0");
+    ta.setModuleFrom("mod-configuration-5.7.1");
     List<Parameter> parameters = new LinkedList<>();
     parameters.add(new Parameter().withKey("loadSample").withValue("true"));
     ta.setParameters(parameters);
