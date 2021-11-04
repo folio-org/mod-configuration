@@ -1,3 +1,7 @@
+## 5.7.2 2021-11-4
+
+* [MODCONF-96](https://issues.folio.org/browse/MODCONF-96) Add other settings naming migration script
+
 ## 5.7.1 2021-09-28
 
  * [MODCONF-92](https://issues.folio.org/browse/MODCONF-92) Update RMB to 33.1.1 and Vert.x to 4.1.4
