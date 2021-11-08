@@ -4,6 +4,11 @@
       "run": "after",
       "snippetPath": "migration/config_data.sql",
       "fromModuleVersion": "mod-configuration-5.3.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration/migrateConfigDataOtherSettingsNamings.sql",
+      "fromModuleVersion": "mod-configuration-5.8.0"
     }
   ],
   "tables": [
