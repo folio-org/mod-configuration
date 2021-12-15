@@ -1,6 +1,11 @@
+## 5.7.3 2021-12-15
+
+ * [MODCONF-102](https://issues.folio.org/browse/MODCONF-102) Upgrade to RMB 33.2.2 Log4j 2.16.0
+ * [MODCONF-98](https://issues.folio.org/browse/MODCONF-98) RMB 33.2.1, Vert.x 4.2.1, Log4j 2.15.0 (CVE-2021-44228)
+
 ## 5.7.2 2021-11-08
 
-* [MODCONF-96](https://issues.folio.org/browse/MODCONF-96) Add other settings naming migration script
+ * [MODCONF-96](https://issues.folio.org/browse/MODCONF-96) Add other settings naming migration script
 
 ## 5.7.1 2021-09-28
 
