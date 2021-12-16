@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-configuration</artifactId>
-  <version>5.7.3-SNAPSHOT</version>
+  <version>5.7.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>mod-configuration-server</module>
@@ -18,11 +18,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <aspectj.version>1.9.6</aspectj.version>
+    <aspectj.version>1.9.7</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.1.4</vertx.version>
-    <raml-module-builder-version>33.1.1</raml-module-builder-version>
+    <vertx.version>4.2.1</vertx.version>
+    <raml-module-builder-version>33.2.2</raml-module-builder-version>
   </properties>
 
   <repositories>
