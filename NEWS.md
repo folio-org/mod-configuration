@@ -1,3 +1,7 @@
+## 5.7.4 2022-01-14
+
+ * [MODCONF-103](https://issues.folio.org/browse/MODCONF-103) RMB 33.2.4, Vert.x 4.2.3, log4j 2.17.1 fixing [] log entries
+
 ## 5.7.3 2021-12-15
 
  * [MODCONF-102](https://issues.folio.org/browse/MODCONF-102) Upgrade to RMB 33.2.2 Log4j 2.16.0
