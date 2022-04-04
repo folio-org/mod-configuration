@@ -9,6 +9,22 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 Configuration module based on the raml-module-builder and a set of raml and json schemas backed by a PostgreSQL async implementation
 
+## Deprecation
+
+This module is deprecated. Please do not add new configuration values to this module.
+
+Consider using standard CRUD APIs to store configuration and settings values in the storage module they belong to.
+This allows to cache the value and invalidate the cache if the value gets changed.
+
+https://wiki.folio.org/display/DD/Distributed+Configuration and https://issues.folio.org/browse/UXPROD-3018
+discuss other options.
+
+## Permission warning
+
+The permission granularity is too coarse.  Permission is always granted to all values, there is no way to grant permission to only a selected set of values.  This applies to read access, and it also applies to write access.
+
+Therefore don't store passwords or other confidential or critical values in mod-configuration.  See previous section for other options.
+
 ## Introduction
 
 This project is built using the raml-module-builder, using the PostgreSQL async client to implement some basic configuration APIs. It is highly recommended to read the [raml-module-builder README](https://github.com/folio-org/raml-module-builder/blob/master/README.md) since there are many features that the mod-configuration module inherits from the raml-module-builder framework.
