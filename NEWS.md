@@ -1,3 +1,7 @@
+## 5.7.7 2022-04-26
+
+ * [MODCONF-107](https://issues.folio.org/browse/MODCONF-107) RMB 33.2.9, Vert.x 4.2.7
+
 ## 5.7.6 2022-03-28
 
  * [MODCONF-106](https://issues.folio.org/browse/MODCONF-106) RMB 33.2.8, Vertx 4.2.6, jackson-databind 2.13.2.1 (CVE-2020-36518)
