@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-configuration</artifactId>
-  <version>5.7.8-SNAPSHOT</version>
+  <version>5.7.9-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>mod-configuration-server</module>
@@ -21,8 +21,8 @@
     <aspectj.version>1.9.7</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.2.7</vertx.version>
-    <raml-module-builder-version>33.2.9</raml-module-builder-version>
+    <vertx.version>4.3.1</vertx.version>
+    <raml-module-builder-version>34.0.0</raml-module-builder-version>
   </properties>
 
   <repositories>
@@ -204,6 +204,49 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>deploy</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 

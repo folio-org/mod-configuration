@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.folio</groupId>
     <artifactId>mod-configuration</artifactId>
-    <version>5.7.8-SNAPSHOT</version>
+    <version>5.7.9-SNAPSHOT</version>
   </parent>
 
   <properties>
@@ -39,7 +39,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/raml-jaxrs</source>
               </sources>
             </configuration>
           </execution>
@@ -67,6 +67,26 @@
               <generateInterfaces>true</generateInterfaces>
               <generateClients>true</generateClients>
               <ramlDirs>${ramlfiles_path}/configuration</ramlDirs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>delete_modulename</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <delete dir="${project.build.directory}/generated-sources/modulename" />
+              </target>
             </configuration>
           </execution>
         </executions>
