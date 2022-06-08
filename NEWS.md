@@ -1,3 +1,10 @@
+## 5.7.8 2022-06-08
+
+ * [MODCONF-109](https://issues.folio.org/browse/MODCONF-109) Publish javadoc and sources to maven repository
+ * [MODCONF-110](https://issues.folio.org/browse/MODCONF-110) Don't generate ModuleName.java for mod-configuration-client
+ * [MODCONF-111](https://issues.folio.org/browse/MODCONF-111) RMB 34.0.0, Vert.x 4.3.1
+ * [MODCONF-112](https://issues.folio.org/browse/MODCONF-112) Fix ZipException on 64-bit systems (Lotus HF#1)
+
 ## 5.7.7 2022-04-26
 
  * [MODCONF-107](https://issues.folio.org/browse/MODCONF-107) RMB 33.2.9, Vert.x 4.2.7
