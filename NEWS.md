@@ -1,3 +1,43 @@
+## 5.8.0 2022-06-20
+
+ * [MODCONF-111](https://issues.folio.org/browse/MODCONF-111) RMB 34.0.0
+
+## 5.7.9 2022-06-20
+
+ * [MODCONF-113](https://issues.folio.org/browse/MODCONF-113) Revert RMB 34, allow PostgreSQL 10 for Lotus and Kiwi
+
+## 5.7.8 2022-06-08
+
+ * [MODCONF-109](https://issues.folio.org/browse/MODCONF-109) Publish javadoc and sources to maven repository
+ * [MODCONF-110](https://issues.folio.org/browse/MODCONF-110) Don't generate ModuleName.java for mod-configuration-client
+ * [MODCONF-111](https://issues.folio.org/browse/MODCONF-111) RMB 34.0.0, Vert.x 4.3.1
+ * [MODCONF-112](https://issues.folio.org/browse/MODCONF-112) Fix ZipException on 64-bit systems (Lotus HF#1)
+
+## 5.7.7 2022-04-26
+
+ * [MODCONF-107](https://issues.folio.org/browse/MODCONF-107) RMB 33.2.9, Vert.x 4.2.7
+
+## 5.7.6 2022-03-28
+
+ * [MODCONF-106](https://issues.folio.org/browse/MODCONF-106) RMB 33.2.8, Vertx 4.2.6, jackson-databind 2.13.2.1 (CVE-2020-36518)
+
+## 5.7.5 2022-02-09
+
+ * [MODCONF-104](https://issues.folio.org/browse/MODCONF-104) RMB 33.2.5, Vert.x 4.2.4
+
+## 5.7.4 2022-01-14
+
+ * [MODCONF-103](https://issues.folio.org/browse/MODCONF-103) RMB 33.2.4, Vert.x 4.2.3, log4j 2.17.1 fixing [] log entries
+
+## 5.7.3 2021-12-15
+
+ * [MODCONF-102](https://issues.folio.org/browse/MODCONF-102) Upgrade to RMB 33.2.2 Log4j 2.16.0
+ * [MODCONF-98](https://issues.folio.org/browse/MODCONF-98) RMB 33.2.1, Vert.x 4.2.1, Log4j 2.15.0 (CVE-2021-44228)
+
+## 5.7.2 2021-11-08
+
+ * [MODCONF-96](https://issues.folio.org/browse/MODCONF-96) Add other settings naming migration script
+
 ## 5.7.1 2021-09-28
 
  * [MODCONF-92](https://issues.folio.org/browse/MODCONF-92) Update RMB to 33.1.1 and Vert.x to 4.1.4
