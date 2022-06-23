@@ -1,3 +1,7 @@
+## 5.7.9 2022-06-20
+
+ * [MODCONF-113](https://issues.folio.org/browse/MODCONF-113) Revert RMB 34, allow PostgreSQL 10 for Lotus and Kiwi
+
 ## 5.7.8 2022-06-08
 
  * [MODCONF-109](https://issues.folio.org/browse/MODCONF-109) Publish javadoc and sources to maven repository
