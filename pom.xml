@@ -22,7 +22,7 @@
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
     <vertx.version>4.3.4</vertx.version>
-    <raml-module-builder-version>35.0.0</raml-module-builder-version>
+    <raml-module-builder-version>35.0.1</raml-module-builder-version>
   </properties>
 
   <repositories>
