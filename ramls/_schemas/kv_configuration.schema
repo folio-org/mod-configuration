@@ -30,6 +30,10 @@
     "userId": {
       "type": "string"
     },
+    "recordsSource": {
+      "type": "string",
+      "default": "Source record storage"
+    },
     "metadata": {
       "$ref": "../raml-util/schemas/metadata.schema",
       "readonly": true
