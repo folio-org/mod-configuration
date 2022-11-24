@@ -1223,33 +1223,6 @@ public class RestVerticleTest extends TestBase {
   }
 
   @Test
-  public void canGetConfigurationRecordsByRecordsSource(TestContext testContext) {
-    final Async async = testContext.async();
-
-    final ArrayList<CompletableFuture<Response>> allCreated = new ArrayList<>();
-
-    JsonObject firstConfigRecord = ConfigurationRecordExamples.audioAlertsExample().create();
-
-    allCreated.add(createConfigRecord(firstConfigRecord));
-
-    JsonObject secondConfigRecord = ConfigurationRecordExamples.timeOutDurationExample().create();
-
-    allCreated.add(createConfigRecord(secondConfigRecord));
-
-    allOf(allCreated).thenRunAsync(() -> {
-      try {
-        testContext.assertEquals(2, getByCql("recordsSource==Source record storage").getInteger("totalRecords"));
-      }
-      catch(Exception e) {
-        testContext.fail(e);
-      }
-      finally {
-        async.complete();
-      }
-    });
-  }
-
-  @Test
   public void canSortConfigurationRecordsByCreatedDate(TestContext testContext)
     throws UnsupportedEncodingException,
     InterruptedException,

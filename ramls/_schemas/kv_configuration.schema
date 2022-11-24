@@ -30,15 +30,6 @@
     "userId": {
       "type": "string"
     },
-    "recordsSource": {
-      "type": "string",
-      "default": "Source record storage",
-      "enum": [
-        "Source record storage",
-        "Inventory",
-        "Source record storage and Inventory"
-      ]
-    },
     "metadata": {
       "$ref": "../raml-util/schemas/metadata.schema",
       "readonly": true
