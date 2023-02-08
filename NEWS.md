@@ -1,3 +1,7 @@
+## 5.9.1 2023-02-09
+
+ * [MODCONF-134](https://issues.folio.org/browse/MODCONF-134) RMB 35.0.5, Vert.x 4.3.7
+
 ## 5.9.0 2022-10-27
 
  * [MODCONF-127](https://issues.folio.org/browse/MODCONF-127) Upgrade to RMB 35.0.0 Vert.x 4.3.4
