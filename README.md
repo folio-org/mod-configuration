@@ -11,13 +11,15 @@ Configuration module based on the raml-module-builder and a set of raml and json
 
 ## Deprecation
 
+<div style="color: red; background: #ffd0d0; padding: 0.4em 1em; font-weight: bold">
 This module is deprecated. Please do not add new configuration values to this module.
+</div>
 
-Consider using standard CRUD APIs to store configuration and settings values in the storage module they belong to.
-This allows to cache the value and invalidate the cache if the value gets changed.
+Instead, consider either:
+* Using [mod-settings](../mod-settings), a conceptually similar centralized-configuration module which fixes [the security flaw](https://github.com/MikeTaylor/folio-docs/blob/main/doc/fixing-mod-configuration.md#backward-compatibility-and-migration) that makes this module unsuitable.
+* Creating CRUD APIs to store configuration and settings values in the storage module they belong to.
 
-https://wiki.folio.org/display/DD/Distributed+Configuration and https://issues.folio.org/browse/UXPROD-3018
-discuss other options.
+At present (May 2023) [a Technical Committee working group](https://wiki.folio.org/display/TC/TC+Subgroup%3A+Distributed+vs.+Centralized+Configuration) is determining which of these two courses to recommend under which circumstances. Until that group returns its recommendations, developers should use their own judgement, but should definitely avoid mod-configuration.
 
 ## Permission warning
 
