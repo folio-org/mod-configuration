@@ -16,7 +16,7 @@ This module is deprecated. Please do not add new configuration values to this mo
 </div>
 
 Instead, consider either:
-* Using [mod-settings](../mod-settings), a conceptually similar centralized-configuration module which fixes [the security flaw](https://github.com/MikeTaylor/folio-docs/blob/main/doc/fixing-mod-configuration.md#backward-compatibility-and-migration) that makes this module unsuitable.
+* Using [mod-settings](https://github.com/folio-org/mod-settings), a conceptually similar centralized-configuration module which fixes [the security flaw](https://github.com/MikeTaylor/folio-docs/blob/main/doc/fixing-mod-configuration.md#backward-compatibility-and-migration) that makes this module unsuitable.
 * Creating CRUD APIs to store configuration and settings values in the storage module they belong to.
 
 At present (May 2023) [a Technical Committee working group](https://wiki.folio.org/display/TC/TC+Subgroup%3A+Distributed+vs.+Centralized+Configuration) is determining which of these two courses to recommend under which circumstances. Until that group returns its recommendations, developers should use their own judgement, but should definitely avoid mod-configuration.
