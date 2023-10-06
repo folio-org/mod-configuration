@@ -1,3 +1,10 @@
+## 5.9.2 2023-10-06
+
+Poppy release with dependency upgrades only:
+
+ * [MODCONF-142](https://issues.folio.org/browse/MODCONF-142) Poppy dependencies: RMB 35.1.0, Vert.x 4.4.5, ...
+ * [MODCONF-139](https://issues.folio.org/browse/MODCONF-139) Java 17
+
 ## 5.9.1 2023-02-09
 
  * [MODCONF-134](https://issues.folio.org/browse/MODCONF-134) RMB 35.0.5, Vert.x 4.3.7
