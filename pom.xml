@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-configuration</artifactId>
-  <version>5.9.2-SNAPSHOT</version>
+  <version>5.9.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>mod-configuration-server</module>
