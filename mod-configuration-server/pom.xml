@@ -17,12 +17,6 @@
     <plugins>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19.1</version>
-      </plugin>
-
-      <plugin>
         <groupId>org.folio</groupId>
         <artifactId>domain-models-maven-plugin</artifactId>
         <version>${raml-module-builder-version}</version>
@@ -40,9 +34,9 @@
       </plugin>
 
       <plugin>
-        <groupId>com.nickwongdev</groupId>
+        <groupId>dev.aspectj</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.12.6</version>
+        <version>1.14</version>
         <configuration>
           <verbose>true</verbose>
           <showWeaveInfo>false</showWeaveInfo>
@@ -84,7 +78,7 @@
 
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -109,7 +103,7 @@
         apidocs directory so that they can be used via the local html api console. -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <phase>prepare-package</phase>
@@ -133,7 +127,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.12</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -151,7 +145,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <version>3.5.2</version>
         <executions>
           <execution>
             <phase>package</phase>

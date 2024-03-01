@@ -18,11 +18,12 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <aspectj.version>1.9.7</aspectj.version>
+    <project.build.outputTimestamp>2024-03-01T17:00:00Z</project.build.outputTimestamp>
+    <aspectj.version>1.9.21.1</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.4.5</vertx.version>
-    <raml-module-builder-version>35.1.0</raml-module-builder-version>
+    <vertx.version>4.5.4</vertx.version>
+    <raml-module-builder-version>35.2.0</raml-module-builder-version>
   </properties>
 
   <repositories>
@@ -46,7 +47,7 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-bom</artifactId>
-        <version>2.20.0</version>
+        <version>2.23.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -110,7 +111,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.12.1</version>
         <configuration>
           <release>17</release>
           <encoding>UTF-8</encoding>
@@ -120,12 +121,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.12.3</version>
+            <version>10.13.0</version>
           </dependency>
         </dependencies>
         <executions>
@@ -146,7 +147,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
+        <version>3.2.5</version>
       </plugin>
 
       <plugin>
@@ -164,7 +165,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>git submodule update</id>
@@ -254,11 +255,11 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.3</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
-            <phase>deploy</phase>
+            <phase>verify</phase>
             <goals>
               <goal>jar</goal>
             </goals>
