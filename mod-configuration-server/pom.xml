@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.folio</groupId>
     <artifactId>mod-configuration</artifactId>
-    <version>5.9.3-SNAPSHOT</version>
+    <version>5.10.0</version>
   </parent>
   <artifactId>mod-configuration-server</artifactId>
 
