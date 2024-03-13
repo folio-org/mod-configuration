@@ -1,3 +1,7 @@
+## 5.10.0 2024-03-12
+
+ * [MODCONF-144](https://folio-org.atlassian.net/browse/MODCONF-144) Quesnelia deps: RMB 35.2.0, Vert.x 4.5.4, log4j 2.23.0, …
+
 ## 5.9.2 2023-10-06
 
 Poppy release with dependency upgrades only:
