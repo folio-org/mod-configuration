@@ -19,7 +19,7 @@ Instead, consider either:
 * Using [mod-settings](https://github.com/folio-org/mod-settings), a conceptually similar centralized-configuration module which fixes [the security flaw](https://github.com/MikeTaylor/folio-docs/blob/main/doc/fixing-mod-configuration.md#backward-compatibility-and-migration) that makes this module unsuitable.
 * Creating CRUD APIs to store configuration and settings values in the storage module they belong to.
 
-For Sunflower release mod-configuration will become read and delete only. This allows for migration.
+For Sunflower release the mod-configuration services will be restricted to read- and delete-only. This allows for migration.
 
 mod-configuration will be removed in the release following the Sunflower release.
 
