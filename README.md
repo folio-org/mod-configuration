@@ -11,13 +11,19 @@ Configuration module based on the raml-module-builder and a set of raml and json
 
 ## Deprecation
 
-*This module is deprecated. Please do not add new configuration values to this module.*
+*mod-configuration has been deprecated due to security problems since March 2022. Modules still using mod-configuration have to move to other solutions after the Ramsons release.*
+
+*Please do not add new configuration values to this module.*
 
 Instead, consider either:
 * Using [mod-settings](https://github.com/folio-org/mod-settings), a conceptually similar centralized-configuration module which fixes [the security flaw](https://github.com/MikeTaylor/folio-docs/blob/main/doc/fixing-mod-configuration.md#backward-compatibility-and-migration) that makes this module unsuitable.
 * Creating CRUD APIs to store configuration and settings values in the storage module they belong to.
 
-At present (March 2024) [a Technical Committee working group](https://wiki.folio.org/display/TC/TC+Subgroup%3A+Distributed+vs.+Centralized+Configuration) is determining which of these two courses to recommend under which circumstances. Until that group returns its recommendations, developers should use their own judgement, but should definitely avoid mod-configuration.
+For Sunflower release the mod-configuration services will be restricted to read- and delete-only. This allows for migration.
+
+mod-configuration will be removed in the release following the Sunflower release.
+
+For details see the [Technical Council RFC 006 Folio distributed vs. centralized configuration](https://github.com/folio-org/rfcs/blob/master/text/0006-folio-distributed-vs-centralized-configration.md).
 
 ## Permission warning
 
