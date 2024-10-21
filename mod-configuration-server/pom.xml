@@ -127,7 +127,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>
@@ -145,7 +145,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -165,12 +165,12 @@
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
               <filters>
-￼               <filter>
-￼               <artifact>*:*</artifact>
-￼                 <excludes>
-￼                   <exclude>**/Log4j2Plugins.dat</exclude>
-￼                 </excludes>
-￼               </filter>
+                <filter>
+                <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>**/Log4j2Plugins.dat</exclude>
+                  </excludes>
+                </filter>
                 <filter>
                   <artifact>org.folio:domain-models-api-interfaces</artifact>
                   <excludes>
