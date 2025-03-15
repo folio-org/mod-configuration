@@ -1,3 +1,11 @@
+## 5.12.0 2025-03-15
+
+Sunflower release with dependency upgrades only:
+
+ * [MODCONF-146](https://folio-org.atlassian.net/browse/MODCONF-146) Add folio-module-descriptor-validator to pom.xml
+ * [FOLREL-615](https://folio-org.atlassian.net/browse/FOLREL-615) Update to mod-configuration Java 21
+ * [MODCONF-149](https://folio-org.atlassian.net/browse/MODCONF-149) Upgrade all dependencies for Sunflower (R1-2025)
+
 ## 5.11.0 2024-10-23
 
 Ramsons release with dependency upgrades only:

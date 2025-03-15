@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.folio</groupId>
     <artifactId>mod-configuration</artifactId>
-    <version>5.12.0-SNAPSHOT</version>
+    <version>5.13.0-SNAPSHOT</version>
   </parent>
   <artifactId>mod-configuration-server</artifactId>
 
@@ -22,7 +22,7 @@
         <version>${folio-module-descriptor-validator.version}</version>
         <executions>
           <execution>
-            <phase/>  <!-- skip execution, run in parent only -->
+            <phase />  <!-- skip execution, run in parent only -->
           </execution>
         </executions>
       </plugin>
