@@ -30,7 +30,7 @@
       }
     },
     "createdDate": {
-      "description": "Timestamp when the audit record was created."
+      "description": "Timestamp when the audit record was created",
       "type": "string"
     }
   }

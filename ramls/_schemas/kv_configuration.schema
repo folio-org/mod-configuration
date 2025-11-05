@@ -21,7 +21,7 @@
       "type": "string"
     },
     "description": {
-      "description": "Description of the configuration setting","description": "Description of the configuration entry",
+      "description": "Description of the configuration setting",
       "type": "string"
     },
     "default": {
