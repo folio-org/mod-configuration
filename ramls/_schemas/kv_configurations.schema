@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for a collection of key-value configuration objects",
   "type": "object",
   "properties": {
     "configs": {
       "id": "configurationData",
+      "description": "Array of key-value configuration objects",
       "type": "array",
       "items": {
         "type": "object",
@@ -11,9 +13,11 @@
       }
     },
     "totalRecords": {
+      "description": "Total number of configuration records available",
       "type": "integer"
     },
     "resultInfo": {
+      "description": "Information about the result set",
       "$ref": "../raml-util/schemas/resultInfo.schema",
       "readonly": true
     }

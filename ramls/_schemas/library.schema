@@ -1,34 +1,44 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for library data objects",
   "type": "object",
   "properties": {
     "library_data": {
+      "description": "Array of library data objects",
       "type": "array",
       "items": {
+        "description": "Library data object",
         "type": "object",
         "properties": {
           "library_code": {
+            "description": "Short code representing the library",
             "type": "string"
           },
           "full_library_code": {
+            "description": "Full code representing the library",
             "type": "string"
           },
           "resource_sharing": {
+            "description": "Indicates if resource sharing is enabled for the library",
             "type": "boolean"
           },
           "name": {
+            "description": "Name of the library",
             "type": "string"
           },
           "description": {
+            "description": "Description of the library",
             "type": "string"
           },
           "scope": {
+            "description": "Scope information for the library",
             "type": "object",
             "properties": {
               "institution_id": {
                 "type": "string"
               },
               "library_id": {
+                "description": "Unique identifier for the library",
                 "type": "string"
               }
             }

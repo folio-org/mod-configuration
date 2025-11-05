@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for a collection of audit log entries",
   "type": "object",
   "properties": {
     "audits": {
       "id": "auditData",
+      "description": "Array of audit log entry objects",
       "type": "array",
       "items": {
         "type": "object",
@@ -11,6 +13,7 @@
       }
     },
     "totalRecords": {
+      "description": "Total number of audit log records available",
       "type": "integer"
     }
   },

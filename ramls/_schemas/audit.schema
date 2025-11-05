@@ -1,17 +1,22 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for audit log entries capturing changes to key-value configurations",
   "type": "object",
   "properties": {
     "id": {
+      "description": "Unique identifier (UUID) for the audit log entry",
       "type": "string"
     },
     "orig_id": {
+      "description": "Original identifier (UUID) of the configuration entry being audited",
       "type": "string"
     },
     "operation": {
+      "description": "Type of operation performed (e.g., CREATE, UPDATE, DELETE)",
       "type": "string"
     },
     "jsonb": {
+      "description": "Snapshot of the configuration data at the time of the operation",
       "type": "object",
       "properties": {
         "content": {
@@ -25,6 +30,7 @@
       }
     },
     "createdDate": {
+      "description": "Timestamp when the audit record was created."
       "type": "string"
     }
   }

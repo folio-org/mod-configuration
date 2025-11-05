@@ -1,36 +1,47 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for key-value configuration objects used in the system",
   "type": "object",
   "properties": {
     "id": {
+      "description": "Unique identifier (UUID) for the configuration entry",
       "type": "string",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "module": {
+      description": "Module name this configuration belongs to",
       "type": "string"
     },
     "configName": {
+      "description": "Name of the configuration setting","description": "Name of the configuration setting",
       "type": "string"
     },
     "code": {
+      "description": "Optional code for the configuration",
       "type": "string"
     },
     "description": {
+      "description": "Description of the configuration setting","description": "Description of the configuration entry",
       "type": "string"
     },
     "default": {
+      "description": "Indicates if this is the default configuration",
       "type": "boolean"
     },
     "enabled": {
+      "description": "Indicates if this configuration is enabled",
       "type": "boolean"
     },
     "value": {
+      "description": "Value of the configuration setting",
       "type": "string"
     },
     "userId": {
+     "description": "Identifier of the user who created or last modified this configuration",
       "type": "string"
     },
     "metadata": {
+      "description": "Metadata about the configuration entry",
       "$ref": "../raml-util/schemas/metadata.schema",
       "readonly": true
     }
