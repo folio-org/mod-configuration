@@ -50,7 +50,10 @@ public class ConfigAPI implements Configurations {
     PgUtil.streamGet(CONFIG_TABLE, Config.class, query, offset, limit, facets, "configs", routingContext, okapiHeaders, context);
   }
 
-  @Deprecated
+  /**
+   * @deprecated deprecating this endpoint for the Trillium release.
+   */
+  @Deprecated(since = "Trillium", forRemoval = true)
   @Validate
   @Override
   public void postConfigurationsEntries(String lang, Config entity, RoutingContext routingContext,
@@ -104,7 +107,10 @@ public class ConfigAPI implements Configurations {
         GetConfigurationsEntriesByEntryIdResponse.class, asyncResultHandler);
   }
 
-  @Deprecated
+  /**
+   * @deprecated deprecating this endpoint for the Trillium release.
+   */
+  @Deprecated(since = "Trillium", forRemoval = true)
   @Validate
   @Override
   public void deleteConfigurationsEntriesByEntryId(String entryId, String lang, Map<String, String>okapiHeaders,
@@ -114,7 +120,10 @@ public class ConfigAPI implements Configurations {
         DeleteConfigurationsEntriesByEntryIdResponse.class, asyncResultHandler);
   }
 
-  @Deprecated
+  /**
+   * @deprecated deprecating this endpoint for the Trillium release.
+   */
+  @Deprecated(since = "Trillium", forRemoval = true)
   @Validate
   @Override
   public void putConfigurationsEntriesByEntryId(
