@@ -21,6 +21,7 @@
       "properties": {
         "content": {
           "id": "contentData",
+          "description": "Array of key-value configuration objects representing the state at the time of the audit",
           "type": "array",
           "items": {
             "type": "object",

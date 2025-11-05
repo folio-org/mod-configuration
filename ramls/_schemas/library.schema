@@ -35,6 +35,7 @@
             "type": "object",
             "properties": {
               "institution_id": {
+                "description": "Unique identifier for the institution",
                 "type": "string"
               },
               "library_id": {
