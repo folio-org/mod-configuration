@@ -50,6 +50,7 @@ public class ConfigAPI implements Configurations {
     PgUtil.streamGet(CONFIG_TABLE, Config.class, query, offset, limit, facets, "configs", routingContext, okapiHeaders, context);
   }
 
+  @Deprecated
   @Validate
   @Override
   public void postConfigurationsEntries(String lang, Config entity, RoutingContext routingContext,
@@ -103,6 +104,7 @@ public class ConfigAPI implements Configurations {
         GetConfigurationsEntriesByEntryIdResponse.class, asyncResultHandler);
   }
 
+  @Deprecated
   @Validate
   @Override
   public void deleteConfigurationsEntriesByEntryId(String entryId, String lang, Map<String, String>okapiHeaders,
@@ -112,6 +114,7 @@ public class ConfigAPI implements Configurations {
         DeleteConfigurationsEntriesByEntryIdResponse.class, asyncResultHandler);
   }
 
+  @Deprecated
   @Validate
   @Override
   public void putConfigurationsEntriesByEntryId(
