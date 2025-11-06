@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import java.util.Collections;
@@ -24,24 +23,24 @@ public class CustomHealthCheckTest {
 
   @BeforeClass
   public static void setUp(TestContext context) {
-    Async async = context.async();
     port = NetworkUtils.nextFreePort();
     DeploymentOptions options = new DeploymentOptions().setConfig(
        new JsonObject().put("http.port", port));
     vertx = VertxUtils.getVertxWithExceptionHandler();
-    vertx.deployVerticle(RestVerticle.class.getName(), options, done -> {
-      deployId = done.result();
-      async.complete();
-    });
+    vertx.deployVerticle(RestVerticle.class.getName(), options)
+    .onComplete(context.asyncAssertSuccess(deployId -> {
+      CustomHealthCheckTest.deployId = deployId;
+    }));
   }
 
   @AfterClass
   public static void tearDown(TestContext context) {
-    vertx.undeploy(deployId, context.asyncAssertSuccess());
+    vertx.undeploy(deployId)
+    .onComplete(context.asyncAssertSuccess());
   }
 
   @Test
-  public void getAdminHealth(TestContext context) throws Exception {
+  public void getAdminHealth(TestContext context) {
     CustomHealthCheck customHealthCheck = new CustomHealthCheck();
     customHealthCheck.getAdminHealth(Collections.emptyMap(), result -> {
       context.assertTrue(result.succeeded());

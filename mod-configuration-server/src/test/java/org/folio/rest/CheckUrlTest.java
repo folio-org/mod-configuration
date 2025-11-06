@@ -12,9 +12,10 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RunTestOnContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import java.util.Base64;
 import java.util.Date;
+
+import org.folio.okapi.common.ChattyHttpResponseExpectation;
 import org.folio.rest.jaxrs.model.Config;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.support.builders.ConfigurationRecordBuilder;
@@ -208,8 +209,8 @@ public class CheckUrlTest extends TestBase {
     webClient
     .put("/admin/loglevel?level=FINE&java_package=org.folio.rest.persist")
     .putHeader("Content-Type", "application/json")
-    .expect(ResponsePredicate.SC_OK)
     .send()
+    .expecting(ChattyHttpResponseExpectation.SC_OK)
     .onComplete(context.asyncAssertSuccess());
   }
 
