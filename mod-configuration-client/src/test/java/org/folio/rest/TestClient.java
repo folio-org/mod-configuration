@@ -51,14 +51,15 @@ public class TestClient {
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port));
-    vertx.deployVerticle(RestVerticle.class.getName(), options, context.asyncAssertSuccess());
+    vertx.deployVerticle(RestVerticle.class.getName(), options)
+    .onComplete(context.asyncAssertSuccess());
   }
 
   @Test
   public void test1(TestContext context){
       ac = new TenantClient("http://localhost:" + port, "harvard", "harvard", webClient);
       TenantAttributes ta = new TenantAttributes();
-      ta.setModuleTo("v1");
+      ta.setModuleTo("m-1");
       TenantInit.exec(ac, ta, 10000).onComplete(context.asyncAssertSuccess(res -> {
         postConfigs(context);
       }));

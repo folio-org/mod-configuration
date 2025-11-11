@@ -22,8 +22,8 @@
     <aspectj.version>1.9.22.1</aspectj.version>
     <ramlfiles_path>${project.parent.basedir}/ramls</ramlfiles_path>
     <generate_routing_context>/configurations/entries</generate_routing_context>
-    <vertx.version>4.5.13</vertx.version>
-    <raml-module-builder-version>35.4.0</raml-module-builder-version>
+    <vertx.version>5.0.5</vertx.version>
+    <raml-module-builder-version>36.0.0-SNAPSHOT</raml-module-builder-version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
   </properties>
 
