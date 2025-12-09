@@ -1,3 +1,9 @@
+## 5.11.1 2025-12-09
+
+Ramsons CSP with fixes:
+
+ * [MODCONF-154](https://folio-org.atlassian.net/browse/MODCONF-154) RMB Logging release - RMB 35.3.1, Vert.x 4.5.22
+
 ## 5.11.0 2024-10-23
 
 Ramsons release with dependency upgrades only:
