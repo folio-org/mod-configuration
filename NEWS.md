@@ -1,3 +1,10 @@
+## 5.12.1 2026-02-19
+
+Sunflower release with dependency upgrades only:
+
+* [MODCONF-155](https://folio-org.atlassian.net/browse/MODCONF-155) RMB 35.4.1 Logging improvements
+* [MODCONF-158](https://folio-org.atlassian.net/browse/MODCONF-158) Vert.x 4.5.25 RMB 35.4.2 fixing CVE-2025-67735 Netty CRLF
+
 ## 5.12.0 2025-03-15
 
 Sunflower release with dependency upgrades only:
