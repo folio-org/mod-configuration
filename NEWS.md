@@ -1,3 +1,11 @@
+## 5.13.0 2026-04-22
+
+Trillium (R1-2026) release with dependency upgrades only:
+
+ * [MODCONF-151](https://folio-org.atlassian.net/browse/MODCONF-151) Upgrade module to Vert.x 5.0
+ * [MODCONF-157](https://folio-org.atlassian.net/browse/MODCONF-157),[FOLIO-4126](https://folio-org.atlassian.net/browse/FOLIO-4126) Switch maven workflow from Jenkins to GitHub Actions
+ * [MODCONF-160](https://folio-org.atlassian.net/browse/MODCONF-160) Bump dependencies for Trillium: Vertx 5.0.11, log4j 2.25.4, …
+
 ## 5.12.0 2025-03-15
 
 Sunflower release with dependency upgrades only:
